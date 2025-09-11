@@ -1,4 +1,5 @@
 // src/app/(public)/page.tsx
+import Company from "@/components/beranda/Company";
 import Hero from "@/components/beranda/Hero";
 import Job from "@/components/beranda/Job";
 import Review from "@/components/beranda/Review";
@@ -9,6 +10,7 @@ export default function Home() {
       <Hero />
       <Job />
       <Review />
+      <Company />
     </main>
   );
 }
