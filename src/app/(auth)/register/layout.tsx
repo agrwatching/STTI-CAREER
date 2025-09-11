@@ -1,17 +1,14 @@
-// src/app/(public)/layout.tsx
+// src/app/(auth)/login/layout.tsx
 import "@/app/globals.css";
 import Script from "next/script";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "STTI CAREERS",
+  title: "Register - STTI CAREERS",
   description: "Website resmi STTI CAREERS",
   icons: {
     icon: "/logo-stti.png",
   },
 };
-
 export default function PublicLayout({
     children,
 }: {
@@ -19,9 +16,7 @@ export default function PublicLayout({
 }) {
   return (
     <>
-      <Navbar />
       <main className="min-h-screen">{children}</main>
-      <Footer />
     </>
   );
 }

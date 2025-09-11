@@ -6,7 +6,7 @@ export const metadata = {
   title: "Login - STTI CAREERS",
   description: "Website resmi STTI CAREERS",
   icons: {
-    icon: "",
+    icon: "/logo-stti.png",
   },
 };
 export default function PublicLayout({
