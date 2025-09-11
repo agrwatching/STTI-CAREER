@@ -1,7 +1,7 @@
 // src/app/(public)/page.tsx
-import Company from "@/components/beranda/Company";
+import Company from "@/components/beranda/Companysection";
 import Hero from "@/components/beranda/Hero";
-import Job from "@/components/beranda/Job";
+import Job from "@/components/beranda/Jobsection";
 import Review from "@/components/beranda/Review";
 
 export default function Home() {
