@@ -18,11 +18,7 @@ export default function Hero() {
 
             {/* bawah gambar 30%, overlap ke atas */}
             <div className="flex-1 flex items-end justify-center relative z-10">
-              <img
-                src="Group 61.png"
-                alt="foto group"
-                className="w-full object-contain relative z-20 -mt-80"
-              />
+              <img src="Group 61.png" alt="foto group" className="w-full object-contain relative z-20 -mt-80" />
             </div>
           </div>
 
@@ -35,15 +31,9 @@ export default function Hero() {
       <div className="relative z-10 flex h-full">
         {/* kiri: teks */}
         <div className="w-3/5 flex flex-col justify-center gap-y-4 pl-16 pb-40">
-          <h1 className="md:text-[88px] font-bold leading-tight">
-            It’s Easy to Find
-          </h1>
-          <h2 className="md:text-7xl font-bold leading-tight">
-            Your Dream Job at
-          </h2>
-          <p className="md:text-6xl font-bold bg-gradient-to-r from-[#0A1FB5] to-[#2C6CF6] bg-clip-text text-transparent">
-            STTICAREER
-          </p>
+          <h1 className="md:text-[88px] font-bold leading-tight">It’s Easy to Find</h1>
+          <h2 className="md:text-7xl font-bold leading-tight">Your Dream Job at</h2>
+          <p className="md:text-6xl font-bold bg-gradient-to-r from-[#0A1FB5] to-[#2C6CF6] bg-clip-text text-transparent">STTICAREER</p>
         </div>
       </div>
     </section>
