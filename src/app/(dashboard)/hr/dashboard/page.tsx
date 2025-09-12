@@ -9,7 +9,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-gray-50 p-8">
         {/* Header */}
-        <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-1">
