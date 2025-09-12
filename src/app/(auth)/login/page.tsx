@@ -53,7 +53,15 @@ export default function Login() {
   }
 
   return (
-    <section className="flex h-screen">
+    <section className="flex h-screen relative">
+      {/* 🔙 Tombol kembali di pojok kiri atas */}
+      <button
+        onClick={() => window.history.back()}
+        className="absolute top-4 left-4 z-20"
+      >
+        <Image src="/back.png" alt="Back" width={32} height={32} />
+      </button>
+
       {/* Bagian kiri */}
       <div className="w-2/5 flex flex-col items-center justify-center bg-white relative z-10">
         <Image
