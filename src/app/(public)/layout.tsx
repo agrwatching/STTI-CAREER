@@ -1,4 +1,4 @@
-// src/app/(public)/layout.tsx
+// src/app/(public)/layout.tsx *Pengaturan Layout dirubah ke mode html sesuai standar next js BY JERRY
 import "@/app/globals.css";
 import Script from "next/script";
 import Navbar from "@/components/Navbar";
@@ -12,16 +12,15 @@ export const metadata = {
   },
 };
 
-export default function PublicLayout({
-    children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen">{children}</main>
-      <Footer />
-    </>
+    <html lang="en">
+      <head />
+      <body>
+        <Navbar />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
+      </body>
+    </html>
   );
 }
