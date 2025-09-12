@@ -7,12 +7,13 @@ export default function Job() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Dummy data manual (bisa kamu tambahin sesuka hati)
+  // Dummy data dengan logo
   const jobs = [
     {
       id: 1,
       title: "Senior Frontend Developer",
       company: "PakulagaCode",
+      logo: "https://dummyimage.com/60x60/2563eb/ffffff&text=P",
       description: "Build scalable frontend apps using React, Next.js, and Tailwind CSS.",
       location: "Karawang, Indonesia",
       type: "Full-time",
@@ -22,6 +23,7 @@ export default function Job() {
       id: 2,
       title: "Backend Engineer",
       company: "TechnoWorks",
+      logo: "https://dummyimage.com/60x60/16a34a/ffffff&text=T",
       description: "Design and implement backend services with Node.js, Express, and PostgreSQL.",
       location: "Jakarta, Indonesia",
       type: "Full-time",
@@ -31,6 +33,7 @@ export default function Job() {
       id: 3,
       title: "UI/UX Designer",
       company: "DesignHub",
+      logo: "https://dummyimage.com/60x60/f97316/ffffff&text=D",
       description: "Create wireframes, prototypes, and design user-centric mobile & web apps.",
       location: "Bandung, Indonesia",
       type: "Contract",
@@ -40,6 +43,7 @@ export default function Job() {
       id: 4,
       title: "Mobile App Developer",
       company: "Appify",
+      logo: "https://dummyimage.com/60x60/9333ea/ffffff&text=A",
       description: "Develop cross-platform mobile applications using Flutter and React Native.",
       location: "Surabaya, Indonesia",
       type: "Full-time",
@@ -49,6 +53,7 @@ export default function Job() {
       id: 5,
       title: "Data Scientist",
       company: "InsightAI",
+      logo: "https://dummyimage.com/60x60/0ea5e9/ffffff&text=I",
       description: "Analyze datasets and build machine learning models for predictive analytics.",
       location: "Remote",
       type: "Remote",
@@ -58,6 +63,7 @@ export default function Job() {
       id: 6,
       title: "DevOps Engineer",
       company: "CloudOps",
+      logo: "https://dummyimage.com/60x60/ca8a04/ffffff&text=C",
       description: "Maintain CI/CD pipelines and cloud infrastructure (AWS, Docker, Kubernetes).",
       location: "Yogyakarta, Indonesia",
       type: "Full-time",
@@ -65,39 +71,43 @@ export default function Job() {
     },
     {
       id: 7,
-      title: "Product Manager",
-      company: "NextVision",
-      description: "Lead product development cycles and manage cross-functional teams effectively.",
-      location: "Bali, Indonesia",
+      title: "DevOps Engineer",
+      company: "CloudOps",
+      logo: "https://dummyimage.com/60x60/ca8a04/ffffff&text=C",
+      description: "Maintain CI/CD pipelines and cloud infrastructure (AWS, Docker, Kubernetes).",
+      location: "Yogyakarta, Indonesia",
       type: "Full-time",
-      level: "Senior",
+      level: "Mid-level",
     },
     {
       id: 8,
-      title: "QA Engineer",
-      company: "Testify",
-      description: "Write automated tests and ensure software quality before production releases.",
-      location: "Semarang, Indonesia",
+      title: "DevOps Engineer",
+      company: "CloudOps",
+      logo: "https://dummyimage.com/60x60/ca8a04/ffffff&text=C",
+      description: "Maintain CI/CD pipelines and cloud infrastructure (AWS, Docker, Kubernetes).",
+      location: "Yogyakarta, Indonesia",
       type: "Full-time",
-      level: "Junior",
+      level: "Mid-level",
     },
     {
       id: 9,
-      title: "Cybersecurity Analyst",
-      company: "SafeNet",
-      description: "Monitor, detect, and respond to security incidents in real-time.",
-      location: "Jakarta, Indonesia",
-      type: "Contract",
+      title: "DevOps Engineer",
+      company: "CloudOps",
+      logo: "https://dummyimage.com/60x60/ca8a04/ffffff&text=C",
+      description: "Maintain CI/CD pipelines and cloud infrastructure (AWS, Docker, Kubernetes).",
+      location: "Yogyakarta, Indonesia",
+      type: "Full-time",
       level: "Mid-level",
     },
     {
       id: 10,
-      title: "Marketing Specialist",
-      company: "MarketPro",
-      description: "Plan and execute digital marketing strategies to increase brand awareness.",
-      location: "Bandung, Indonesia",
+      title: "DevOps Engineer",
+      company: "CloudOps",
+      logo: "https://dummyimage.com/60x60/ca8a04/ffffff&text=C",
+      description: "Maintain CI/CD pipelines and cloud infrastructure (AWS, Docker, Kubernetes).",
+      location: "Yogyakarta, Indonesia",
       type: "Full-time",
-      level: "Junior",
+      level: "Mid-level",
     },
   ];
 
@@ -106,7 +116,7 @@ export default function Job() {
   const currentJobs = jobs.slice(startIdx, startIdx + itemsPerPage);
 
   // --- Pagination Window Logic ---
-  const windowSize = 3; // tampil maksimal 3 angka
+  const windowSize = 3;
   let startPage = Math.max(1, page - 1);
   let endPage = startPage + windowSize - 1;
   if (endPage > totalPages) {
@@ -141,20 +151,27 @@ export default function Job() {
       {/* Featured Job Listings */}
       <h2 className="text-xl font-semibold mb-6">Featured Job Listings</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {currentJobs.map((job) => (
-          <div key={job.id} className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-            <h3 className="text-lg font-semibold mb-2">{job.title}</h3>
-            <p className="text-gray-600 text-sm mb-2">{job.company}</p>
-            <p className="text-gray-500 text-sm line-clamp-3 mb-4">{job.description}</p>
-            <div className="flex gap-2 flex-wrap mb-4">
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{job.type}</span>
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">{job.level}</span>
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{job.location}</span>
-            </div>
-            <button className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700">Apply Now</button>
-          </div>
-        ))}
+  {currentJobs.map((job) => (
+    <div key={job.id} className="bg-white p-6 rounded-xl shadow hover:shadow-lg">
+      <div className="flex items-center gap-3 mb-4">
+        <img src={job.logo} alt={job.company} className="w-12 h-12 rounded-full object-cover" />
+        <div>
+          <h3 className="text-lg font-semibold">{job.title}</h3>
+          <p className="text-gray-600 text-sm">{job.company}</p>
+        </div>
       </div>
+      <p className="text-gray-500 text-sm line-clamp-3 mb-4">{job.description}</p>
+      <div className="flex gap-2 flex-wrap mb-4">
+        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{job.type}</span>
+        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">{job.level}</span>
+        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{job.location}</span>
+      </div>
+      <button className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700">Apply Now</button>
+    </div>
+  ))}
+</div>
+
+
 
       {/* Pagination */}
       <div className="flex justify-center items-center gap-2 mt-10">
@@ -163,7 +180,11 @@ export default function Job() {
         </button>
 
         {visiblePages.map((num) => (
-          <button key={num} className={`px-3 py-1 rounded ${page === num ? "bg-blue-600 text-white" : "hover:bg-gray-200"}`} onClick={() => setPage(num)}>
+          <button
+            key={num}
+            className={`px-3 py-1 rounded ${page === num ? "bg-blue-600 text-white" : "hover:bg-gray-200"}`}
+            onClick={() => setPage(num)}
+          >
             {num}
           </button>
         ))}

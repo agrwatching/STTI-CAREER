@@ -15,35 +15,49 @@ const companies: Company[] = [
   {
     id: 1,
     name: "Pakulaga Code",
-    logo: "https://i.pravatar.cc/12", // dummy aman
+    logo: "https://i.pravatar.cc/150?img=12",
     interns: 1200,
     alumni: 1000,
   },
   {
     id: 2,
     name: "TechnoWorks",
-    logo: "https://i.pravatar.cc/13",
+    logo: "https://i.pravatar.cc/150?img=13",
     interns: 800,
     alumni: 900,
   },
   {
     id: 3,
     name: "DesignHub",
-    logo: "https://i.pravatar.cc/2",
+    logo: "https://i.pravatar.cc/150?img=2",
     interns: 1500,
     alumni: 1200,
   },
   {
     id: 4,
     name: "InsightAI",
-    logo: "https://i.pravatar.cc/1",
+    logo: "https://i.pravatar.cc/150?img=14",
     interns: 600,
     alumni: 500,
   },
   {
     id: 5,
     name: "GlobalSoft",
-    logo: "https://i.pravatar.cc/15",
+    logo: "https://i.pravatar.cc/150?img=15",
+    interns: 2000,
+    alumni: 1800,
+  },
+  {
+    id: 5,
+    name: "GlobalSoft",
+    logo: "https://i.pravatar.cc/150?img=15",
+    interns: 2000,
+    alumni: 1800,
+  },
+  {
+    id: 5,
+    name: "GlobalSoft",
+    logo: "https://i.pravatar.cc/150?img=15",
     interns: 2000,
     alumni: 1800,
   },
@@ -67,7 +81,8 @@ export default function Company() {
             <div key={slideIndex} className="grid grid-cols-1 md:grid-cols-3 gap-6 min-w-full flex-shrink-0">
               {companies.slice(slideIndex * itemsPerSlide, slideIndex * itemsPerSlide + itemsPerSlide).map((company) => (
                 <div key={company.id} className="bg-white rounded-xl p-6 shadow-sm flex flex-col items-center justify-center">
-                  <Image src={company.logo} alt={company.name} width={100} height={100} className="mb-4 rounded-sm" />
+                  <img src={company.logo} alt={company.name} width={100} height={100} className="mb-4 rounded-sm" />
+
                   <h3 className="font-semibold text-lg">{company.name}</h3>
                   <div className="w-12 h-[2px] bg-gray-200 my-3"></div>
                   <p className="text-sm text-gray-600">👥 {company.interns} Interns</p>
