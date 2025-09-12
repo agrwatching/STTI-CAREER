@@ -1,5 +1,5 @@
 import "@/app/globals.css";
-import SidebarHR from "@/components/SidebarHR";
+import SidebarHR from "@/components/hr/SidebarHR";
 
 export const metadata = {
   title: "STTI CAREERS",
@@ -13,7 +13,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <html lang="en">
       <body className="flex">
-         <SidebarHR />
+        <SidebarHR />
         <main className="flex-1 bg-gray-50 min-h-screen ">{children}</main>
       </body>
     </html>
