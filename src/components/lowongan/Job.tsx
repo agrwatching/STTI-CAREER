@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // atau dari react-router-dom
+import { useRouter } from "next/navigation";
 
 // Interface untuk tipe data job
 interface Job {
@@ -36,6 +36,10 @@ const Job: React.FC = () => {
   });
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [jobsPerPage] = useState<number>(5); // Jumlah job per halaman
 
   const router = useRouter();
 
@@ -89,6 +93,54 @@ const Job: React.FC = () => {
       salary: "Rp 18.000.000 – Rp 28.000.000",
       postedAt: "5 days ago",
     },
+    {
+      id: 5,
+      title: "Full Stack Developer",
+      company: "PT Digital Inovasi",
+      location: "Jakarta, Indonesia",
+      type: "Full Time",
+      description:
+        "Kami mencari Full Stack Developer yang passionate untuk mengembangkan aplikasi end-to-end. Pengalaman dengan React, Node.js, dan database management sangat dihargai.",
+      tags: ["Onsite", "Senior"],
+      salary: "Rp 12.000.000 – Rp 20.000.000",
+      postedAt: "4 days ago",
+    },
+    {
+      id: 6,
+      title: "Mobile App Developer",
+      company: "PT Mobile Tech",
+      location: "Surabaya, Indonesia",
+      type: "Full Time",
+      description:
+        "Bergabunglah dengan tim mobile development kami untuk menciptakan aplikasi mobile yang inovatif. Pengalaman dengan React Native atau Flutter akan menjadi nilai tambah.",
+      tags: ["Remote", "Junior"],
+      salary: "Rp 9.000.000 – Rp 15.000.000",
+      postedAt: "6 days ago",
+    },
+    {
+      id: 7,
+      title: "Data Scientist",
+      company: "PT Analytics Pro",
+      location: "Bandung, Indonesia",
+      type: "Full Time",
+      description:
+        "Kami membutuhkan Data Scientist untuk menganalisis data besar dan memberikan insights bisnis yang valuable. Pengalaman dengan Python, R, dan machine learning sangat dibutuhkan.",
+      tags: ["Remote", "Senior"],
+      salary: "Rp 16.000.000 – Rp 24.000.000",
+      postedAt: "1 week ago",
+    },
+    {
+      id: 8,
+      title: "Product Manager",
+      company: "PT Startup Unicorn",
+      location: "Jakarta, Indonesia",
+      type: "Full Time",
+      description:
+        "Bergabunglah sebagai Product Manager untuk memimpin pengembangan produk digital yang revolusioner. Pengalaman di startup dan pemahaman teknis sangat dihargai.",
+      tags: ["Onsite", "Senior"],
+      salary: "Rp 20.000.000 – Rp 35.000.000",
+      postedAt: "3 days ago",
+    },
   ];
 
   // Fetch jobs from API - replace mock data
@@ -103,7 +155,7 @@ const Job: React.FC = () => {
       // setJobs(data.jobs);
 
       // Mock API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setJobs(mockJobs);
       setFilteredJobs(mockJobs);
     } catch (err) {
@@ -140,6 +192,7 @@ const Job: React.FC = () => {
     });
 
     setFilteredJobs(filtered);
+    setCurrentPage(1); // Reset ke halaman pertama saat filter berubah
   };
 
   // Handle filter changes
@@ -159,11 +212,70 @@ const Job: React.FC = () => {
       search: "",
     });
     setFilteredJobs(jobs);
+    setCurrentPage(1);
   };
 
-  // Handle job click
+  // Handle job click - Fixed routing to detail page
   const handleJobClick = (jobId: number) => {
-    router.push(`/jobs/${jobId}`);
+    router.push(`/lowongan/${jobId}`);
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+
+  // Handle pagination
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      handlePageChange(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      // Jika total halaman <= 5, tampilkan semua
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Jika lebih dari 5 halaman, tampilkan dengan logic
+      if (currentPage <= 3) {
+        // Jika di awal, tampilkan 1,2,3,4,5
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        // Jika di akhir, tampilkan 5 halaman terakhir
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Jika di tengah, tampilkan current-2, current-1, current, current+1, current+2
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pages.push(i);
+        }
+      }
+    }
+
+    return pages;
   };
 
   // Load jobs on component mount
@@ -175,17 +287,6 @@ const Job: React.FC = () => {
   useEffect(() => {
     applyFilters();
   }, [filters, jobs]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-gray-50 pt-20">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
 
   // Error state
   if (error) {
@@ -354,7 +455,9 @@ const Job: React.FC = () => {
 
           {/* Filter Results Count */}
           <div className="mt-4 text-sm text-gray-600">
-            Menampilkan {filteredJobs.length} dari {jobs.length} pekerjaan
+            Menampilkan {indexOfFirstJob + 1}-
+            {Math.min(indexOfLastJob, filteredJobs.length)} dari{" "}
+            {filteredJobs.length} pekerjaan
           </div>
         </div>
       </div>
@@ -371,136 +474,235 @@ const Job: React.FC = () => {
           </p>
         </div>
 
-        {/* Job Listings */}
-        {filteredJobs.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
           <div className="text-center py-12">
-            <svg
-              className="w-16 h-16 text-gray-300 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Tidak ada pekerjaan ditemukan
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Coba ubah filter atau kata kunci pencarian Anda
-            </p>
-            <button
-              onClick={clearFilters}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Reset Filter
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4 lg:space-y-6">
-            {filteredJobs.map((job) => (
-              <div
-                key={job.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleJobClick(job.id)}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between">
-                  {/* Job Icon and Info */}
-                  <div className="flex items-start space-x-4 mb-4 lg:mb-0 flex-1">
-                    {/* Company Logo/Icon */}
-                    <div className="w-12 h-12 lg:w-16 lg:h-16 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg
-                        className="w-6 h-6 lg:w-8 lg:h-8 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-6m-4 0H3m6 0v-9a2 2 0 012-2h2a2 2 0 012 2v9"
-                        />
-                      </svg>
-                    </div>
-
-                    {/* Job Details */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">
-                        {job.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-1">
-                        {job.company}
-                      </p>
-                      <p className="text-sm text-gray-500 mb-2">
-                        {job.location}
-                      </p>
-
-                      {/* Salary and Posted Date */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-3">
-                        {job.salary && (
-                          <span className="text-sm font-medium text-green-600">
-                            {job.salary}
-                          </span>
-                        )}
-                        {job.postedAt && (
-                          <span className="text-sm text-gray-500">
-                            Posted {job.postedAt}
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 lg:line-clamp-2">
-                        {job.description}
-                      </p>
-
-                      {/* Lihat Detail Link */}
-                      <button
-                        className="text-blue-600 text-sm mt-3 hover:text-blue-700 font-medium"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleJobClick(job.id);
-                        }}
-                      >
-                        Lihat Detail →
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap lg:flex-col lg:space-y-2 gap-2 lg:gap-0 lg:ml-4 lg:items-end">
-                    {job.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                          tag === "Remote"
-                            ? "bg-green-100 text-green-800"
-                            : tag === "Onsite"
-                            ? "bg-orange-100 text-orange-800"
-                            : tag === "Contract"
-                            ? "bg-purple-100 text-purple-800"
-                            : tag === "Senior"
-                            ? "bg-blue-100 text-blue-800"
-                            : tag === "Junior"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
-                      {job.type}
+            <div className="animate-pulse space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white p-6 rounded-lg border border-gray-200"
+                >
+                  <div className="flex space-x-4">
+                    <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/3"></div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Job Listings */}
+            {currentJobs.length === 0 ? (
+              <div className="text-center py-12">
+                <svg
+                  className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Tidak ada pekerjaan ditemukan
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  Coba ubah filter atau kata kunci pencarian Anda
+                </p>
+                <button
+                  onClick={clearFilters}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4 lg:space-y-6">
+                  {currentJobs.map((job) => (
+                    <div
+                      key={job.id}
+                      className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => handleJobClick(job.id)}
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between">
+                        {/* Job Icon and Info */}
+                        <div className="flex items-start space-x-4 mb-4 lg:mb-0 flex-1">
+                          {/* Company Logo/Icon */}
+                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-6 h-6 lg:w-8 lg:h-8 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-6m-4 0H3m6 0v-9a2 2 0 012-2h2a2 2 0 012 2v9"
+                              />
+                            </svg>
+                          </div>
+
+                          {/* Job Details */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">
+                              {job.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {job.company}
+                            </p>
+                            <p className="text-sm text-gray-500 mb-2">
+                              {job.location}
+                            </p>
+
+                            {/* Salary and Posted Date */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-3">
+                              {job.salary && (
+                                <span className="text-sm font-medium text-green-600">
+                                  {job.salary}
+                                </span>
+                              )}
+                              {job.postedAt && (
+                                <span className="text-sm text-gray-500">
+                                  Posted {job.postedAt}
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-3 lg:line-clamp-2">
+                              {job.description}
+                            </p>
+
+                            {/* Lihat Detail Link */}
+                            <button
+                              className="text-blue-600 text-sm mt-3 hover:text-blue-700 font-medium"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleJobClick(job.id);
+                              }}
+                            >
+                              Lihat Detail →
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap lg:flex-col lg:space-y-2 gap-2 lg:gap-0 lg:ml-4 lg:items-end">
+                          {job.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                                tag === "Remote"
+                                  ? "bg-green-100 text-green-800"
+                                  : tag === "Onsite"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : tag === "Contract"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : tag === "Senior"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : tag === "Junior"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">
+                            {job.type}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center mt-8">
+                    <nav className="flex items-center space-x-1">
+                      {/* Previous Button */}
+                      <button
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                        className={`p-2 rounded-md ${
+                          currentPage === 1
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {/* Page Numbers */}
+                      {getPageNumbers().map((pageNumber) => (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`px-3 py-2 rounded-md text-sm font-medium ${
+                            currentPage === pageNumber
+                              ? "bg-blue-600 text-white"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      ))}
+
+                      {/* Next Button */}
+                      <button
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                        className={`p-2 rounded-md ${
+                          currentPage === totalPages
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
       </div>
     </div>
