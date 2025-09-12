@@ -1,4 +1,4 @@
-// src/app/(auth)/login/layout.tsx
+// src/app/(auth)/login/layout.tsx *Pengaturan Layout dirubah ke mode html sesuai standar next js BY JERRY
 import "@/app/globals.css";
 import Script from "next/script";
 
@@ -9,14 +9,14 @@ export const metadata = {
     icon: "/logo-stti.png",
   },
 };
-export default function PublicLayout({
-    children,
-}: {
-  children: React.ReactNode;
-}) {
+
+export default function RegisterLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <main className="min-h-screen">{children}</main>
-    </>
+    <html lang="en">
+      <head />
+      <body>
+        <main className="min-h-screen">{children}</main>
+      </body>
+    </html>
   );
 }
