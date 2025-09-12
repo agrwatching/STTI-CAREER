@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 
 const About = () => {
   const [formData, setFormData] = useState({
     nama: "",
     email: "",
-    telepon: "",
+    subjek: "",
     pesan: "",
   });
+
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -26,160 +29,172 @@ const About = () => {
     // Handle form submission logic here
   };
 
+  const toggleFAQ = (index: number) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
+
+  const faqItems = [
+    "Bagaimana Cara saya membuat akun di STICKAREER ?",
+    "Apakah Layanan di STICKAREER berbayar ?",
+    "Bagaimana saya bisa yakin data pribadi saya aman ?",
+    "Apa yang harus saya lakukan ketika lupa kata sandi ?",
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-2xl font-bold text-gray-900 mb-8">
-            TENTANG STICKAREER
-          </h1>
+    <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Card Section - TENTANG STICKAREER & Misi Kami */}
+        <div className="bg-white rounded-lg border border-gray-300 p-8 mb-12">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-blue-900 mb-6">
+              TENTANG STICKAREER
+            </h1>
+          </div>
+
+          {/* Misi Kami */}
+          <div className="flex items-center gap-8">
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-black mb-4">Misi Kami</h2>
+              <p className="text-sm text-gray-800 leading-relaxed">
+                STICKAREER lahir dengan misi untuk menjembatani kesenjangan
+                antara talenta berbakat dengan perusahaan-perusahaan impian
+                mereka. Kami berkomitmen untuk memberikan kesempatan bagi
+                individu berbakat mendapatkan kesempatan untuk membangun karir
+                sesuai dengan potensi mereka. Melalui platform kami yang
+                inovatif dan terpercaya, kami bertujuan menjadi mitra terbaik
+                dalam mencari dan merekrut talenta terbaik, serta mendukung
+                karir mereka ke level lebih tinggi di berbagai peluang kerja
+                terbaik di seluruh Indonesia.
+              </p>
+            </div>
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center">
+              <Image
+                src="/logo-stti.png"
+                alt="Logo STTI"
+                width={150}
+                height={150}
+                className="object-contain"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-          <div className="flex items-start gap-8">
-            {/* Left Content */}
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Misi Kami
-              </h2>
-              <p className="text-sm text-gray-700 leading-relaxed mb-6">
-                STICKAREER hadir dengan misi untuk mempermudah kebersamaan
-                antara talenta terbaik dengan perusahaan impian. Kami percaya
-                bahwa setiap individu memiliki potensi bertemunan untuk
-                memberikan kontribusi bagi individu, Berbagai eksistansi
-                ketersangkutan, kami menciptakan platform yang memungkinkan para
-                pencari kerja dan perusahaan untuk bertemu dan terhubung secara
-                mudah melalui satu yang modern dan transsparan. Kami bertujuan
-                membantu menciptakan masa depan karir yang lebih cerah dan
-                berkualitas.
-              </p>
+        {/* Visi Kami - No Card */}
+        <div className="bg-blue-50 p-6 rounded-lg mb-12 max-w-4xl mx-auto">
+          <h2 className="text-lg font-bold text-blue-900 mb-4 text-center">
+            Visi Kami
+          </h2>
+          <p className="text-sm text-gray-800 leading-relaxed text-center">
+            Menjadi platform karir nomor satu di Indonesia yang paling dipercaya
+            oleh para pencari kerja dan perusahaan. Kami bertekad untuk
+            menciptakan ekosistem yang transparan dan mendukung pertumbuhan
+            profesional dengan memberikan informasi, kesempatan, dan bimbingan
+            yang relevan agar talenta terbaik dapat tumbuh dan bersinar.
+          </p>
+        </div>
 
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Visi Kami
-              </h2>
-              <p className="text-sm text-gray-700 leading-relaxed mb-8">
-                Menjadi platform karir nomor satu di Indonesia yang dapat
-                membantu sejumlah orang dengan karir terbaik untuk masa depan
-                yang lebih baik, serta membantu perusahaan menemukan dengan
-                menampilkan informasi, kesenangan, dan kemudahan yang maksimun
-                untuk semua kalangan tanpa bapak dari tuntutan dan lainnya.
-              </p>
+        {/* FAQ Section - No Card */}
+        <div className="mb-12 max-w-3xl mx-auto">
+          <h2 className="text-lg font-bold text-blue-900 mb-6 text-center">
+            Pertanyaan yang sering di ajukan
+          </h2>
 
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Pertanyaan yang sering di ajukan
-              </h2>
-
-              {/* FAQ Dropdowns */}
-              <div className="space-y-3 mb-8">
-                <details className="bg-gray-50 rounded-lg border border-gray-200">
-                  <summary className="p-4 text-sm font-medium text-gray-900 cursor-pointer hover:bg-gray-100">
-                    Bagaimana Cara saya membuat akun di STICKAREER ?
-                  </summary>
-                </details>
-
-                <details className="bg-gray-50 rounded-lg border border-gray-200">
-                  <summary className="p-4 text-sm font-medium text-gray-900 cursor-pointer hover:bg-gray-100">
-                    Apakah layanan di STICKAREER berbayar ?
-                  </summary>
-                </details>
-
-                <details className="bg-gray-50 rounded-lg border border-gray-200">
-                  <summary className="p-4 text-sm font-medium text-gray-900 cursor-pointer hover:bg-gray-100">
-                    Bagaimana saya bisa yakin pada pekerjaan lowongan ?
-                  </summary>
-                </details>
-
-                <details className="bg-gray-50 rounded-lg border border-gray-200">
-                  <summary className="p-4 text-sm font-medium text-gray-900 cursor-pointer hover:bg-gray-100">
-                    Apa yang harus saya lakukan ketika masa kerja tidak?
-                  </summary>
-                </details>
-              </div>
-
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Hubungi Kami
-              </h2>
-
-              {/* Contact Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nama
-                  </label>
-                  <input
-                    type="text"
-                    name="nama"
-                    value={formData.nama}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Telepon
-                  </label>
-                  <input
-                    type="tel"
-                    name="telepon"
-                    value={formData.telepon}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pesan
-                  </label>
-                  <textarea
-                    name="pesan"
-                    value={formData.pesan}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    required
-                  ></textarea>
-                </div>
-
+          <div className="space-y-3">
+            {faqItems.map((question, index) => (
+              <div
+                key={index}
+                className="bg-blue-50 rounded-lg border border-gray-200"
+              >
                 <button
-                  type="submit"
-                  className="w-full bg-blue-900 text-white py-3 px-6 rounded-md hover:bg-blue-800 transition-colors font-medium"
+                  onClick={() => toggleFAQ(index)}
+                  className="w-full p-4 text-left text-sm font-medium text-gray-900 hover:bg-blue-100 rounded-lg flex items-center justify-between"
                 >
-                  Kirim Pesan
+                  <span>{question}</span>
+                  <span className="text-gray-500 text-lg">
+                    {openFAQ === index ? "−" : "⌄"}
+                  </span>
                 </button>
-              </form>
+                {openFAQ === index && (
+                  <div className="px-4 pb-4 text-sm text-gray-700">
+                    Jawaban untuk pertanyaan ini akan ditampilkan di sini.
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Contact Form - No Card */}
+        <div className="max-w-lg mx-auto">
+          <h2 className="text-lg font-bold text-blue-900 mb-6 text-center">
+            Hubungi Kami
+          </h2>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nama
+              </label>
+              <input
+                type="text"
+                name="nama"
+                value={formData.nama}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
 
-            {/* Right Logo */}
-            <div className="flex-shrink-0">
-              <div className="w-32 h-32 bg-blue-900 rounded-full flex items-center justify-center">
-                <div className="text-white text-center">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-blue-900 font-bold text-lg">S</span>
-                  </div>
-                  <div className="text-xs">STICKAREER</div>
-                </div>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                required
+              />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subjek
+              </label>
+              <input
+                type="text"
+                name="subjek"
+                value={formData.subjek}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pesan
+              </label>
+              <textarea
+                name="pesan"
+                value={formData.pesan}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-gray-50"
+                required
+              ></textarea>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-blue-900 text-white py-3 px-6 rounded-md hover:bg-blue-800 transition-colors font-medium"
+            >
+              Kirim Pesan
+            </button>
           </div>
         </div>
       </div>
