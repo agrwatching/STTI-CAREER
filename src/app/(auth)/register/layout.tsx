@@ -3,14 +3,14 @@ import "@/app/globals.css";
 import Script from "next/script";
 
 export const metadata = {
-  title: "Login - STTI CAREERS",
+  title: "Register - STTI CAREERS",
   description: "Website resmi STTI CAREERS",
   icons: {
     icon: "/logo-stti.png",
   },
 };
 
-export default function LoginLayout({ children }: { children: React.ReactNode }) {
+export default function RegisterLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head />
