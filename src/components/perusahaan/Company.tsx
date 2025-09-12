@@ -1,131 +1,92 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 const Company = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
   const [industry, setIndustry] = useState("");
 
-  // Data dummy untuk PT Palugada Code
+  // Data dummy (18 perusahaan berbeda) + logo dari pravatar
   const companies = [
-    {
-      id: 1,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
-    {
-      id: 2,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
-    {
-      id: 3,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
-    {
-      id: 4,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
-    {
-      id: 5,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
-    {
-      id: 6,
-      name: "PT Palugada Code",
-      tagline: "Teknik Informatika",
-      description:
-        "Usaha di bidang Teknologi Informasi (IT) meliputi kegiatan usaha yang berkaitan untuk penyediaan sistem berbasis teknologi untuk membantu pemrosesan organisasi.",
-      location: "Karawang, Indonesia",
-    },
+    { id: 1, name: "PT Palugada Code", tagline: "Teknik Informatika", description: "Penyedia solusi teknologi informasi untuk perusahaan dan organisasi.", location: "Karawang, Indonesia", logo: "https://i.pravatar.cc/80?img=1" },
+    { id: 2, name: "PT Nusantara Tech", tagline: "Software Development", description: "Membangun aplikasi inovatif berbasis web dan mobile.", location: "Jakarta, Indonesia", logo: "https://i.pravatar.cc/80?img=2" },
+    { id: 3, name: "PT Digital Kreatif", tagline: "Creative Agency", description: "Fokus pada branding, desain grafis, dan strategi digital marketing.", location: "Bandung, Indonesia", logo: "https://i.pravatar.cc/80?img=3" },
+    { id: 4, name: "PT Logistik Jaya", tagline: "Transportasi & Logistik", description: "Layanan distribusi cepat dan aman ke seluruh wilayah Indonesia.", location: "Surabaya, Indonesia", logo: "https://i.pravatar.cc/80?img=4" },
+    { id: 5, name: "PT Agro Sejahtera", tagline: "Agrikultur", description: "Pengolahan hasil pertanian menjadi produk bernilai tambah.", location: "Yogyakarta, Indonesia", logo: "https://i.pravatar.cc/80?img=5" },
+    { id: 6, name: "PT Edukasi Pintar", tagline: "EdTech", description: "Platform pembelajaran online untuk siswa dan profesional.", location: "Depok, Indonesia", logo: "https://i.pravatar.cc/80?img=6" },
+    { id: 7, name: "PT Energi Baru", tagline: "Energi Terbarukan", description: "Mengembangkan solusi energi bersih dan ramah lingkungan.", location: "Makassar, Indonesia", logo: "https://i.pravatar.cc/80?img=7" },
+    { id: 8, name: "PT Sehat Selalu", tagline: "Kesehatan", description: "Menyediakan layanan klinik modern dan aplikasi kesehatan digital.", location: "Medan, Indonesia", logo: "https://i.pravatar.cc/80?img=8" },
+    { id: 9, name: "PT Properti Maju", tagline: "Real Estate", description: "Pengembang perumahan dan gedung komersial modern.", location: "Bekasi, Indonesia", logo: "https://i.pravatar.cc/80?img=9" },
+    { id: 10, name: "PT Otomotif Jaya", tagline: "Otomotif", description: "Produsen dan distributor suku cadang kendaraan bermotor.", location: "Semarang, Indonesia", logo: "https://i.pravatar.cc/80?img=10" },
+    { id: 11, name: "PT Retail Global", tagline: "Ritel Modern", description: "Mengelola jaringan supermarket dan minimarket di Indonesia.", location: "Bogor, Indonesia", logo: "https://i.pravatar.cc/80?img=11" },
+    { id: 12, name: "PT Media Kreatif", tagline: "Media & Hiburan", description: "Produksi konten digital, film, dan iklan kreatif.", location: "Denpasar, Indonesia", logo: "https://i.pravatar.cc/80?img=12" },
+    { id: 13, name: "PT Fintech Nusantara", tagline: "Finansial Teknologi", description: "Memberikan layanan pinjaman online dan pembayaran digital.", location: "Jakarta, Indonesia", logo: "https://i.pravatar.cc/80?img=13" },
+    { id: 14, name: "PT Makanan Lezat", tagline: "F&B", description: "Restoran cepat saji dengan cita rasa lokal modern.", location: "Solo, Indonesia", logo: "https://i.pravatar.cc/80?img=14" },
+    { id: 15, name: "PT Wisata Indah", tagline: "Pariwisata", description: "Penyedia layanan tour & travel domestik dan internasional.", location: "Bali, Indonesia", logo: "https://i.pravatar.cc/80?img=15" },
+    { id: 16, name: "PT Bangun Negeri", tagline: "Konstruksi", description: "Spesialis pembangunan infrastruktur dan gedung bertingkat.", location: "Palembang, Indonesia", logo: "https://i.pravatar.cc/80?img=16" },
+    { id: 17, name: "PT Transportasi Maju", tagline: "Transportasi", description: "Layanan transportasi online dan logistik perkotaan.", location: "Cirebon, Indonesia", logo: "https://i.pravatar.cc/80?img=17" },
+    { id: 18, name: "PT Fashion Trendy", tagline: "Fashion", description: "Produksi dan distribusi pakaian casual dan formal.", location: "Tangerang, Indonesia", logo: "https://i.pravatar.cc/80?img=18" },
   ];
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  const totalPages = Math.ceil(companies.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentCompanies = companies.slice(indexOfFirst, indexOfLast);
+
   const handleSearch = () => {
-    // Logic untuk pencarian dapat ditambahkan di sini
     console.log("Searching for:", { searchTerm, location, industry });
   };
 
-  const CompanyCard = ({ company }: { company: (typeof companies)[0] }) => (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3">
-        {/* Logo placeholder */}
-        <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-          <div className="grid grid-cols-2 gap-0.5">
-            <div className="w-2 h-2 bg-white rounded-sm"></div>
-            <div className="w-2 h-2 bg-white rounded-sm"></div>
-            <div className="w-2 h-2 bg-white rounded-sm"></div>
-            <div className="w-2 h-2 bg-white rounded-sm"></div>
-          </div>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg text-gray-900 mb-1">
-            {company.name}
-          </h3>
-          <p className="text-blue-600 text-sm mb-2">{company.tagline}</p>
-          <p className="text-gray-600 text-sm leading-relaxed mb-3">
-            {company.description}
-          </p>
-          <div className="flex items-center text-gray-500 text-sm">
-            <MapPin className="w-4 h-4 mr-1" />
-            {company.location}
-          </div>
-        </div>
+  // ✅ Card perusahaan dengan logo pravatar
+ const CompanyCard = ({ company }: { company: (typeof companies)[0] }) => (
+  <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow flex flex-col h-full min-h-[250px]">
+    {/* Bagian atas: logo, nama, tagline */}
+    <div className="flex items-center gap-3 mb-3">
+      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+        <img
+          src={company.logo}
+          alt={company.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div>
+        <h3 className="font-semibold text-lg text-gray-900">{company.name}</h3>
+        <p className="text-blue-600 text-sm">{company.tagline}</p>
       </div>
     </div>
-  );
+
+    {/* Bagian bawah: deskripsi & lokasi */}
+    <div className="flex-1 flex flex-col items-start">
+      <p className="text-gray-600 text-sm leading-relaxed mb-3">{company.description}</p>
+      <div className="flex items-center text-gray-500 text-sm mt-auto">
+        <MapPin className="w-4 h-4 mr-1" />
+        {company.location}
+      </div>
+    </div>
+  </div>
+);
+
 
   const Pagination = () => (
     <div className="flex items-center justify-center gap-2 mt-8">
       <button
         className="p-2 text-gray-400 hover:text-gray-600"
-        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+        disabled={currentPage === 1}
       >
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
+        ◀
       </button>
 
-      {[1, 2, 3, 4].map((page) => (
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
           className={`w-10 h-10 rounded-lg ${
-            currentPage === page
-              ? "bg-blue-600 text-white"
-              : "text-gray-600 hover:bg-gray-100"
+            currentPage === page ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
           }`}
           onClick={() => setCurrentPage(page)}
         >
@@ -135,21 +96,10 @@ const Company = () => {
 
       <button
         className="p-2 text-gray-400 hover:text-gray-600"
-        onClick={() => setCurrentPage(Math.min(4, currentPage + 1))}
+        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+        disabled={currentPage === totalPages}
       >
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
+        ▶
       </button>
     </div>
   );
@@ -159,9 +109,7 @@ const Company = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header Pencarian */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h1 className="text-xl font-semibold text-gray-900 mb-4">
-            Cari Perusahaan Impianmu
-          </h1>
+          <h1 className="text-xl font-semibold text-gray-900 mb-4">Cari Perusahaan Impianmu</h1>
 
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -204,8 +152,8 @@ const Company = () => {
         </div>
 
         {/* Grid Perusahaan */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {companies.map((company) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {currentCompanies.map((company) => (
             <CompanyCard key={company.id} company={company} />
           ))}
         </div>
