@@ -9,7 +9,7 @@ interface Job {
   salary: string;
   location: string;
   logo: string;
-  type: string;
+  type: string; // "Remote" | "On-site" | "Hybrid"
 }
 
 interface JobCardProps {
@@ -17,6 +17,19 @@ interface JobCardProps {
 }
 
 export default function JobCard({ job }: JobCardProps) {
+  const getTypeStyle = (type: string) => {
+    switch (type) {
+      case "Remote":
+        return "bg-green-500 text-white";
+      case "On-site":
+        return "bg-orange-500 text-white";
+      case "Hybrid":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-300 text-black";
+    }
+  };
+
   return (
     <div className="bg-white shadow-md rounded-xl p-5 flex gap-4">
       {/* Logo */}
@@ -28,15 +41,25 @@ export default function JobCard({ job }: JobCardProps) {
 
       {/* Content */}
       <div className="flex-1 flex flex-col">
-        <p
-          className={`text-sm font-semibold mb-1 flex items-center gap-1 ${job.statusColor}`}
-        >
-          {job.icon}
-          {job.status}
-        </p>
+        {/* Status & Work Type sejajar */}
+        <div className="flex items-center justify-between mb-1">
+          <p
+            className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}
+          >
+            {job.icon}
+            {job.status}
+          </p>
+
+          <span
+            className={`w-20 py-0.5 rounded-full text-xs font-semibold text-center ${getTypeStyle(
+              job.type
+            )}`}
+          >
+            {job.type}
+          </span>
+        </div>
 
         <h2 className="text-lg font-bold text-gray-800">{job.title}</h2>
-
         <p className="text-gray-600 text-sm mb-3">{job.desc}</p>
 
         {/* Info + Actions */}

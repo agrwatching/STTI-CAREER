@@ -1,6 +1,4 @@
 "use client";
-import { h1 } from "framer-motion/client";
-import { useState } from "react";
 
 interface Job {
   posisi: string;
@@ -30,38 +28,36 @@ export default function LowonganSayaTable({ jobs }: LowonganSayaTableProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Lowongan Saya</h1>
+      {/* Judul keluar dari kotak */}
+      <h1 className="text-3xl font-bold mb-4">Lowongan Saya</h1>
 
-      <div className="bg-white rounded-lg shadow-md p-4 ">
-        {/* Scrollable table */}
-        <div className="overflow-x-auto ">
-          <div className="max-h-96 overflow-y-auto border rounded">
-            <table className="w-full border-separate min-w-[600px]">
-              <thead className="sticky top-0 z-10 bg-gray-300 ">
-                <tr>
-                  <th className="p-3 border text-left ">Posisi</th>
-                  <th className="p-3 border text-left">Tanggal Posting</th>
-                  <th className="p-3 border text-center">Status</th>
-                  <th className="p-3 border text-center">Aksi</th>
+      {/* Kotak tabel */}
+      <div className="bg-white rounded-lg shadow-md flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto max-h-[28rem]">
+          <table className="w-full text-left">
+            <thead className="bg-gray-300 sticky top-0 z-10">
+              <tr>
+                <th className="px-6 py-3 rounded-tl-lg">Posisi</th>
+                <th className="px-6 py-3">Tanggal Posting</th>
+                <th className="px-6 py-3 text-center">Status</th>
+                <th className="px-6 py-3 text-center rounded-tr-lg">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {jobs.map((job, index) => (
+                <tr key={index} className="border-t">
+                  <td className="px-6 py-3">{job.posisi}</td>
+                  <td className="px-6 py-3">{job.tanggal}</td>
+                  <td className="px-6 py-3 text-center">
+                    <span className={getStatusStyle(job.status)}>{job.status}</span>
+                  </td>
+                  <td className="px-6 py-3 text-center">
+                    <span className="text-blue-600 cursor-pointer hover:underline">Lihat</span>
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody>
-                {jobs.map((job, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="p-3">{job.posisi}</td>
-                    <td className="p-3">{job.tanggal}</td>
-                    <td className="p-3 text-center">
-                      <span className={getStatusStyle(job.status)}>{job.status}</span>
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className="text-blue-600 cursor-pointer hover:underline">Lihat</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

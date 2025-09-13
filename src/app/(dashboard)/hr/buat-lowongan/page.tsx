@@ -13,29 +13,63 @@ export default function BuatLowonganPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState([
-    {
-      status: "Tunggu Verifikasi",
-      statusColor: "text-blue-600",
-      icon: <Clock className="w-5 h-5 text-blue-600" />,
-      title: "Frontend Developer",
-      desc: "Kami mencari Frontend Developer...",
-      salary: "Rp. 3.000.000 - Rp. 6.000.000",
-      location: "Jakarta Selatan, Indonesia",
-      logo: "https://i.pravatar.cc/150?img=5",
-      type: "WFH",
-    },
-    {
-      status: "Terverifikasi",
-      statusColor: "text-green-600",
-      icon: <CheckCircle2 className="w-5 h-5 text-green-600" />,
-      title: "Backend Developer",
-      desc: "Mencari Backend Developer...",
-      salary: "Rp. 5.000.000 - Rp. 9.000.000",
-      location: "Bandung, Indonesia",
-      logo: "https://i.pravatar.cc/150?img=15",
-      type: "Hybrid",
-    },
-  ]);
+  {
+    status: "Tunggu Verifikasi",
+    statusColor: "text-blue-600",
+    icon: <Clock className="w-5 h-5 text-blue-600" />,
+    title: "Frontend Developer",
+    desc: "Kami mencari Frontend Developer...",
+    salary: "Rp. 3.000.000 - Rp. 6.000.000",
+    location: "Jakarta Selatan, Indonesia",
+    logo: "https://i.pravatar.cc/150?img=5",
+    type: "Remote",
+  },
+  {
+    status: "Terverifikasi",
+    statusColor: "text-green-600",
+    icon: <CheckCircle2 className="w-5 h-5 text-green-600" />,
+    title: "Backend Developer",
+    desc: "Mencari Backend Developer...",
+    salary: "Rp. 5.000.000 - Rp. 9.000.000",
+    location: "Bandung, Indonesia",
+    logo: "https://i.pravatar.cc/150?img=15",
+    type: "Hybrid",
+  },
+  {
+    status: "Ditolak",
+    statusColor: "text-red-600",
+    icon: <XCircle className="w-5 h-5 text-red-600" />,
+    title: "UI/UX Designer",
+    desc: "Butuh UI/UX Designer berpengalaman...",
+    salary: "Rp. 4.000.000 - Rp. 7.000.000",
+    location: "Surabaya, Indonesia",
+    logo: "https://i.pravatar.cc/150?img=25",
+    type: "On-site",
+  },
+  {
+    status: "Terverifikasi",
+    statusColor: "text-green-600",
+    icon: <CheckCircle2 className="w-5 h-5 text-green-600" />,
+    title: "Mobile Developer",
+    desc: "Dicari Android/iOS Developer...",
+    salary: "Rp. 6.000.000 - Rp. 10.000.000",
+    location: "Yogyakarta, Indonesia",
+    logo: "https://i.pravatar.cc/150?img=35",
+    type: "Remote",
+  },
+  {
+    status: "Tunggu Verifikasi",
+    statusColor: "text-blue-600",
+    icon: <Clock className="w-5 h-5 text-blue-600" />,
+    title: "Data Analyst",
+    desc: "Kami mencari Data Analyst untuk analisis data...",
+    salary: "Rp. 5.000.000 - Rp. 8.000.000",
+    location: "Semarang, Indonesia",
+    logo: "https://i.pravatar.cc/150?img=45",
+    type: "Hybrid",
+  },
+]);
+
 
   // cek query param
   useEffect(() => {

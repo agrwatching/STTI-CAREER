@@ -55,22 +55,28 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
               <textarea name="qualification" value={formData.qualification} onChange={handleChange} rows={2} className="w-full border rounded px-2 py-1 text-sm" />
             </div>
 
-            {/* Work Type */}
+           {/* Work Type */}
             <div>
               <label className="block font-semibold mb-1 text-base">Work Type</label>
               <div className="flex gap-2 mb-1">
-                {["WFH", "Onsite", "Hybrid"].map((type) => (
+                {[
+                  { label: "Remote", color: "bg-green-500" },
+                  { label: "On-site", color: "bg-orange-500" },
+                  { label: "Hybrid", color: "bg-red-500" },
+                ].map(({ label, color }) => (
                   <button
                     type="button"
-                    key={type}
-                    className={`px-2 py-1 rounded-full text-xs font-medium border ${formData.type === type ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"}`}
-                    onClick={() => setFormData({ ...formData, type })}
+                    key={label}
+                    className={`w-24 py-1 rounded-full text-xs font-semibold text-white transition-colors
+                      ${formData.type === label ? color : "bg-gray-300"}`}
+                    onClick={() => setFormData({ ...formData, type: label })}
                   >
-                    {type}
+                    {label}
                   </button>
                 ))}
               </div>
             </div>
+
 
             {/* Salary */}
             <div>
