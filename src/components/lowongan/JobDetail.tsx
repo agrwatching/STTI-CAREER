@@ -25,26 +25,11 @@ interface JobDetail {
   views?: number;
 }
 
-// Interface untuk application data
-interface JobApplication {
-  jobId: number;
-  coverLetter: string;
-  resume: File | null;
-}
-
 const JobDetail: React.FC = () => {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isApplying, setIsApplying] = useState<boolean>(false);
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
-  const [showApplicationModal, setShowApplicationModal] =
-    useState<boolean>(false);
-  const [application, setApplication] = useState<JobApplication>({
-    jobId: 0,
-    coverLetter: "",
-    resume: null,
-  });
 
   const router = useRouter();
   const params = useParams();
@@ -118,7 +103,6 @@ const JobDetail: React.FC = () => {
 
       if (id === "1") {
         setJob(mockJobDetail);
-        setApplication((prev) => ({ ...prev, jobId: mockJobDetail.id }));
       } else {
         throw new Error("Job not found");
       }
@@ -165,38 +149,9 @@ const JobDetail: React.FC = () => {
     }
   };
 
-  // Handle job application
-  const handleApply = async () => {
-    try {
-      setIsApplying(true);
-
-      // TODO: Replace with actual API call
-      // const formData = new FormData();
-      // formData.append('jobId', application.jobId.toString());
-      // formData.append('coverLetter', application.coverLetter);
-      // if (application.resume) {
-      //   formData.append('resume', application.resume);
-      // }
-
-      // const response = await fetch('/api/applications', {
-      //   method: 'POST',
-      //   headers: { Authorization: `Bearer ${token}` },
-      //   body: formData
-      // });
-
-      // if (!response.ok) throw new Error('Failed to submit application');
-
-      // Mock API delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setShowApplicationModal(false);
-      alert("Application submitted successfully!");
-    } catch (err) {
-      console.error("Error submitting application:", err);
-      alert("Failed to submit application. Please try again.");
-    } finally {
-      setIsApplying(false);
-    }
+  // Handle navigate to application form
+  const handleApplyNow = () => {
+    router.push(`/lowongan/${jobId}/lamar`);
   };
 
   // Handle share
@@ -545,9 +500,9 @@ const JobDetail: React.FC = () => {
               Bagikan
             </button>
 
-            {/* Apply Now Button */}
+            {/* Apply Now Button - Now navigates to LamarKerja page */}
             <button
-              onClick={() => setShowApplicationModal(true)}
+              onClick={handleApplyNow}
               className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium"
             >
               Apply Now
@@ -555,106 +510,6 @@ const JobDetail: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Application Modal */}
-      {showApplicationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Apply for {job.title}
-                </h2>
-                <button
-                  onClick={() => setShowApplicationModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleApply();
-                }}
-              >
-                {/* Cover Letter */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Letter <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    required
-                    rows={8}
-                    value={application.coverLetter}
-                    onChange={(e) =>
-                      setApplication((prev) => ({
-                        ...prev,
-                        coverLetter: e.target.value,
-                      }))
-                    }
-                    placeholder="Tell us why you're interested in this position and what makes you a great fit..."
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Resume Upload */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Resume/CV <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    required
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) =>
-                      setApplication((prev) => ({
-                        ...prev,
-                        resume: e.target.files ? e.target.files[0] : null,
-                      }))
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Supported formats: PDF, DOC, DOCX (max 5MB)
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowApplicationModal(false)}
-                    className="px-6 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isApplying}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isApplying ? "Submitting..." : "Submit Application"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
