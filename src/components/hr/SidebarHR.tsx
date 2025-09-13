@@ -1,6 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const menu = [
+  { name: "Dashboard", href: "/hr/dashboard" },
+  { name: "Buat Lowongan", href: "/hr/buat-lowongan" },
+  { name: "Lowongan Saya", href: "/hr/lowongan-saya" },
+  { name: "Pelamar", href: "/hr/pelamar" },
+  { name: "Pengaturan", href: "/hr/pengaturan" },
+];
 
 export default function SidebarHR() {
+  const pathname = usePathname();
+
   return (
     <div className="w-64 h-screen bg-[#0B1B54] text-white flex flex-col">
       {/* Logo/Header */}
@@ -11,54 +24,32 @@ export default function SidebarHR() {
       {/* Menu */}
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          <li>
-            <Link
-              href="/hr/dashboard"
-              className="block px-4 py-2 rounded-lg bg-gray-700"
-            >
-              Dashboard
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/hr/buat-lowongan"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Buat Lowongan
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/hr/lowongan-saya"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Lowongan Saya
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/hr/pelamar"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Pelamar
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/hr/pengaturan"
-              className="block px-4 py-2 rounded-lg hover:bg-gray-700"
-            >
-              Pengaturan
-            </Link>
-          </li>
+          {menu.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`block px-4 py-2 rounded-lg transition ${
+                    isActive ? "bg-gray-700 font-semibold" : "hover:bg-gray-700"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
       {/* Tombol bawah */}
       <div className="p-4">
+        <Link href="/hr/buat-lowongan?mode=form">
         <button className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
           Buat Lowongan
         </button>
+      </Link>
+
       </div>
     </div>
   );
