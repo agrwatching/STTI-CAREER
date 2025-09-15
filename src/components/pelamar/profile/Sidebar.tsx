@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, BriefcaseBusiness, FileText, Settings } from "lucide-react"; // icon lucide-react
 
 const menuItems = [
-  { name: "Data Pribadi", href: "/pelamar/profile", icon: Home },
+  { name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
   { name: "Simpan Lowongan", href: "/dashboard/saved", icon: BriefcaseBusiness },
   { name: "Lamaran saya", href: "/dashboard/applications", icon: FileText },
 ];
