@@ -19,12 +19,12 @@ export default function CompanyProfileForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white border rounded-lg shadow-sm p-3 mb-2 text-sm"
+      className="bg-white border rounded-lg shadow-sm p-3 mb-1 text-sm"
     >
       <h2 className="text-sm font-semibold mb-3">Profil Perusahaan</h2>
 
       {/* Form grid */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3 mb-1">
         <div>
           <label className="block text-xs font-medium mb-1">
             Nama Perusahaan
