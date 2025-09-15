@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react"; // 👉 tambah Trash2
+import { Pencil, Plus, Trash2 } from "lucide-react"; // 👉 tambah Trash2
 import PengalamanForm from "./PengalamanForm";
 
 export default function PengalamanSection() {
@@ -10,6 +10,41 @@ export default function PengalamanSection() {
 
   // 👉 jadikan state supaya bisa dihapus
   const [pengalamanList, setPengalamanList] = useState([
+    {
+      posisi: "Frontend Developer",
+      perusahaan: "Overstack Dev",
+      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
+       tahunMasuk: "2022",
+    tahunKeluar: "2023",
+    },
+    {
+      posisi: "Frontend Developer",
+      perusahaan: "Overstack Dev",
+      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
+       tahunMasuk: "2022",
+    tahunKeluar: "2023",
+    },
+    {
+      posisi: "Frontend Developer",
+      perusahaan: "Overstack Dev",
+      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
+       tahunMasuk: "2022",
+    tahunKeluar: "2023",
+    },
+    {
+      posisi: "Frontend Developer",
+      perusahaan: "Overstack Dev",
+      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
+       tahunMasuk: "2022",
+    tahunKeluar: "2023",
+    },
+    {
+      posisi: "Frontend Developer",
+      perusahaan: "Overstack Dev",
+      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
+       tahunMasuk: "2022",
+    tahunKeluar: "2023",
+    },
     {
       posisi: "Frontend Developer",
       perusahaan: "Overstack Dev",
@@ -89,18 +124,19 @@ export default function PengalamanSection() {
   return (
     <div className="mt-3">
       {/* Header */}
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-sm font-semibold">Pengalaman Kerja</h2>
-        {!showForm && (
-          <button
-            onClick={handleAdd}
-            className="bg-blue-600 text-white px-2 py-1 text-xs rounded hover:bg-blue-700"
-          >
-            Tambah Pengalaman
-          </button>
-        )}
-      </div>
+    <div className="flex justify-end items-center mb-3">
+  {!showForm && (
+    <button
+      onClick={handleAdd}
+      className="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 text-sm font-medium rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+    >
+      <Plus className="w-4 h-4" />
+      Tambah Pengalaman
+    </button>
+  )}
+</div>
 
+    <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
       {/* Konten */}
       {showForm ? (
         <PengalamanForm
@@ -110,7 +146,7 @@ export default function PengalamanSection() {
           onSave={handleCancel}
         />
       ) : (
-        <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
+        <div className="grid grid-cols-2 gap-2 max-h-[45vh] overflow-y-auto pr-1">
           {pengalamanList.map((exp, idx) => (
             <div
               key={idx}

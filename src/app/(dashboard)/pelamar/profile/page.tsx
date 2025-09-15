@@ -7,8 +7,8 @@ import Tabs from "@/components/pelamar/profile/Tabs";
 import Biodata from "@/components/pelamar/profile/Biodata";
 import Pendidikan from "@/components/pelamar/profile/Pendidikan";
 import PengalamanSection from "@/components/pelamar/profile/pengalaman/PengalamanSection";
-import SertifikatForm from "@/components/pelamar/profile/pengalaman/SertifikatForm";
-import SertifikatSection from "@/components/pelamar/profile/pengalaman/SertifikatSection";
+import SertifikatSection from "@/components/pelamar/profile/sertifikat/SertifikatSection";
+import KeterampilanSection from "@/components/pelamar/profile/keterampilan/KeterampilanSection";
 
 // nanti tinggal tambah Sertifikat, Keterampilan
 export default function ProfilePage() {
@@ -30,6 +30,7 @@ export default function ProfilePage() {
           {activeTab === "pendidikan" && <Pendidikan />}
           {activeTab === "pengalaman" && <PengalamanSection />}
           {activeTab === "sertifikat" && <SertifikatSection />}
+          {activeTab === "keterampilan" && <KeterampilanSection />}
         </div>
       </div>
     </>
