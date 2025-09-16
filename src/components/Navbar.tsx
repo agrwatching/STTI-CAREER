@@ -95,7 +95,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 {/* Profile */}
                 <Link
-                  href="/pelamar/profile"
+                  href="/pelamar/profile/{id}"
                   className="flex items-center space-x-2 hover:text-yellow-400 transition-colors"
                 >
                   {user.foto ? (
