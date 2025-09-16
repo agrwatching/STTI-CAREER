@@ -1,21 +1,23 @@
+// src/components/hr/buat-lowongan/JobForm.tsx
 "use client";
 
 import { useState, useRef } from "react";
+import { JobType } from "@/app/(dashboard)/hr/buat-lowongan/page";
 
 interface JobFormProps {
   onCancel: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Omit<JobType, "status" | "statusColor" | "icon" | "logo">) => void;
 }
 
 export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
   const [formData, setFormData] = useState({
     company: "",
     title: "",
-    description: "",
+    desc: "",
     qualification: "",
-    type: "WFH",
-    salaryMin: "",
-    salaryMax: "",
+    type: "Remote",
+    salary: "",
+    location: "",
     logo: "",
   });
 
@@ -44,7 +46,6 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
   return (
     <div className="max-h-screen flex justify-center items-center bg-gray-50 p-4">
       <div className="bg-white rounded-lg shadow-md p-4 w-full mx-auto text-xl">
-        {/* Form */}
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-3 gap-4"
@@ -82,8 +83,8 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
                 Description
               </label>
               <textarea
-                name="description"
-                value={formData.description}
+                name="desc"
+                value={formData.desc}
                 onChange={handleChange}
                 rows={2}
                 className="w-full border rounded px-2 py-1 text-sm"
@@ -109,18 +110,12 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
                 Work Type
               </label>
               <div className="flex gap-2 mb-1">
-                {[
-                  { label: "Remote", color: "bg-green-500" },
-                  { label: "On-site", color: "bg-orange-500" },
-                  { label: "Hybrid", color: "bg-red-500" },
-                ].map(({ label, color }) => (
+                {["Remote", "On-site", "Hybrid"].map((label) => (
                   <button
                     type="button"
                     key={label}
                     className={`w-24 py-1 rounded-full text-xs font-semibold text-white transition-colors
-                      ${
-                        formData.type === label ? color : "bg-gray-300"
-                      }`}
+                      ${formData.type === label ? "bg-blue-600" : "bg-gray-300"}`}
                     onClick={() =>
                       setFormData({ ...formData, type: label })
                     }
@@ -134,26 +129,30 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
             {/* Salary */}
             <div>
               <label className="block font-semibold mb-1 text-base">
-                Salary Range
+                Salary
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  name="salaryMin"
-                  value={formData.salaryMin}
-                  onChange={handleChange}
-                  placeholder="Min"
-                  className="w-1/2 border rounded px-2 py-1 text-sm"
-                />
-                <input
-                  type="number"
-                  name="salaryMax"
-                  value={formData.salaryMax}
-                  onChange={handleChange}
-                  placeholder="Max"
-                  className="w-1/2 border rounded px-2 py-1 text-sm"
-                />
-              </div>
+              <input
+                type="text"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
+                placeholder="Contoh: Rp. 5.000.000 - Rp. 8.000.000"
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="block font-semibold mb-1 text-base">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
           </div>
 

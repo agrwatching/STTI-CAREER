@@ -1,3 +1,4 @@
+// src/components/lowongan/Job.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -167,8 +168,8 @@ const Job: React.FC = () => {
   };
 
   // Apply filters
-  const applyFilters = () => {
-    let filtered = jobs.filter((job) => {
+  const applyFilters = (): void => {
+    const filtered = jobs.filter((job) => {
       const matchesType =
         !filters.type ||
         job.type.toLowerCase().includes(filters.type.toLowerCase());

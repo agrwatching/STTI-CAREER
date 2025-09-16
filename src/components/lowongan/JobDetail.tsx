@@ -1,7 +1,9 @@
+// src/components/lowongan/JobDetail.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation"; // atau dari react-router-dom
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 // Interface untuk tipe data job detail
 interface JobDetail {
@@ -32,7 +34,7 @@ const JobDetail: React.FC = () => {
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
 
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const jobId = params?.id;
 
   // Mock job detail data - akan diganti dengan API call
@@ -87,7 +89,7 @@ const JobDetail: React.FC = () => {
   };
 
   // Fetch job detail from API
-  const fetchJobDetail = async (id: string | string[]) => {
+  const fetchJobDetail = async (id: string): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
@@ -117,7 +119,7 @@ const JobDetail: React.FC = () => {
   };
 
   // Check if job is bookmarked
-  const checkBookmarkStatus = async (id: string | string[]) => {
+  const checkBookmarkStatus = async (id: string): Promise<void> => {
     try {
       // TODO: Replace with actual API call
       // const response = await fetch(`/api/jobs/${id}/bookmark`, {
@@ -222,7 +224,8 @@ const JobDetail: React.FC = () => {
               {error || "Job not found"}
             </h3>
             <p className="text-gray-500 mb-4">
-              The job you're looking for doesn't exist or has been removed.
+              The job you&apos;re looking for doesn&apos;t exist or has been
+              removed.
             </p>
             <button
               onClick={() => router.push("/lowongan")}
