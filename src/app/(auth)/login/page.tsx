@@ -3,6 +3,18 @@
 import Image from "next/image";
 import { useState } from "react";
 
+type User = {
+  email: string;
+  password: string;
+  role: "admin" | "hr" | "pelamar";
+};
+
+const dummyUsers: User[] = [
+  { email: "admin@stti.com", password: "123456", role: "admin" },
+  { email: "hr@stti.com", password: "123456", role: "hr" },
+  { email: "user@stti.com", password: "123456", role: "pelamar" },
+];
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,35 +27,26 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch(
-        "https://api-recruitmentstti-production.up.railway.app/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
+      // ✅ cek dari dummyUsers
+      const user = dummyUsers.find(
+        (u) => u.email === email && u.password === password
       );
 
-      const data = await res.json();
+      if (!user) throw new Error("Email atau password salah!");
 
-      if (!res.ok) throw new Error(data.message || "Login gagal");
-
-      // ✅ Simpan token & user ke localStorage
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      // ✅ Simpan "token palsu" & user
+      localStorage.setItem("token", "fake-token-123456");
+      localStorage.setItem("user", JSON.stringify(user));
 
       alert("Login sukses!");
 
       // ✅ Redirect sesuai role
-      const role = data.data.user.role;
-      if (role === "admin") {
+      if (user.role === "admin") {
         window.location.href = "/admin/dashboard";
-      } else if (role === "hr") {
+      } else if (user.role === "hr") {
         window.location.href = "/hr/dashboard";
-      } else if (role === "pelamar") {
-        window.location.href = "/"; // pelamar ke menu utama
-      } else {
-        alert("Role tidak dikenali!");
+      } else if (user.role === "pelamar") {
+        window.location.href = "/";
       }
     } catch (err: any) {
       setError(err.message);
@@ -64,12 +67,7 @@ export default function Login() {
 
       {/* Bagian kiri */}
       <div className="w-2/5 flex flex-col items-center justify-center bg-white relative z-10">
-        <Image
-          src="/logo-stti.png"
-          alt="Logo STTIS"
-          width={180}
-          height={180}
-        />
+        <Image src="/logo-stti.png" alt="Logo STTIS" width={180} height={180} />
         <h1 className="mt-6 text-3xl font-bold text-[#0A1FB5]">STTICAREER</h1>
       </div>
 
