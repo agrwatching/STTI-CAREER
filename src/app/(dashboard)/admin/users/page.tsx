@@ -170,7 +170,7 @@ const UserManagement = () => {
               {currentUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-b border-gray-700 hover:bg-gray-750"
+                  className="border-b border-gray-700 hover:bg-gray-700"
                 >
                   <td className="py-4 px-6 text-white">{user.name}</td>
                   <td className="py-4 px-6 text-gray-400">{user.email}</td>
