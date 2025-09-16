@@ -119,7 +119,7 @@ const UserManagement = () => {
           </div>
           <div className="w-10 h-10 rounded-full bg-gray-600 overflow-hidden">
             <img
-              src="/api/placeholder/40/40"
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
               alt="Admin"
               className="w-full h-full object-cover"
             />

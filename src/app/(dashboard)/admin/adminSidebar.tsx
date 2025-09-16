@@ -38,7 +38,7 @@ const SidebarAdmin = () => {
     {
       icon: Bell,
       label: "Notifications",
-      href: "/admin/notifications",
+      href: "/admin/notification",
     },
   ];
 

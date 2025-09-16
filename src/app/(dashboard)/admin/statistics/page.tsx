@@ -14,7 +14,11 @@ const Dashboard = () => {
         {/* Admin Profile */}
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-semibold text-lg">A</span>
+            <img
+              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+              alt="Admin"
+              className="w-full h-full object-cover rounded-full"
+            />
           </div>
           <div>
             <div className="text-white font-semibold">Admin</div>

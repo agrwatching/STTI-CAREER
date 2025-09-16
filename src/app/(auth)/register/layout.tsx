@@ -1,6 +1,5 @@
 // src/app/(auth)/login/layout.tsx *Pengaturan Layout dirubah ke mode html sesuai standar next js BY JERRY
 import "@/app/globals.css";
-import Script from "next/script";
 
 export const metadata = {
   title: "Register - STTI CAREERS",

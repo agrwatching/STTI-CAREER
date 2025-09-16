@@ -3,18 +3,6 @@
 import Image from "next/image";
 import { useState } from "react";
 
-type User = {
-  email: string;
-  password: string;
-  role: "admin" | "hr" | "pelamar";
-};
-
-const dummyUsers: User[] = [
-  { email: "admin@stti.com", password: "123456", role: "admin" },
-  { email: "hr@stti.com", password: "123456", role: "hr" },
-  { email: "user@stti.com", password: "123456", role: "pelamar" },
-];
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,15 +15,29 @@ export default function Login() {
     setError("");
 
     try {
-      // ✅ cek dari dummyUsers
-      const user = dummyUsers.find(
-        (u) => u.email === email && u.password === password
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
       );
 
-      if (!user) throw new Error("Email atau password salah!");
+      if (!res.ok) {
+        throw new Error("Email atau password salah!");
+      }
 
-      // ✅ Simpan "token palsu" & user
-      localStorage.setItem("token", "fake-token-123456");
+      const data = await res.json();
+
+      // ⚡ Ambil token & user dari response backend
+      const user = data.data.user;
+      const accessToken = data.data.tokens.accessToken;
+      const refreshToken = data.data.tokens.refreshToken;
+
+      // 🔒 Simpan ke localStorage
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
 
       alert("Login sukses!");
@@ -45,7 +47,7 @@ export default function Login() {
         window.location.href = "/admin/dashboard";
       } else if (user.role === "hr") {
         window.location.href = "/hr/dashboard";
-      } else if (user.role === "pelamar") {
+      } else {
         window.location.href = "/";
       }
     } catch (err: any) {

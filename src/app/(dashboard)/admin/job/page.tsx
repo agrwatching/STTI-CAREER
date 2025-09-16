@@ -63,7 +63,7 @@ const JobPostsVerification: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       {/* Header Section */}
-      <div className="bg-slate-800 px-6 py-4">
+      <div className="bg-slate-900 px-6 py-4">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-semibold text-white">
             Job Posts Verification
@@ -87,7 +87,7 @@ const JobPostsVerification: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-slate-800 px-6">
+      <div className="bg-slate-900 px-6">
         <div className="flex gap-0 border-b border-slate-700">
           {(["Pending", "Verified", "Rejected"] as const).map((tab) => (
             <button
