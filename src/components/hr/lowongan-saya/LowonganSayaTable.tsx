@@ -1,6 +1,6 @@
 "use client";
 
-interface Job {
+export interface Job {
   posisi: string;
   tanggal: string;
   status: "AKTIF" | "DITUTUP" | "MENUNGGU";

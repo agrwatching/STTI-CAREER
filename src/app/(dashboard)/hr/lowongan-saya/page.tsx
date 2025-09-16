@@ -1,8 +1,11 @@
 // app/hr/lowongan-saya/page.tsx
 import LowonganSayaTable from "@/components/hr/lowongan-saya/LowonganSayaTable";
 
+// Export type Job dari LowonganSayaTable biar bisa dipakai ulang
+import type { Job } from "@/components/hr/lowongan-saya/LowonganSayaTable";
+
 export default function LowonganSayaPage() {
-  const jobs = [
+  const jobs: Job[] = [
     { posisi: "Frontend Developer", tanggal: "01-08-2023", status: "AKTIF" },
     { posisi: "Backend Developer", tanggal: "05-08-2023", status: "DITUTUP" },
     { posisi: "UI/UX Designer", tanggal: "10-08-2023", status: "MENUNGGU" },
