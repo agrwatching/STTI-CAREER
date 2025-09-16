@@ -3,12 +3,21 @@
 import React, { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
 
+// ✅ Tambahin tipe User
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+}
+
 const UserManagement = () => {
   const [activeTab, setActiveTab] = useState("Applicant");
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null); // ✅ kasih tipe User
 
-  const applicants = [
+  const applicants: User[] = [
     {
       id: 1,
       name: "Sulaer",
@@ -32,7 +41,7 @@ const UserManagement = () => {
     },
   ];
 
-  const hrRepresentatives = [
+  const hrRepresentatives: User[] = [
     {
       id: 4,
       name: "John Doe",
@@ -49,10 +58,11 @@ const UserManagement = () => {
     },
   ];
 
-  const currentUsers =
+  const currentUsers: User[] =
     activeTab === "Applicant" ? applicants : hrRepresentatives;
 
-  const handleEdit = (user) => {
+  // ✅ kasih typing ke parameter user
+  const handleEdit = (user: User) => {
     setEditingUser(user);
     setShowEditModal(true);
   };
@@ -63,7 +73,6 @@ const UserManagement = () => {
   };
 
   const handleSave = () => {
-    // Here you would typically save the changes
     console.log("Saving user:", editingUser);
     handleCloseModal();
   };
