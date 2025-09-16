@@ -1,6 +1,8 @@
 // src/components/Footer.tsx
 'use client';
 
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-blue-900 text-white">
@@ -17,10 +19,18 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-3">Navigasi</h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="/" className="hover:text-yellow-400">Beranda</a></li>
-            <li><a href="/lowongan" className="hover:text-yellow-400">Lowongan</a></li>
-            <li><a href="/perusahaan" className="hover:text-yellow-400">Perusahaan</a></li>
-            <li><a href="/tentang" className="hover:text-yellow-400">Tentang Kami</a></li>
+            <li>
+              <Link href="/" className="hover:text-yellow-400">Beranda</Link>
+            </li>
+            <li>
+              <Link href="/lowongan" className="hover:text-yellow-400">Lowongan</Link>
+            </li>
+            <li>
+              <Link href="/perusahaan" className="hover:text-yellow-400">Perusahaan</Link>
+            </li>
+            <li>
+              <Link href="/tentang" className="hover:text-yellow-400">Tentang Kami</Link>
+            </li>
           </ul>
         </div>
 

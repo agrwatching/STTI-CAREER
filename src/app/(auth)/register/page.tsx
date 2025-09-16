@@ -37,7 +37,7 @@ export default function RegisterPelamar() {
 
     try {
       const res = await fetch(
-        "https://api-recruitmentstti-production.up.railway.app/api/auth/register/pelamar",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register/pelamar`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -54,16 +54,13 @@ export default function RegisterPelamar() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Registrasi gagal");
-      }
+      if (!res.ok) throw new Error(data.message || "Registrasi gagal");
 
       setSuccess("Registrasi berhasil! Mengarahkan ke halaman login...");
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message);
+      setTimeout(() => router.push("/login"), 2000);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Terjadi kesalahan tak terduga");
     } finally {
       setLoading(false);
     }
@@ -71,17 +68,13 @@ export default function RegisterPelamar() {
 
   return (
     <section className="relative flex items-center justify-center min-h-screen">
-      {/* Background */}
       <Image src="/job.jpg" alt="Background" fill className="object-cover" />
 
-      {/* Card */}
       <div className="relative z-10 bg-white/90 rounded-lg shadow-lg w-11/12 md:w-4/5 lg:w-3/4 flex flex-col md:flex-row p-8 md:p-12 gap-8 my-4">
-        {/* Form */}
         <div className="flex-1">
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {/* Full Name */}
-            <div>
-              <label className="block mb-1 font-semibold">Your Full Name :</label>
+            <label>
+              Full Name:
               <input
                 type="text"
                 value={fullName}
@@ -90,11 +83,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Address */}
-            <div>
-              <label className="block mb-1 font-semibold">Your Address :</label>
+            <label>
+              Address:
               <input
                 type="text"
                 value={address}
@@ -103,11 +95,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Date of Birth */}
-            <div>
-              <label className="block mb-1 font-semibold">My date of birth :</label>
+            <label>
+              Date of Birth:
               <input
                 type="date"
                 value={dob}
@@ -115,11 +106,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Phone */}
-            <div>
-              <label className="block mb-1 font-semibold">Phone Number :</label>
+            <label>
+              Phone:
               <input
                 type="text"
                 value={phone}
@@ -128,11 +118,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Email */}
-            <div>
-              <label className="block mb-1 font-semibold">Your Mail :</label>
+            <label>
+              Email:
               <input
                 type="email"
                 value={email}
@@ -141,11 +130,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Password */}
-            <div>
-              <label className="block mb-1 font-semibold">Your Password :</label>
+            <label>
+              Password:
               <input
                 type="password"
                 value={password}
@@ -154,11 +142,10 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block mb-1 font-semibold">Confirm Password :</label>
+            <label>
+              Confirm Password:
               <input
                 type="password"
                 value={confirmPassword}
@@ -167,13 +154,11 @@ export default function RegisterPelamar() {
                 className="w-full p-2 border rounded-md"
                 required
               />
-            </div>
+            </label>
 
-            {/* Error / Success */}
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {success && <p className="text-green-600 text-sm">{success}</p>}
 
-            {/* Button */}
             <button
               type="submit"
               disabled={loading}
@@ -183,7 +168,6 @@ export default function RegisterPelamar() {
             </button>
           </form>
 
-          {/* Link ke Login */}
           <p className="mt-4 text-sm text-center">
             Sudah punya akun?{" "}
             <span
@@ -195,14 +179,8 @@ export default function RegisterPelamar() {
           </p>
         </div>
 
-        {/* Logo + Title */}
         <div className="flex flex-col items-center justify-center flex-1">
-          <Image
-            src="/logo-stti.png"
-            alt="Logo STTIS"
-            width={200}
-            height={200}
-          />
+          <Image src="/logo-stti.png" alt="Logo STTIS" width={200} height={200} />
           <h1 className="mt-4 text-2xl md:text-3xl font-bold text-[#0A1FB5]">
             STTICAREER
           </h1>

@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -24,34 +26,25 @@ export default function Login() {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Email atau password salah!");
-      }
+      if (!res.ok) throw new Error("Email atau password salah!");
 
       const data = await res.json();
-
-      // ⚡ Ambil token & user dari response backend
       const user = data.data.user;
       const accessToken = data.data.tokens.accessToken;
       const refreshToken = data.data.tokens.refreshToken;
 
-      // 🔒 Simpan ke localStorage
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
 
       alert("Login sukses!");
 
-      // ✅ Redirect sesuai role
-      if (user.role === "admin") {
-        window.location.href = "/admin/dashboard";
-      } else if (user.role === "hr") {
-        window.location.href = "/hr/dashboard";
-      } else {
-        window.location.href = "/";
-      }
-    } catch (err: any) {
-      setError(err.message);
+      if (user.role === "admin") router.push("/admin/dashboard");
+      else if (user.role === "hr") router.push("/hr/dashboard");
+      else router.push("/");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Terjadi kesalahan tak terduga");
     } finally {
       setLoading(false);
     }
@@ -59,7 +52,6 @@ export default function Login() {
 
   return (
     <section className="flex h-screen relative">
-      {/* 🔙 Tombol kembali di pojok kiri atas */}
       <button
         onClick={() => window.history.back()}
         className="absolute top-4 left-4 z-20"
@@ -67,20 +59,17 @@ export default function Login() {
         <Image src="/back.png" alt="Back" width={32} height={32} />
       </button>
 
-      {/* Bagian kiri */}
       <div className="w-2/5 flex flex-col items-center justify-center bg-white relative z-10">
         <Image src="/logo-stti.png" alt="Logo STTIS" width={180} height={180} />
         <h1 className="mt-6 text-3xl font-bold text-[#0A1FB5]">STTICAREER</h1>
       </div>
 
-      {/* Bagian kanan */}
       <div className="w-4/5 relative flex items-center justify-center">
         <div
           className="absolute inset-0 bg-[#0A1FB5]"
           style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
-        ></div>
+        />
 
-        {/* Form Login */}
         <form
           onSubmit={handleLogin}
           className="relative z-10 w-3/4 max-w-md text-white"
@@ -112,7 +101,7 @@ export default function Login() {
               <input type="checkbox" className="accent-white" />
               Remember me
             </label>
-            <a href="#" className="hover:underline">
+            <a href="/forgot-password" className="hover:underline">
               Forget password ?
             </a>
           </div>
@@ -127,7 +116,7 @@ export default function Login() {
             </button>
             <button
               type="button"
-              onClick={() => (window.location.href = "/role")}
+              onClick={() => router.push("/role")}
               className="flex-1 bg-yellow-400 text-black font-bold py-2 rounded-md"
             >
               Register
