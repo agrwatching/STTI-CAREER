@@ -1,4 +1,4 @@
-import Sidebar from "@/components/pelamar/profile/Sidebar";
+import Sidebar from "@/components/pelamar/Sidebar";
 import "@/app/globals.css";
 
 export const metadata = {

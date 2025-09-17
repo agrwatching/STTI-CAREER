@@ -6,8 +6,8 @@ import { Home, BriefcaseBusiness, FileText, Settings } from "lucide-react"; // i
 
 const menuItems = [
   { name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
-  { name: "Simpan Lowongan", href: "/dashboard/saved", icon: BriefcaseBusiness },
-  { name: "Lamaran saya", href: "/dashboard/applications", icon: FileText },
+  { name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness },
+  { name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText },
 ];
 
 export default function Sidebar() {
