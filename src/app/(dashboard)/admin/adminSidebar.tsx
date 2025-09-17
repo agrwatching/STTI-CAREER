@@ -1,3 +1,4 @@
+// src/app/(dashboard)/admin/adminSidebar.tsx
 "use client";
 
 import React from "react";
@@ -47,13 +48,12 @@ const SidebarAdmin = () => {
       {/* Header/Logo Section */}
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center space-x-3">
-          {/* Logo - using a circular badge design */}
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-            <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
-              <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
-            </div>
-          </div>
-          <span className="text-lg font-semibold tracking-wide">
+          <img
+            src="/logo-stti.png"
+            alt="Logo"
+            className="w-16 object-contain"
+          />
+          <span className="text-xl font-semibold tracking-wide">
             STTICAREER
           </span>
         </div>

@@ -40,7 +40,7 @@ export default function SidebarHR() {
                   href={item.href}
                   className={`block px-4 py-2 rounded-lg transition ${
                     isActive
-                      ? "bg-white/50 font-semibold text-[#0B1B54] hover:text-[#0B1B54]"
+                      ? "bg-stone-200/50 font-semibold text-[#0B1B54] hover:text-[#0B1B54]"
                       : "text-white"
                   }`}
                 >
