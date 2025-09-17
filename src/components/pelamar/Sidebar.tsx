@@ -43,7 +43,7 @@ export default function Sidebar() {
       {/* Pengaturan di bawah */}
       <div className="p-6">
         <Link
-          href="/dashboard/settings"
+          href="/pelamar/pengaturan"
           className={`flex items-center gap-3 px-6 py-2 rounded-lg transition-colors
             ${pathname === "/dashboard/settings" ? "bg-[#1C2E9E]" : "hover:bg-[#1C2E9E]/50"}`}
         >
