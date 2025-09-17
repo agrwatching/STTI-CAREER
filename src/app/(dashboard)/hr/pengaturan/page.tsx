@@ -1,13 +1,28 @@
+"use client";
+
 import CompanyProfileForm from "@/components/hr/pengaturan/CompanyProfileForm";
 import ChangePasswordForm from "@/components/hr/pengaturan/ChangePasswordForm";
 
 export default function PengaturanPage() {
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Pengaturan</h1>
-
-      <CompanyProfileForm />
-      <ChangePasswordForm />
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white border-b px-6 py-4 flex-shrink-0">
+          <h1 className="text-xl font-semibold">Pengaturan</h1>
+        </div>
+        
+        {/* Content Area dengan scroll */}
+        <div className="flex-1 overflow-auto p-6">
+          <div className="space-y-6 max-w-4xl">
+            <CompanyProfileForm />
+            <ChangePasswordForm />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
