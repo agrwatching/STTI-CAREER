@@ -1,5 +1,6 @@
+// src/components/hr/buat-lowongan/JobList.tsx
 import JobCard from "./JobCard";
-import type { JobType } from "@/app/(dashboard)/hr/buat-lowongan/BuatLowonganContent";
+import type { JobType } from "./types";
 
 interface JobListProps {
   jobs: JobType[];

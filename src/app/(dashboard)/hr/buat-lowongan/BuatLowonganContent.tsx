@@ -1,3 +1,4 @@
+// src/app/(dashboard)/hr/buat-lowongan/BuatLowonganContent.tsx
 "use client";
 
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
@@ -7,7 +8,6 @@ import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
 
-// Export type supaya bisa dipakai di file lain
 export interface JobType {
   status: string;
   statusColor: string;

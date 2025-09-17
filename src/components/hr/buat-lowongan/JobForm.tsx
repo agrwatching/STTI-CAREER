@@ -1,7 +1,8 @@
+// src/components/hr/buat-lowongan/JobForm.tsx
 "use client";
 
 import { useState, useRef } from "react";
-import type { JobType } from "@/app/(dashboard)/hr/buat-lowongan/BuatLowonganContent";
+import type { JobType } from "./types";
 
 interface JobFormProps {
   onCancel: () => void;
@@ -68,7 +69,7 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
             <div>
               <label className="block font-semibold mb-1 text-base">Work Type</label>
               <div className="flex gap-2 mb-1">
-                {["Remote", "On-site", "Hybrid"].map((label) => (
+                {["Remote", "On-site", "Hybrid"].map(label => (
                   <button
                     type="button"
                     key={label}

@@ -1,19 +1,9 @@
+// src/components/hr/buat-lowongan/JobCard.tsx
 import { Pencil, Trash2, Wallet, MapPin } from "lucide-react";
-
-interface Job {
-  status: string;
-  statusColor: string;
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-  salary: string;
-  location: string;
-  logo: string;
-  type: string; // "Remote" | "On-site" | "Hybrid"
-}
+import type { JobType } from "./types";
 
 interface JobCardProps {
-  job: Job;
+  job: JobType;
 }
 
 export default function JobCard({ job }: JobCardProps) {
@@ -41,19 +31,15 @@ export default function JobCard({ job }: JobCardProps) {
 
       {/* Content */}
       <div className="flex-1 flex flex-col">
-        {/* Status & Work Type sejajar */}
+        {/* Status & Work Type */}
         <div className="flex items-center justify-between mb-1">
-          <p
-            className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}
-          >
+          <p className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}>
             {job.icon}
             {job.status}
           </p>
 
           <span
-            className={`w-20 py-0.5 rounded-full text-xs font-semibold text-center ${getTypeStyle(
-              job.type
-            )}`}
+            className={`w-20 py-0.5 rounded-full text-xs font-semibold text-center ${getTypeStyle(job.type)}`}
           >
             {job.type}
           </span>
