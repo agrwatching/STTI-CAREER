@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Header from "@/components/pelamar/profile/Header";
+import Header from "@/components/pelamar/Header";
 import ProfileHeader from "@/components/pelamar/profile/ProfileHeader";
 import Tabs from "@/components/pelamar/profile/Tabs";
 import Biodata from "@/components/pelamar/profile/biodata/Biodata";
