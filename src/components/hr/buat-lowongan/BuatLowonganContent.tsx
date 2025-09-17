@@ -1,9 +1,8 @@
-// src/app/(dashboard)/hr/buat-lowongan/BuatLowonganContent.tsx
 "use client";
 
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { useState, useEffect, ReactNode } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, useParams } from "next/navigation"; // ⬅️ tambahkan useParams
 import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
@@ -23,6 +22,8 @@ export interface JobType {
 export default function BuatLowonganContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const params = useParams(); // ⬅️ ambil params dari URL
+  const hrId = params?.hrId as string; // ⬅️ pastikan string
 
   const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState<JobType[]>([
@@ -81,7 +82,7 @@ export default function BuatLowonganContent() {
       },
     ]);
     setShowForm(false);
-    router.push("/hr/buat-lowongan");
+    router.push(`/hr/${hrId}/buat-lowongan`); // ✅ sudah sesuai hrId
   };
 
   return (
@@ -92,7 +93,7 @@ export default function BuatLowonganContent() {
           <JobForm
             onCancel={() => {
               setShowForm(false);
-              router.push("/hr/buat-lowongan");
+              router.push(`/hr/${hrId}/buat-lowongan`); // ✅ diperbaiki
             }}
             onSubmit={handleAddJob}
           />
