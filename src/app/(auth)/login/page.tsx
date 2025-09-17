@@ -17,14 +17,11 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       if (!res.ok) throw new Error("Email atau password salah!");
 
@@ -40,7 +37,7 @@ export default function Login() {
       alert("Login sukses!");
 
       if (user.role === "admin") router.push("/admin/dashboard");
-      else if (user.role === "hr") router.push("/hr/dashboard");
+      else if (user.role === "hr") router.push(`/hr/${user.id}/dashboard`);
       else router.push("/");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
@@ -52,10 +49,7 @@ export default function Login() {
 
   return (
     <section className="flex h-screen relative">
-      <button
-        onClick={() => window.history.back()}
-        className="absolute top-4 left-4 z-20"
-      >
+      <button onClick={() => window.history.back()} className="absolute top-4 left-4 z-20">
         <Image src="/back.png" alt="Back" width={32} height={32} />
       </button>
 
@@ -65,36 +59,16 @@ export default function Login() {
       </div>
 
       <div className="w-4/5 relative flex items-center justify-center">
-        <div
-          className="absolute inset-0 bg-[#0A1FB5]"
-          style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
-        />
+        <div className="absolute inset-0 bg-[#0A1FB5]" style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }} />
 
-        <form
-          onSubmit={handleLogin}
-          className="relative z-10 w-3/4 max-w-md text-white"
-        >
+        <form onSubmit={handleLogin} className="relative z-10 w-3/4 max-w-md text-white">
           {error && <p className="mb-4 text-red-300">{error}</p>}
 
           <label className="block mb-2 font-semibold">Your Mail :</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full p-3 mb-4 rounded-md text-black"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <input type="email" placeholder="Enter your email" className="w-full p-3 mb-4 rounded-md text-black" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
           <label className="block mb-2 font-semibold">Your Password :</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            className="w-full p-3 mb-4 rounded-md text-black"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <input type="password" placeholder="Enter your password" className="w-full p-3 mb-4 rounded-md text-black" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
           <div className="flex justify-between items-center mb-6 text-sm">
             <label className="flex items-center gap-2">
@@ -107,18 +81,10 @@ export default function Login() {
           </div>
 
           <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-white text-black font-bold py-2 rounded-md disabled:opacity-50"
-            >
+            <button type="submit" disabled={loading} className="flex-1 bg-white text-black font-bold py-2 rounded-md disabled:opacity-50">
               {loading ? "Loading..." : "Login"}
             </button>
-            <button
-              type="button"
-              onClick={() => router.push("/role")}
-              className="flex-1 bg-yellow-400 text-black font-bold py-2 rounded-md"
-            >
+            <button type="button" onClick={() => router.push("/role")} className="flex-1 bg-yellow-400 text-black font-bold py-2 rounded-md">
               Register
             </button>
           </div>
