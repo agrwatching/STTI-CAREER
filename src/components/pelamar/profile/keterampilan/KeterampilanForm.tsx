@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Plus } from "lucide-react";
 
 type Props = {
@@ -18,7 +19,6 @@ export default function KeterampilanForm({
 }: Props) {
   const [nama, setNama] = useState(initialData?.nama || "");
   const [deskripsi, setDeskripsi] = useState(initialData?.deskripsi || "");
-  const [tags, setTags] = useState(["Html", "Css", "JavaScript"]);
   const [links, setLinks] = useState([""]);
   const [files, setFiles] = useState<(File | null)[]>([null, null, null]);
 
@@ -119,15 +119,15 @@ export default function KeterampilanForm({
                 {item.title}
               </h4>
               <p className="text-xs text-gray-500 mb-3">{item.desc}</p>
-              <img
+              <Image
                 src="/folder-icon.png"
                 alt="folder"
-                className="w-16 h-16 mb-2"
+                width={64}
+                height={64}
+                className="mb-2"
               />
               <p className="text-xs">
-                <span className="text-blue-600 hover:underline">
-                  Unggah File
-                </span>{" "}
+                <span className="text-blue-600 hover:underline">Unggah File</span>{" "}
                 atau tarik & seret
               </p>
               <p className="text-[11px] text-gray-500">Maksimal 2 MB</p>
