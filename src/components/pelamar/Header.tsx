@@ -1,4 +1,7 @@
+// src/components/pelamar/Header.tsx
 "use client";
+
+import Image from "next/image"; // ✅ Tambahkan import
 
 type HeaderProps = {
   title: string;
@@ -11,16 +14,18 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <header className="flex justify-between items-center  ">
+    <header className="flex justify-between items-center">
       {/* Kiri */}
       <h1 className="text-2xl font-bold">{title}</h1>
 
       {/* Kanan */}
       <div className="flex items-center gap-3">
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt={name}
+            width={40}
+            height={40}
             className="w-10 h-10 rounded-full object-cover"
           />
         ) : (

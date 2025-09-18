@@ -1,3 +1,4 @@
+//src/components/lowongan/Lamar.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -62,7 +63,6 @@ const LamarKerja: React.FC = () => {
     const fetchJobDetail = async () => {
       try {
         setLoading(true);
-        // Mock API delay
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         if (jobId === "1") {
@@ -81,7 +81,7 @@ const LamarKerja: React.FC = () => {
     if (jobId) {
       fetchJobDetail();
     }
-  }, [jobId, router]);
+  }, [jobId, router, mockJobDetail]);
 
   // Handle form input changes
   const handleInputChange = (
