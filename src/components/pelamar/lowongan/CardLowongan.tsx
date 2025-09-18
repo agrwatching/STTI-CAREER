@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Bookmark } from "lucide-react";
 
 type CardLowonganProps = {
@@ -19,17 +20,20 @@ export default function CardLowongan({
   warnaKategori = "bg-green-500",
   logoUrl,
 }: CardLowonganProps) {
+  const avatarSrc =
+    logoUrl ||
+    `https://i.pravatar.cc/48?img=${Math.floor(Math.random() * 70) + 1}`;
+
   return (
     <div className="flex items-center justify-between py-3 border-b-2 last:border-none">
       {/* Kiri */}
       <div className="flex items-center gap-3">
         {/* Logo / Avatar */}
-        <img
-          src={
-            logoUrl ||
-            `https://i.pravatar.cc/48?img=${Math.floor(Math.random() * 70) + 1}`
-          }
+        <Image
+          src={avatarSrc}
           alt={perusahaan}
+          width={48}
+          height={48}
           className="w-12 h-12 rounded-md object-cover"
         />
 

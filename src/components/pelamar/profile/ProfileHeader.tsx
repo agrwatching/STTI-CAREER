@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 type ProfileHeaderProps = {
   name: string;
   joined: string;
@@ -20,11 +22,14 @@ export default function ProfileHeader({
       {/* Avatar + Info */}
       <div className="flex items-center gap-3">
         {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
+          <div className="relative w-12 h-12">
+            <Image
+              src={avatarUrl}
+              alt={name}
+              fill
+              className="rounded-full object-cover"
+            />
+          </div>
         ) : (
           <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-base">
             {initial}

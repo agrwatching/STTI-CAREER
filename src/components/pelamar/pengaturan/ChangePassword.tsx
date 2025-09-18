@@ -22,13 +22,11 @@ export default function ChangePassword() {
 
     try {
       // TODO: ganti dengan API kamu sendiri
-      // contoh pakai fetch:
       // const res = await fetch("/api/change-password", {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({ oldPassword, newPassword }),
       // });
-
       // if (!res.ok) throw new Error("Gagal update password");
 
       setMessage("✅ Password berhasil diubah");
@@ -36,6 +34,7 @@ export default function ChangePassword() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
+      console.error("Change password error:", err);
       setMessage("❌ Gagal mengubah password");
     } finally {
       setLoading(false);
@@ -44,9 +43,7 @@ export default function ChangePassword() {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow">
-      <h1 className="text-xl font-bold text-gray-800 mb-6">
-        Ubah Password
-      </h1>
+      <h1 className="text-xl font-bold text-gray-800 mb-6">Ubah Password</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Password lama */}
