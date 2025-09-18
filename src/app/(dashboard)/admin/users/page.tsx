@@ -45,8 +45,8 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="min-h-screen text-white">
-      {/* Judul utama */}
+    <div className="h-screen text-white">
+      {/* ✅ Judul utama */}
       <h2 className="text-3xl px-6 py-4 font-bold">Management Users</h2>
 
       {/* ✅ Tabs */}
@@ -78,7 +78,7 @@ const UserManagement = () => {
       {/* ✅ Card Search & Table */}
       <div className="p-6">
         <div className="bg-gray-800 rounded-lg p-4 mb-6">
-          {/* 🔥 Search di kiri, Filter di kanan */}
+          {/* 🔍 Search & Filter */}
           <div className="flex items-center justify-between mb-6">
             <div className="relative flex-1 max-w-xs">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -94,58 +94,60 @@ const UserManagement = () => {
             </button>
           </div>
 
-          {/* ✅ Table */}
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-500/50">
-                <th className="text-left py-5 px-6 text-gray-300 font-medium">NAME</th>
-                <th className="text-left py-5 px-6 text-gray-300 font-medium">EMAIL</th>
-                <th className="text-left py-5 px-6 text-gray-300 font-medium">ROLE</th>
-                <th className="text-left py-5 px-6 text-gray-300 font-medium">STATUS</th>
-                <th className="text-left py-5 px-6 text-gray-300 font-medium">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-700">
-                  <td className="py-4 px-6 text-white">{user.name}</td>
-                  <td className="py-4 px-6 text-gray-400">{user.email}</td>
-                  <td className="py-4 px-6 text-gray-400">{user.role}</td>
-                  <td className="py-4 px-6">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === "Active"
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-600 text-gray-300"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                      >
-                        Edit
-                      </button>
-                      <span className="text-gray-600">|</span>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
+          {/* ✅ Table Wrapper (scrollable tbody only) */}
+          <div className="max-h-80 overflow-y-auto rounded-md">
+            <table className="w-full">
+              <thead className="sticky top-0 bg-gray-700/90 z-10">
+                <tr>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">NAME</th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">EMAIL</th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">ROLE</th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">STATUS</th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">ACTIONS</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-700">
+                    <td className="py-4 px-6 text-white">{user.name}</td>
+                    <td className="py-4 px-6 text-gray-400">{user.email}</td>
+                    <td className="py-4 px-6 text-gray-400">{user.role}</td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          user.status === "Active"
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-600 text-gray-300"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <span className="text-gray-600">|</span>
+                        <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* ✅ Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 w-96 max-w-md mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-white">Edit User</h3>

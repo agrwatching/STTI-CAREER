@@ -19,13 +19,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const title = pageTitles[pathname] || "";
 
   return (
-    <div className="flex min-h-screen bg-slate-900 text-white">
-      <SidebarAdmin />
-      <div className="flex-1 flex flex-col">
+    <div className="h-screen bg-slate-900 text-white flex">
+      {/* ✅ Sidebar dibikin fixed */}
+      <div className="fixed inset-y-0 left-0 w-64">
+        <SidebarAdmin />
+      </div>
+
+      {/* ✅ Konten utama */}
+      <div className="flex-1 flex flex-col ml-64">
         <div className="px-12 pt-6">
           <Header title={title} />
         </div>
-        <main className="flex-1 p-6">{children}</main>
+
+        {/* ✅ Scroll hanya di area konten */}
+        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

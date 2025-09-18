@@ -1,4 +1,4 @@
-/*src/app/globals.css*/
+/* src/app/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,3 +11,12 @@ body {
   font-family: Arial, Helvetica, 'poppins', sans-serif;
 }
 
+/* Hilangin scrollbar tapi tetap bisa scroll */
+::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+html, body {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
