@@ -4,13 +4,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  BarChart3,
-  Bell,
-} from "lucide-react";
+import Image from "next/image";
+import { LayoutDashboard, FileText, Users, BarChart3, Bell } from "lucide-react";
 
 const SidebarAdmin = () => {
   const pathname = usePathname();
@@ -48,14 +43,8 @@ const SidebarAdmin = () => {
       {/* Header/Logo Section */}
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center space-x-3">
-          <img
-            src="/logo-stti.png"
-            alt="Logo"
-            className="w-16 object-contain"
-          />
-          <span className="text-xl font-semibold tracking-wide">
-            STTICAREER
-          </span>
+          <Image src="/logo-stti.png" alt="Logo" width={40} height={40} className="w-16 object-contain" />
+          <span className="text-xl font-semibold tracking-wide">STTICAREER</span>
         </div>
       </div>
 
@@ -71,15 +60,10 @@ const SidebarAdmin = () => {
                 <Link
                   href={item.href}
                   className={`flex items-center space-x-3 px-6 py-3 text-sm font-medium transition-colors duration-200 hover:bg-slate-700 ${
-                    isActive
-                      ? "bg-slate-700 border-r-3 border-orange-500 text-white"
-                      : "text-slate-300 hover:text-white"
+                    isActive ? "bg-slate-700 border-r-3 border-orange-500 text-white" : "text-slate-300 hover:text-white"
                   }`}
                 >
-                  <IconComponent
-                    size={20}
-                    className={isActive ? "text-white" : "text-slate-400"}
-                  />
+                  <IconComponent size={20} className={isActive ? "text-white" : "text-slate-400"} />
                   <span>{item.label}</span>
                 </Link>
               </li>

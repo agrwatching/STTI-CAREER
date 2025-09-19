@@ -100,7 +100,7 @@ export default function Company() {
                     key={company.id}
                     className="bg-white rounded-xl p-6 shadow-sm flex flex-col items-center justify-center"
                   >
-                    <img
+                    <Image
                       src={company.logo}
                       alt={company.name}
                       width={100}

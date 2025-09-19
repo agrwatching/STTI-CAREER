@@ -1,11 +1,23 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+// ✅ Bikin interface jangan pakai nama "FormData" (bentrok sama bawaan browser)
+interface RegisterFormData {
+  full_name: string;
+  email: string;
+  password: string;
+  company_name: string;
+  company_address: string;
+  position: string;
+  phone: string;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     full_name: "",
     email: "",
     password: "",
@@ -19,11 +31,13 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // ✅ Typing lebih aman pakai keyof
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name as keyof RegisterFormData]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,8 +59,12 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error(data.message || "Gagal register");
 
       setShowSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Terjadi kesalahan");
+      }
     } finally {
       setLoading(false);
     }
@@ -61,26 +79,35 @@ export default function RegisterPage() {
     <div className="flex flex-col md:flex-row h-screen">
       {/* Gambar di atas (mobile) / kanan (desktop) */}
       <div className="order-1 md:order-2 relative basis-2/5 md:basis-2/5 h-40 md:h-full">
-        <img
+        <Image
           src="/company.jpg"
           alt="STTIS"
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <img
+          <Image
             src="/logo-stti.png"
             alt="Logo Senat"
+            width={240}
+            height={240}
             className="w-24 h-24 md:w-60 md:h-60 object-contain"
           />
         </div>
 
-        {/* Tombol Back (selalu muncul di desktop & mobile) */}
+        {/* Tombol Back */}
         <button
           onClick={() => router.back()}
           className="absolute top-4 left-4"
         >
-          <img src="/back.png" alt="Back" className="w-8 h-8" />
+          <Image
+            src="/back.png"
+            alt="Back"
+            width={40}
+            height={40}
+            className="w-8 h-8"
+          />
         </button>
       </div>
 
