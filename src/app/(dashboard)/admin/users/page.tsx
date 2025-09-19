@@ -47,7 +47,7 @@ const UserManagement = () => {
   return (
     <div className="h-screen text-white">
       {/* ✅ Judul utama */}
-      <h2 className="text-3xl px-6 py-4 font-bold">Management Users</h2>
+      <h2 className="text-3xl px-6 font-bold">Management Users</h2>
 
       {/* ✅ Tabs */}
       <div className="px-6">
