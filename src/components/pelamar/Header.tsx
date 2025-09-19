@@ -1,17 +1,16 @@
-// src/components/pelamar/Header.tsx
 "use client";
 
-import Image from "next/image"; // ✅ Tambahkan import
+import Image from "next/image";
 
 type HeaderProps = {
   title: string;
   name: string;
   role: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 };
 
 export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
-  const initial = name.charAt(0).toUpperCase();
+  const initial = name?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <header className="flex justify-between items-center">
@@ -36,7 +35,7 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
 
         <div className="text-left">
           <p className="font-semibold">{name}</p>
-          <p className="text-sm text-gray-500">{role}</p>
+          <p className="text-sm text-gray-500 capitalize">{role}</p>
         </div>
       </div>
     </header>

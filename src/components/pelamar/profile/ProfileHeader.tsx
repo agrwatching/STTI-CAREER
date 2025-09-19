@@ -2,19 +2,14 @@
 
 import Image from "next/image";
 
-type ProfileHeaderProps = {
+type Props = {
   name: string;
   joined: string;
   avatarUrl?: string;
   onEdit?: () => void;
 };
 
-export default function ProfileHeader({
-  name,
-  joined,
-  avatarUrl,
-  onEdit,
-}: ProfileHeaderProps) {
+export default function ProfileHeader({ name, joined, avatarUrl, onEdit }: Props) {
   const initial = name.charAt(0).toUpperCase();
 
   return (
@@ -41,12 +36,12 @@ export default function ProfileHeader({
         </div>
       </div>
 
-      {/* Tombol Edit */}
+      {/* Tombol Edit pindah ke sini */}
       <button
         onClick={onEdit}
         className="flex items-center gap-2 bg-blue-600 text-white px-3.5 py-1.5 text-sm rounded-md hover:bg-blue-700"
       >
-        ✏️ Edit Profil
+        ✏️ Edit Biodata
       </button>
     </div>
   );
