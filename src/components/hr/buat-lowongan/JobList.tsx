@@ -18,7 +18,7 @@ export default function JobList({ jobs }: JobListProps) {
   return (
     <div className="flex-1 overflow-y-auto pr-2 space-y-4">
       {jobs.map((job) => (
-        <JobCard key={(job as any).id ?? job.title} job={job} />
+        <JobCard key={job.id ?? job.title} job={job} />
       ))}
     </div>
   );
