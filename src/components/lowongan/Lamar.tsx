@@ -44,26 +44,26 @@ const LamarKerja: React.FC = () => {
   const params = useParams();
   const jobId = params?.id;
 
-  // Mock job detail data - sesuai dengan JobDetail.tsx
-  const mockJobDetail: JobDetail = {
-    id: 1,
-    title: "Senior Frontend Developer",
-    company: "PT Pelagenda Code",
-    location: "Karawang, Indonesia",
-    type: "Full Time",
-    description:
-      "Kami mencari Senior Frontend Developer berpengalaman untuk memimpin pengembangan antarmuka aplikasi web modern. Kandidat ideal memiliki kemampuan teknis yang mendalam pada framework frontend populer serta mampu memimpin tim dalam menciptakan produk yang skalabel, responsif, dan berperforma tinggi.",
-    tags: ["Remote", "Senior"],
-    salary: "Rp 15.000.000 – Rp 25.000.000 per bulan",
-    postedAt: "2 days ago",
-  };
-
-  // Fetch job detail
+  // Fetch job detail (dummy dulu)
   useEffect(() => {
     const fetchJobDetail = async () => {
       try {
         setLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Mock job detail data
+        const mockJobDetail: JobDetail = {
+          id: 1,
+          title: "Senior Frontend Developer",
+          company: "PT Pelagenda Code",
+          location: "Karawang, Indonesia",
+          type: "Full Time",
+          description:
+            "Kami mencari Senior Frontend Developer berpengalaman untuk memimpin pengembangan antarmuka aplikasi web modern. Kandidat ideal memiliki kemampuan teknis yang mendalam pada framework frontend populer serta mampu memimpin tim dalam menciptakan produk yang skalabel, responsif, dan berperforma tinggi.",
+          tags: ["Remote", "Senior"],
+          salary: "Rp 15.000.000 – Rp 25.000.000 per bulan",
+          postedAt: "2 days ago",
+        };
 
         if (jobId === "1") {
           setJob(mockJobDetail);
@@ -81,7 +81,7 @@ const LamarKerja: React.FC = () => {
     if (jobId) {
       fetchJobDetail();
     }
-  }, [jobId, router, mockJobDetail]);
+  }, [jobId, router]); // ✅ fix: mockJobDetail tidak jadi dependency
 
   // Handle form input changes
   const handleInputChange = (
@@ -145,7 +145,7 @@ const LamarKerja: React.FC = () => {
     router.push("/lowongan");
   };
 
-  // Handle back button - go to previous page
+  // Handle back button
   const handleGoBack = () => {
     router.back();
   };
@@ -163,7 +163,6 @@ const LamarKerja: React.FC = () => {
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       const file = files[0];
-      // Check file type
       const allowedTypes = [
         "application/pdf",
         "application/msword",
@@ -216,7 +215,7 @@ const LamarKerja: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
-        {/* Back Button - Fixed to go to previous page */}
+        {/* Back Button */}
         <button
           onClick={handleGoBack}
           className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors"
@@ -237,7 +236,7 @@ const LamarKerja: React.FC = () => {
           Back
         </button>
 
-        {/* Job Information Card - Fixed description click issue */}
+        {/* Job Information Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="flex items-start space-x-4">
             {/* Company Logo */}
@@ -355,7 +354,7 @@ const LamarKerja: React.FC = () => {
               </div>
             </div>
 
-            {/* Resume Upload - Fixed drag and drop functionality */}
+            {/* Resume Upload */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Your Resume

@@ -1,9 +1,8 @@
 // src/components/lowongan/Job.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 // Interface untuk tipe data job
 interface Job {
@@ -172,7 +171,7 @@ const Job: React.FC = () => {
   };
 
   // Apply filters
-  const applyFilters = (): void => {
+  const applyFilters = useCallback((): void => {
     const filtered = jobs.filter((job) => {
       const matchesType =
         !filters.type ||
@@ -186,7 +185,6 @@ const Job: React.FC = () => {
         job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
         job.description.toLowerCase().includes(filters.search.toLowerCase());
 
-      // Level matching berdasarkan tags
       const matchesLevel =
         !filters.level ||
         job.tags.some((tag) =>
@@ -197,8 +195,8 @@ const Job: React.FC = () => {
     });
 
     setFilteredJobs(filtered);
-    setCurrentPage(1); // Reset ke halaman pertama saat filter berubah
-  };
+    setCurrentPage(1);
+  }, [jobs, filters]);
 
   // Handle filter changes
   const handleFilterChange = (filterType: keyof JobFilters, value: string) => {
@@ -286,6 +284,7 @@ const Job: React.FC = () => {
   // Load jobs on component mount
   useEffect(() => {
     fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Apply filters when filters change
