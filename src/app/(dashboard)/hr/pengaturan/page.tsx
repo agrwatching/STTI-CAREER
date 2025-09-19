@@ -1,3 +1,4 @@
+// src/app/(dashboard)/hr/pengaturan/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ export default function PengaturanPage() {
     localStorage.removeItem("user");
 
     // Redirect ke halaman login
-    router.push("/login");
+    router.replace("/login");
   };
 
   return (

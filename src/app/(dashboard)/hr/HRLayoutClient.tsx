@@ -15,7 +15,8 @@ export default function HRLayoutClient({ children }: { children: React.ReactNode
     const role = user ? JSON.parse(user).role : null;
 
     if (!token || role !== "hr") {
-      router.replace("/login"); // langsung redirect kalau belum login / bukan HR
+      router.replace("/login");
+      window.location.reload(); // langsung redirect kalau belum login / bukan HR
     } else {
       setAuthorized(true); // token valid & role HR
     }
