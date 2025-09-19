@@ -1,3 +1,4 @@
+//src/app/(dashboard)/hr/dashboard/page.tsx
 import Header from "@/components/hr/dashboard/Header";
 import StatsSection from "@/components/hr/dashboard/StatsSection";
 import LowonganTable from "@/components/hr/dashboard/LowonganTable";

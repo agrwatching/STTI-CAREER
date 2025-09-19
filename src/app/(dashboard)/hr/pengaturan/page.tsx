@@ -10,6 +10,8 @@ export default function PengaturanPage() {
   const handleLogout = () => {
     // Hapus token (atau session) yang kamu simpan
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
 
     // Redirect ke halaman login
     router.push("/login");
