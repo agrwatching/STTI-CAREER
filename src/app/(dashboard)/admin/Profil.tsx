@@ -1,6 +1,7 @@
 // src/app/(dashboard)/admin/Profil.tsx
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 
 interface HeaderProps {
   title: string;
@@ -23,9 +24,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           onClick={() => setDropdownOpen(!dropdownOpen)}
           className="w-10 h-10 bg-orange-500 rounded-full overflow-hidden focus:outline-none"
         >
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
             alt="Admin"
+            width={40}
+            height={40}
             className="w-full h-full object-cover"
           />
         </button>
