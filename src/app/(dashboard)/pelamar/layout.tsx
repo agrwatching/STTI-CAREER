@@ -1,18 +1,14 @@
-import Sidebar from "@/components/pelamar/Sidebar";
+import PelamarLayoutClient from "./PelamarLayoutClient";
 import "@/app/globals.css";
 
 export const metadata = {
-  title: "Dashboard Pelamar",
-  description: "Portal Karir STTI",
+  title: "STTI CAREERS - Pelamar",
+  description: "Dashboard Pelamar STTI CAREERS",
+  icons: {
+    icon: "/logo-stti.png",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="id">
-      <body className="flex bg-gray-100  h-screen overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 p-6">{children}</main>
-      </body>
-    </html>
-  );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <PelamarLayoutClient>{children}</PelamarLayoutClient>;
 }
