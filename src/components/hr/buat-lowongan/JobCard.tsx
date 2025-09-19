@@ -24,7 +24,7 @@ export default function JobCard({ job }: JobCardProps) {
     <div className="bg-white shadow-md rounded-xl p-5 flex gap-4">
       {/* Logo */}
       <img
-        src={job.logo}
+        src={job.logo || "https://via.placeholder.com/150"}
         alt="Company Logo"
         className="w-14 h-14 rounded-full object-cover"
       />
@@ -33,12 +33,14 @@ export default function JobCard({ job }: JobCardProps) {
       <div className="flex-1 flex flex-col">
         {/* Status & Work Type */}
         <div className="flex items-center justify-between mb-1">
-          <p
-            className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}
-          >
-            {job.icon}
-            {job.status}
-          </p>
+          {job.status && (
+            <p
+              className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}
+            >
+              {job.icon}
+              {job.status}
+            </p>
+          )}
 
           <span
             className={`w-20 py-0.5 rounded-full text-xs font-semibold text-center ${getTypeStyle(
@@ -50,13 +52,13 @@ export default function JobCard({ job }: JobCardProps) {
         </div>
 
         <h2 className="text-lg font-bold text-gray-800">{job.title}</h2>
-        <p className="text-gray-600 text-sm mb-3">{job.desc}</p>
+        <p className="text-gray-600 text-sm mb-3">{job.description}</p>
 
         {/* Info + Actions */}
         <div className="flex items-center gap-4 text-sm text-gray-500 mt-auto">
           <span className="flex items-center gap-1">
             <Wallet className="w-4 h-4" />
-            {job.salary}
+            {job.salary_range}
           </span>
           <span className="flex items-center gap-1">
             <MapPin className="w-4 h-4" />

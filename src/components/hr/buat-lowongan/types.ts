@@ -1,14 +1,14 @@
 // src/components/hr/buat-lowongan/types.ts
-import { ReactNode } from "react";
-
 export interface JobType {
-  status: string;
-  statusColor: string;
-  icon: ReactNode;
+  id?: number; // optional, biasanya dari DB
   title: string;
-  desc: string;
-  salary: string;
+  description: string;
+  requirements: string;
+  salary_range: string;
   location: string;
+  type: string;
   logo: string;
-  type: string; // "Remote" | "On-site" | "Hybrid"
+  status?: string;       // dari backend (pending, accepted, rejected, dll)
+  statusColor?: string;  // tambahan untuk UI
+  icon?: React.ReactNode; // tambahan untuk UI
 }

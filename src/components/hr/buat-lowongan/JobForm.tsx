@@ -6,20 +6,17 @@ import type { JobType } from "./types";
 
 interface JobFormProps {
   onCancel: () => void;
-  onSubmit: (
-    data: Omit<JobType, "status" | "statusColor" | "icon" | "logo">
-  ) => void;
+  onSubmit: (data: Omit<JobType, "status" | "statusColor" | "icon">) => void;
 }
 
 export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
   const [formData, setFormData] = useState({
-    company: "",
     title: "",
-    desc: "",
-    qualification: "",
-    type: "Remote",
-    salary: "",
+    description: "",
+    requirements: "",
+    salary_range: "",
     location: "",
+    type: "Remote",
     logo: "",
   });
 
@@ -42,7 +39,19 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // pastikan payload sesuai API
+    const payload: Omit<JobType, "status" | "statusColor" | "icon"> = {
+      title: formData.title,
+      description: formData.description,
+      requirements: formData.requirements,
+      salary_range: formData.salary_range,
+      location: formData.location,
+      type: formData.type,
+      logo: formData.logo,
+    };
+
+    onSubmit(payload);
   };
 
   return (
@@ -55,19 +64,6 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
           <div className="col-span-2 space-y-2">
             <div>
               <label className="block font-semibold mb-1 text-lg">
-                Company Name
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                className="w-full border rounded px-2 py-1 text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-1 text-base">
                 Job Title
               </label>
               <input
@@ -84,8 +80,8 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
                 Description
               </label>
               <textarea
-                name="desc"
-                value={formData.desc}
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 rows={2}
                 className="w-full border rounded px-2 py-1 text-sm"
@@ -94,11 +90,11 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
 
             <div>
               <label className="block font-semibold mb-1 text-base">
-                Required Qualification
+                Requirements
               </label>
               <textarea
-                name="qualification"
-                value={formData.qualification}
+                name="requirements"
+                value={formData.requirements}
                 onChange={handleChange}
                 rows={2}
                 className="w-full border rounded px-2 py-1 text-sm"
@@ -127,12 +123,12 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
 
             <div>
               <label className="block font-semibold mb-1 text-base">
-                Salary
+                Salary Range
               </label>
               <input
                 type="text"
-                name="salary"
-                value={formData.salary}
+                name="salary_range"
+                value={formData.salary_range}
                 onChange={handleChange}
                 placeholder="Contoh: Rp. 5.000.000 - Rp. 8.000.000"
                 className="w-full border rounded px-2 py-1 text-sm"

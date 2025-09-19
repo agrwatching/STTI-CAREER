@@ -1,23 +1,24 @@
-// src/app/(dashboard)/hr/buat-lowongan/BuatLowonganContent.tsx
 "use client";
 
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
 
 export interface JobType {
-  status: string;
-  statusColor: string;
-  icon: ReactNode;
+  id?: number;
   title: string;
-  desc: string;
-  salary: string;
+  description: string;
+  requirements: string;
+  salary_range: string;
   location: string;
-  logo: string;
   type: string;
+  logo: string;
+  status?: string;
+  statusColor?: string;
+  icon?: React.ReactNode;
 }
 
 export default function BuatLowonganContent() {
@@ -25,48 +26,88 @@ export default function BuatLowonganContent() {
   const router = useRouter();
 
   const [showForm, setShowForm] = useState(false);
-  const [jobs, setJobs] = useState<JobType[]>([
-    {
-      status: "Tunggu Verifikasi",
-      statusColor: "text-blue-600",
-      icon: <Clock className="w-5 h-5 text-blue-600" />,
-      title: "Frontend Developer",
-      desc: "Kami mencari Frontend Developer...",
-      salary: "Rp. 3.000.000 - Rp. 6.000.000",
-      location: "Jakarta Selatan, Indonesia",
-      logo: "https://i.pravatar.cc/150?img=5",
-      type: "Remote",
-    },
-    {
-      status: "Terverifikasi",
-      statusColor: "text-green-600",
-      icon: <CheckCircle2 className="w-5 h-5 text-green-600" />,
-      title: "Backend Developer",
-      desc: "Mencari Backend Developer...",
-      salary: "Rp. 5.000.000 - Rp. 9.000.000",
-      location: "Bandung, Indonesia",
-      logo: "https://i.pravatar.cc/150?img=15",
-      type: "Hybrid",
-    },
-    {
-      status: "Ditolak",
-      statusColor: "text-red-600",
-      icon: <XCircle className="w-5 h-5 text-red-600" />,
-      title: "UI/UX Designer",
-      desc: "Butuh UI/UX Designer berpengalaman...",
-      salary: "Rp. 4.000.000 - Rp. 7.000.000",
-      location: "Surabaya, Indonesia",
-      logo: "https://i.pravatar.cc/150?img=25",
-      type: "On-site",
-    },
-  ]);
+  const [jobs, setJobs] = useState<JobType[]>([]);
 
+  // Ambil data dari backend
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Gagal mengambil data lowongan");
+
+        const data = await res.json();
+
+        // pastikan data.data berupa array
+        const mappedJobs: JobType[] = (Array.isArray(data.data) ? data.data : [data.data]).map(
+          (job: any) => ({
+            id: job.id,
+            title: job.job_title,
+            description: job.job_description,
+            requirements: job.qualifications || "-",
+            salary_range:
+              job.salary_min && job.salary_max
+                ? `Rp ${job.salary_min} - Rp ${job.salary_max}`
+                : "Negotiable",
+            location: job.location || "-",
+            type: job.type || "Hybrid",
+            logo: "/logo-stti.png", // default logo
+
+            // tambahan UI status
+            status:
+              job.verification_status === "pending"
+                ? "Tunggu Verifikasi"
+                : job.verification_status === "approved"
+                ? "Terverifikasi"
+                : "Ditolak",
+            statusColor:
+              job.verification_status === "pending"
+                ? "text-blue-600"
+                : job.verification_status === "approved"
+                ? "text-green-600"
+                : "text-red-600",
+            icon:
+              job.verification_status === "pending" ? (
+                <Clock className="w-5 h-5 text-blue-600" />
+              ) : job.verification_status === "approved" ? (
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              ) : (
+                <XCircle className="w-5 h-5 text-red-600" />
+              ),
+          })
+        );
+
+        setJobs(mappedJobs);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchJobs();
+  }, [router]);
+
+  // Kalau URL ada ?mode=form → buka form
   useEffect(() => {
     if (searchParams.get("mode") === "form") {
       setShowForm(true);
     }
   }, [searchParams]);
 
+  // Tambah job baru (frontend-side)
   const handleAddJob = (
     job: Omit<JobType, "status" | "statusColor" | "icon" | "logo">
   ) => {
