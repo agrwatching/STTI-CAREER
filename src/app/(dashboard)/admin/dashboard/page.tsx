@@ -2,6 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 
+interface ApplicationType {
+  id?: number;
+  status?: string;
+  [key: string]: unknown; // fleksibel untuk field tambahan
+}
+
 interface DashboardData {
   users: {
     total_users: number;
@@ -19,7 +25,7 @@ interface DashboardData {
     verification_status: string;
     total: number;
   }[];
-  applications: any[];
+  applications: ApplicationType[];
 }
 
 const Dashboard: React.FC = () => {
@@ -39,6 +45,7 @@ const Dashboard: React.FC = () => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard`,
           {
+            method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
@@ -72,15 +79,12 @@ const Dashboard: React.FC = () => {
   if (!data) return null;
 
   // Hitung data dari jobs
-  const pendingJobs = data.jobs.find(
-    (j) => j.verification_status === "pending"
-  )?.total ?? 0;
-  const rejectedJobs = data.jobs.find(
-    (j) => j.verification_status === "rejected"
-  )?.total ?? 0;
-  const approvedJobs = data.jobs.find(
-    (j) => j.verification_status === "approved"
-  )?.total ?? 0;
+  const pendingJobs =
+    data.jobs.find((j) => j.verification_status === "pending")?.total ?? 0;
+  const rejectedJobs =
+    data.jobs.find((j) => j.verification_status === "rejected")?.total ?? 0;
+  const approvedJobs =
+    data.jobs.find((j) => j.verification_status === "approved")?.total ?? 0;
 
   return (
     <>
