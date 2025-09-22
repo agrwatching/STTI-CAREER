@@ -9,7 +9,12 @@ type Props = {
   onEdit?: () => void;
 };
 
-export default function ProfileHeader({ name, joined, avatarUrl, onEdit }: Props) {
+export default function ProfileHeader({
+  name,
+  joined,
+  avatarUrl,
+  onEdit,
+}: Props) {
   const initial = name.charAt(0).toUpperCase();
 
   return (
@@ -31,15 +36,15 @@ export default function ProfileHeader({ name, joined, avatarUrl, onEdit }: Props
           </div>
         )}
         <div>
-          <h1 className="text-lg font-semibold">{name}</h1>
-          <p className="text-gray-500 text-sm">Bergabung sejak {joined}</p>
+          <h1 className="md:text-lg text-lg font-semibold">{name}</h1>
+          <p className="text-gray-500 md:text-sm text-xs">Bergabung sejak {joined}</p>
         </div>
       </div>
 
       {/* Tombol Edit pindah ke sini */}
       <button
         onClick={onEdit}
-        className="flex items-center gap-2 bg-blue-600 text-white px-3.5 py-1.5 text-sm rounded-md hover:bg-blue-700"
+        className="flex items-center gap-2 bg-blue-600 text-white px-2 py-3 text-xs md:text-sm rounded-md hover:bg-blue-700 whitespace-nowrap"
       >
         ✏️ Edit Biodata
       </button>
