@@ -4,76 +4,93 @@ import type { JobType } from "./types";
 
 interface JobCardProps {
   job: JobType;
+  onEdit?: (job: JobType) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function JobCard({ job }: JobCardProps) {
-  const getTypeStyle = (type: string) => {
+export default function JobCard({ job, onEdit, onDelete }: JobCardProps) {
+  // Label work type
+  const getTypeLabel = (type: string) => {
     switch (type) {
       case "Remote":
-        return "bg-green-500 text-white";
+        return "WFH";
       case "On-site":
-        return "bg-orange-500 text-white";
+        return "WFO";
       case "Hybrid":
-        return "bg-red-500 text-white";
+        return "Hybrid";
       default:
-        return "bg-gray-300 text-black";
+        return type;
     }
   };
 
+  // Warna status text
+  const getStatusColor = (status: string) => {
+    if (status === "Tunggu Verifikasi") return "text-blue-600";
+    if (status === "Terverifikasi") return "text-green-600";
+    return "text-red-600";
+  };
+
   return (
-    <div className="bg-white shadow-md rounded-xl p-5 flex gap-4">
-      {/* Logo */}
-      <img
-        src={job.logo || "https://via.placeholder.com/150"}
-        alt="Company Logo"
-        className="w-14 h-14 rounded-full object-cover"
-      />
+    <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-5">
+      {/* Status + Work Type */}
+      <div className="flex items-center justify-between mb-3">
+        <p
+          className={`text-sm font-semibold ${getStatusColor(job.statusLabel)}`}
+        >
+          {job.statusLabel}
+        </p>
+        <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-0.5 rounded-full">
+          {getTypeLabel(job.type)}
+        </span>
+      </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Status & Work Type */}
-        <div className="flex items-center justify-between mb-1">
-          {job.status && (
-            <p
-              className={`text-sm font-semibold flex items-center gap-1 ${job.statusColor}`}
-            >
-              {job.icon}
-              {job.status}
-            </p>
-          )}
+      <div className="flex gap-5">
+        {/* Logo perusahaan */}
+        <img
+          src={job.logo || "https://via.placeholder.com/80"}
+          alt="Company Logo"
+          className="w-20 h-20 rounded-md object-cover border"
+        />
 
-          <span
-            className={`w-20 py-0.5 rounded-full text-xs font-semibold text-center ${getTypeStyle(
-              job.type
-            )}`}
-          >
-            {job.type}
-          </span>
-        </div>
+        {/* Detail */}
+        <div className="flex-1 flex flex-col">
+          {/* Title */}
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{job.title}</h2>
 
-        <h2 className="text-lg font-bold text-gray-800">{job.title}</h2>
-        <p className="text-gray-600 text-sm mb-3">{job.description}</p>
+          {/* Description */}
+          <p className="text-gray-700 text-sm mb-3">{job.description}</p>
 
-        {/* Info + Actions */}
-        <div className="flex items-center gap-4 text-sm text-gray-500 mt-auto">
-          <span className="flex items-center gap-1">
-            <Wallet className="w-4 h-4" />
-            {job.salary_range}
-          </span>
-          <span className="flex items-center gap-1">
-            <MapPin className="w-4 h-4" />
-            {job.location}
-          </span>
+          {/* Info bawah */}
+          <div className="flex items-center justify-between text-sm text-gray-600 mt-auto">
+            <div className="flex items-center gap-6">
+              <span className="flex items-center gap-1">
+                <Wallet className="w-4 h-4" />
+                {job.salary_range || "Negotiable"}
+              </span>
+              <span className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                {job.location}
+              </span>
+            </div>
 
-          <div className="flex gap-2 ml-auto">
-            <button className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-            <button className="flex items-center gap-1 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
-              <Trash2 className="w-4 h-4" />
-              Hapus
-            </button>
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEdit?.(job)}
+                className="flex items-center gap-1 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm hover:bg-blue-700"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={() => job.id && onDelete?.(job.id)}
+                className="flex items-center gap-1 bg-red-600 text-white px-4 py-1.5 rounded-full text-sm hover:bg-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>

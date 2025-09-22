@@ -6,33 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
-
-export interface JobType {
-  id?: number;
-  title: string;
-  description: string;
-  requirements: string;
-  salary_range: string;
-  location: string;
-  type: string;
-  logo: string;
-  status?: string;
-  statusColor?: string;
-  icon?: React.ReactNode;
-}
-
-// Interface untuk data yang datang dari API
-interface JobApiResponse {
-  id: number;
-  job_title: string;
-  job_description: string;
-  qualifications?: string;
-  salary_min?: number;
-  salary_max?: number;
-  location?: string;
-  type?: string;
-  verification_status: "pending" | "approved" | "rejected";
-}
+import type { JobApiResponse, JobType, JobFormValues } from "@/components/hr/buat-lowongan/types";
 
 export default function BuatLowonganContent() {
   const searchParams = useSearchParams();
@@ -40,6 +14,7 @@ export default function BuatLowonganContent() {
 
   const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState<JobType[]>([]);
+  const [editJob, setEditJob] = useState<JobType | null>(null);
 
   // Ambil data dari backend
   useEffect(() => {
@@ -51,58 +26,57 @@ export default function BuatLowonganContent() {
           return;
         }
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
 
         const data = await res.json();
 
-        // pastikan data.data berupa array
         const mappedJobs: JobType[] = (
           Array.isArray(data.data) ? data.data : [data.data]
-        ).map((job: JobApiResponse) => ({
-          id: job.id,
-          title: job.job_title,
-          description: job.job_description,
-          requirements: job.qualifications || "-",
-          salary_range:
-            job.salary_min && job.salary_max
-              ? `Rp ${job.salary_min} - Rp ${job.salary_max}`
-              : "Negotiable",
-          location: job.location || "-",
-          type: job.type || "Hybrid",
-          logo: "/logo-stti.png", // default logo
+        ).map((job: JobApiResponse) => {
+          let statusLabel = "";
+          let statusColor = "";
+          let icon: React.ReactNode = null;
 
-          // tambahan UI status
-          status:
-            job.verification_status === "pending"
-              ? "Tunggu Verifikasi"
-              : job.verification_status === "approved"
-              ? "Terverifikasi"
-              : "Ditolak",
-          statusColor:
-            job.verification_status === "pending"
-              ? "text-blue-600"
-              : job.verification_status === "approved"
-              ? "text-green-600"
-              : "text-red-600",
-          icon:
-            job.verification_status === "pending" ? (
-              <Clock className="w-5 h-5 text-blue-600" />
-            ) : job.verification_status === "approved" ? (
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            ) : (
-              <XCircle className="w-5 h-5 text-red-600" />
-            ),
-        }));
+          switch (job.verification_status) {
+            case "pending":
+              statusLabel = "Tunggu Verifikasi";
+              statusColor = "text-blue-600";
+              icon = <Clock className="w-5 h-5 text-blue-600" />;
+              break;
+            case "approved":
+              statusLabel = "Terverifikasi";
+              statusColor = "text-green-600";
+              icon = <CheckCircle2 className="w-5 h-5 text-green-600" />;
+              break;
+            case "rejected":
+              statusLabel = "Ditolak";
+              statusColor = "text-red-600";
+              icon = <XCircle className="w-5 h-5 text-red-600" />;
+              break;
+          }
+
+          return {
+            ...job,
+            title: job.job_title,
+            description: job.job_description,
+            requirements: job.qualifications || "-",
+            salary_range:
+              job.salary_min && job.salary_max
+                ? `Rp ${job.salary_min} - Rp ${job.salary_max}`
+                : "Negotiable",
+            logo: job.logo || "/logo-stti.png",
+            statusLabel,
+            statusColor,
+            icon,
+          };
+        });
 
         setJobs(mappedJobs);
       } catch (err) {
@@ -120,22 +94,99 @@ export default function BuatLowonganContent() {
     }
   }, [searchParams]);
 
-  // Tambah job baru (frontend-side)
-  const handleAddJob = (
-    job: Omit<JobType, "status" | "statusColor" | "icon" | "logo">
-  ) => {
-    setJobs([
-      ...jobs,
-      {
-        ...job,
-        status: "Tunggu Verifikasi",
-        statusColor: "text-blue-600",
-        icon: <Clock className="w-5 h-5 text-blue-600" />,
-        logo: "https://i.pravatar.cc/150?img=30",
-      },
-    ]);
-    setShowForm(false);
-    router.push("/hr/buat-lowongan");
+  // Tambah job
+  const handleAddJob = async (job: JobFormValues) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(job),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Job ditambahkan:", data);
+        router.refresh();
+        setShowForm(false);
+        setEditJob(null);
+        router.push("/hr/buat-lowongan");
+      } else {
+        console.error("Gagal tambah job:", data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Edit job
+  const handleEditJob = async (job: JobFormValues, id: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(job),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Job diupdate:", data);
+        router.refresh();
+        setShowForm(false);
+        setEditJob(null);
+      } else {
+        console.error("Gagal update job:", data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Hapus job
+  const handleDeleteJob = async (id: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        console.log("Job dihapus");
+        setJobs((prev) => prev.filter((job) => job.id !== id));
+      } else {
+        const data = await res.json();
+        console.error("Gagal hapus job:", data.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -144,14 +195,25 @@ export default function BuatLowonganContent() {
         <Header onAddClick={() => setShowForm(true)} />
         {showForm ? (
           <JobForm
+            initialValues={editJob || undefined}
             onCancel={() => {
               setShowForm(false);
+              setEditJob(null);
               router.push("/hr/buat-lowongan");
             }}
-            onSubmit={handleAddJob}
+            onSubmit={(values) =>
+              editJob ? handleEditJob(values, editJob.id) : handleAddJob(values)
+            }
           />
         ) : (
-          <JobList jobs={jobs} />
+          <JobList
+            jobs={jobs}
+            onEdit={(job) => {
+              setEditJob(job);
+              setShowForm(true);
+            }}
+            onDelete={handleDeleteJob}
+          />
         )}
       </div>
     </div>

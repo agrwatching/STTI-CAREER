@@ -113,7 +113,7 @@ export default function RegisterPage() {
 
       {/* Form di bawah (mobile) / kiri (desktop) */}
       <div className="order-2 md:order-1 flex items-center justify-center bg-white flex-1">
-        <div className="w-full max-w-md h-full overflow-y-auto px-6 py-6">
+        <div className="w-full max-w-md overflow-y-auto px-6 py-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">

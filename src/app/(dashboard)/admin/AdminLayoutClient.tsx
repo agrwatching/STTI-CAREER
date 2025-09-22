@@ -7,10 +7,10 @@ import Header from "@/app/(dashboard)/admin/Profil";
 
 const pageTitles: Record<string, string> = {
   "/admin/dashboard": "Dashboard",
-  "/admin/job": "Job Management",
-  "/admin/users": "User Management",
-  "/admin/statistics": "Statistics",
-  "/admin/notification": "Notifications",
+  "/admin/job": "",
+  "/admin/users": "",
+  "/admin/statistics": "",
+  "/admin/notification": "",
 };
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
