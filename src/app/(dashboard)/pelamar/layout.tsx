@@ -1,5 +1,5 @@
-import Sidebar from "@/components/pelamar/Sidebar";
 import "@/app/globals.css";
+import PelamarLayoutClient from "./PelamarLayoutClient";
 
 export const metadata = {
   title: "Dashboard Pelamar",
@@ -9,16 +9,6 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="id">
-      <body className="min-h-screen flex flex-col md:flex-row bg-gray-100">
-        {/* Sidebar / Navbar */}
-        <Sidebar />
-
-        {/* Konten */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
-      </body>
-    </html>
-  );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <PelamarLayoutClient>{children}</PelamarLayoutClient>;
 }

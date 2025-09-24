@@ -1,3 +1,4 @@
+// src/app/(dashboard)/pelamar/profile/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -83,7 +84,7 @@ export default function ProfilePage() {
         avatarUrl={user.profile_photo ?? undefined}
       />
 
-      <div className="bg-white rounded-xl p-6 mt-4 h-[calc(100vh-110px)] overflow-hidden">
+      <div className="bg-white rounded-xl p-6 mt-4 h-[calc(100vh-110px)] overflow-y-auto">
         <ProfileHeader
           name={user.full_name}
           joined={joinedYear}

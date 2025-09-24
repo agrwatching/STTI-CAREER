@@ -16,7 +16,7 @@ const pageTitles: Record<string, string> = {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const [authorized, setAuthorized] = useState<null | boolean>(null);
 
   const title = pageTitles[pathname] || "";
 
@@ -27,17 +27,20 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
     if (!token || role !== "admin") {
       router.replace("/login");
-      window.location.reload();
     } else {
       setAuthorized(true);
     }
   }, [router]);
 
+  if (authorized === null) {
+    return <div className="flex h-screen items-center justify-center text-white">Checking access...</div>;
+  }
+
   if (!authorized) return null;
 
   return (
     <div className="h-screen bg-slate-900 text-white flex">
-      {/* ✅ Sidebar dibikin fixed */}
+      {/* ✅ Sidebar fixed */}
       <div className="fixed inset-y-0 left-0 w-64">
         <SidebarAdmin />
       </div>

@@ -20,8 +20,20 @@ export default function Sidebar() {
     <>
       {/* ✅ Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-[#0C1E6F] text-white min-h-screen flex-col">
-        {/* Logo */}
-        <div className="flex items-center gap-2 p-6">
+        {/* Logo + Back Button */}
+        <div className="flex items-center gap-3 p-6">
+          {/* Back button */}
+          <button onClick={() => window.history.back()}>
+            <Image
+              src="/back.png"
+              alt="Back"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+          </button>
+
+          {/* Logo */}
           <Image
             src="/logo-stti.png"
             alt="Logo"
@@ -71,8 +83,17 @@ export default function Sidebar() {
       {/* ✅ Mobile Navbar */}
       <div className="md:hidden bg-[#0C1E6F] text-white">
         <div className="flex justify-between items-center p-4">
-          {/* Logo */}
+          {/* Back Button + Logo */}
           <div className="flex items-center gap-2">
+            <button onClick={() => window.history.back()}>
+              <Image
+                src="/back.png"
+                alt="Back"
+                width={24}
+                height={24}
+                className="w-6 h-6"
+              />
+            </button>
             <Image
               src="/logo-stti.png"
               alt="Logo"
@@ -101,7 +122,7 @@ export default function Sidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
                     ${isActive ? "bg-[#1C2E9E]" : "hover:bg-[#1C2E9E]/50"}`}
-                  onClick={() => setIsOpen(false)} // tutup menu setelah klik
+                  onClick={() => setIsOpen(false)}
                 >
                   <Icon size={18} />
                   <span>{item.name}</span>

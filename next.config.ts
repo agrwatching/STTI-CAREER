@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "dummyimage.com",
       },
+      // ✅ tambahkan domain API kamu di sini
+      {
+        protocol: "https",
+        hostname: "apicareer-production.up.railway.app",
+      },
     ],
   },
 };
