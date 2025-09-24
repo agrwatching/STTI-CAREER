@@ -1,20 +1,28 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Filter, X } from "lucide-react";
+import { X } from "lucide-react";
+
+interface ApiUser {
+  id: number;
+  full_name: string;
+  email: string;
+  role: "pelamar" | "hr" | "admin";
+  is_active: number;
+}
 
 interface User {
   id: number;
   name: string;
   email: string;
-  role: string;
-  status: string;
+  role: "Applicant" | "HR Representative";
+  status: "Active" | "Inactive";
 }
 
-const UserManagement = () => {
-  const [activeTab, setActiveTab] = useState<
-    "Applicant" | "HR Representatives"
-  >("Applicant");
+const UserManagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"Applicant" | "HR Representatives">(
+    "Applicant"
+  );
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +41,9 @@ const UserManagement = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
-        const mapped = json.data.users
-          .filter((u: any) => u.role === "pelamar" || u.role === "hr") // skip admin
-          .map((u: any) => ({
+        const mapped: User[] = json.data.users
+          .filter((u: ApiUser) => u.role === "pelamar" || u.role === "hr")
+          .map((u: ApiUser) => ({
             id: u.id,
             name: u.full_name,
             email: u.email,
@@ -44,8 +52,8 @@ const UserManagement = () => {
           }));
 
         setUsers(mapped);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -91,18 +99,18 @@ const UserManagement = () => {
       const refreshed = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`
       ).then((r) => r.json());
-      setUsers(
-        refreshed.data.users
-          .filter((u: any) => u.role === "pelamar" || u.role === "hr")
-          .map((u: any) => ({
-            id: u.id,
-            name: u.full_name,
-            email: u.email,
-            role: u.role === "pelamar" ? "Applicant" : "HR Representative",
-            status: u.is_active === 1 ? "Active" : "Inactive",
-          }))
-      );
-    } catch (err) {
+      const mapped: User[] = refreshed.data.users
+        .filter((u: ApiUser) => u.role === "pelamar" || u.role === "hr")
+        .map((u: ApiUser) => ({
+          id: u.id,
+          name: u.full_name,
+          email: u.email,
+          role: u.role === "pelamar" ? "Applicant" : "HR Representative",
+          status: u.is_active === 1 ? "Active" : "Inactive",
+        }));
+
+      setUsers(mapped);
+    } catch {
       alert("Error update user");
     }
   };
@@ -113,13 +121,11 @@ const UserManagement = () => {
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Gagal hapus user");
       setUsers((prev) => prev.filter((u) => u.id !== id));
-    } catch (err) {
+    } catch {
       alert("Error hapus user");
     }
   };
@@ -271,12 +277,15 @@ const UserManagement = () => {
                 <select
                   value={editingUser.status}
                   onChange={(e) =>
-                    setEditingUser({ ...editingUser, status: e.target.value })
+                    setEditingUser({
+                      ...editingUser,
+                      status: e.target.value as "Active" | "Inactive",
+                    })
                   }
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 >
-                  <option>Active</option>
-                  <option>Inactive</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
             </div>
