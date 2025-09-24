@@ -37,62 +37,61 @@ const JobDetail: React.FC = () => {
   const params = useParams<{ id: string }>();
   const jobId = params?.id;
 
-  // Fetch job detail (dummy)
-  const fetchJobDetail = useCallback(async (id: string) => {
-    // pindahin mock data ke dalam sini → biar gak kena warning deps
-    const mockJobDetail: JobDetail = {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "PT Perusahaan Lokal",
-      location: "Surabaya, Indonesia",
-      type: "Full Time",
-      description:
-        "Kami mencari Senior Frontend Developer berpengalaman untuk memimpin pengembangan antarmuka aplikasi web modern.",
-      tags: ["Remote", "Senior"],
-      salary: "Rp 15.000.000 – Rp 25.000.000 per bulan",
-      postedAt: "2 days ago",
-      companyDescription:
-        "PT Perusahaan Lokal adalah perusahaan teknologi terkemuka yang fokus pada pengembangan solusi digital inovatif.",
-      requirements: [
-        "Minimal 5 tahun pengalaman sebagai Frontend Developer",
-        "Menguasai React, Vue, atau Angular",
-        "Memahami konsep UI/UX dengan baik",
-        "Pengalaman dengan RESTful API",
-        "Mampu bekerja dalam tim dan memiliki komunikasi yang baik",
-      ],
-      responsibilities: [
-        "Memimpin pengembangan antarmuka pengguna untuk aplikasi web",
-        "Berkolaborasi dengan tim design dan backend",
-        "Mengoptimalkan performa aplikasi",
-      ],
-      benefits: ["Gaji kompetitif", "Asuransi kesehatan", "Bonus tahunan"],
-      workingSystem: ["Jam kerja fleksibel", "Remote", "Agile methodology"],
-      companyCriteria: [
-        "Berpengalaman di bidang teknologi",
-        "Budaya kerja sehat",
-      ],
-      applicants: 45,
-      views: 128,
-    };
+ // Fetch job detail (API)
+const fetchJobDetail = useCallback(async (id: string) => {
+  try {
+    setLoading(true);
+    setError(null);
 
-    try {
-      setLoading(true);
-      setError(null);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`
+    );
 
-      if (id === "1") {
-        setJob(mockJobDetail);
-      } else {
-        throw new Error("Job not found");
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch job details"
-      );
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch job (status ${res.status})`);
     }
-  }, []);
+
+    const json = await res.json();
+
+    if (json.success && json.data) {
+      // mapping data API → struktur JobDetail
+      const apiJob = json.data;
+
+      const mappedJob: JobDetail = {
+        id: apiJob.id,
+        title: apiJob.job_title,
+        company: `Company #${apiJob.company_id}`,
+        location: apiJob.location,
+        type: "Full Time", // sementara hardcode, karena API belum ada field type
+        description: apiJob.job_description,
+        tags: ["Remote"], // sementara statis, nanti bisa parsing dari location atau field baru
+        salary:
+          apiJob.salary_min && apiJob.salary_max
+            ? `Rp ${apiJob.salary_min.toLocaleString()} – Rp ${apiJob.salary_max.toLocaleString()}`
+            : "Salary not specified",
+        postedAt: apiJob.created_at,
+        companyLogo: undefined, // kalau backend nanti kasih logo, bisa dipakai
+        companyDescription: undefined, // belum ada di API
+        requirements: [], // kalau belum ada field, kosongkan
+        responsibilities: [],
+        benefits: [],
+        workingSystem: [],
+        companyCriteria: [],
+        applicants: 0,
+        views: 0,
+      };
+
+      setJob(mappedJob);
+    } else {
+      throw new Error("Job not found");
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Failed to fetch job details");
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   // Check if job is bookmarked (dummy)
   const checkBookmarkStatus = useCallback(async () => {
