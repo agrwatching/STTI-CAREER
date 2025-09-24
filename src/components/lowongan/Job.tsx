@@ -41,7 +41,7 @@ function timeAgo(dateString: string): string {
     { unit: "second", seconds: 1 },
   ];
 
-  for (let { unit, seconds } of units) {
+  for (const { unit, seconds } of units) {
     const value = Math.floor(diff / seconds);
     if (value >= 1) {
       return new Intl.RelativeTimeFormat("id", { numeric: "auto" }).format(
@@ -85,32 +85,45 @@ const fetchJobs = async () => {
 
     console.log("Data dari API:", result);
 
-    if (result.success && Array.isArray(result.data)) {
-      // Map API response ke struktur Job
-    const mappedJobs: Job[] = Array.isArray(result.data) ? result.data.map((job: any) => {
-  let salaryText = "";
-  if (job.salary_min && job.salary_max) {
-    salaryText = `Rp ${job.salary_min.toLocaleString("id-ID")} - Rp ${job.salary_max.toLocaleString("id-ID")}`;
-  } else if (job.salary_min) {
-    salaryText = `Rp ${job.salary_min.toLocaleString("id-ID")}`;
-  } else if (job.salary_max) {
-    salaryText = `Rp ${job.salary_max.toLocaleString("id-ID")}`;
-  } else {
-    salaryText = "Negotable";
-  }
+ if (result.success && Array.isArray(result.data)) {
+  // Map API response ke struktur Job
+  const mappedJobs: Job[] = result.data.map((job: unknown) => {
+    const j = job as {
+      id: number;
+      job_title: string;
+      company_name?: string;
+      location?: string;
+      employment_type?: string;
+      job_description: string;
+      tags?: string;
+      salary_min?: number;
+      salary_max?: number;
+      created_at?: string;
+    };
 
-  return {
-    id: job.id,
-    title: job.job_title,
-    company: job.company_name || "Unknown Company",
-    location: job.location || "Indonesia",
-    type: job.employment_type || "Full Time",
-    description: job.job_description,
-    tags: job.tags ? job.tags.split(",") : [],
-    salary: salaryText,
-   postedAt: job.created_at ? timeAgo(job.created_at) : "",
-  };
-}) : [];
+    let salaryText = "";
+    if (j.salary_min && j.salary_max) {
+      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")} - Rp ${j.salary_max.toLocaleString("id-ID")}`;
+    } else if (j.salary_min) {
+      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")}`;
+    } else if (j.salary_max) {
+      salaryText = `Rp ${j.salary_max.toLocaleString("id-ID")}`;
+    } else {
+      salaryText = "Negotable";
+    }
+
+    return {
+      id: j.id,
+      title: j.job_title,
+      company: j.company_name || "Unknown Company",
+      location: j.location || "Indonesia",
+      type: j.employment_type || "Full Time",
+      description: j.job_description,
+      tags: j.tags ? j.tags.split(",") : [],
+      salary: salaryText,
+      postedAt: j.created_at ? timeAgo(j.created_at) : "",
+    };
+  });
 
 
       setJobs(mappedJobs);
@@ -247,7 +260,6 @@ const fetchJobs = async () => {
   // Load jobs on component mount
   useEffect(() => {
     fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Apply filters when filters change

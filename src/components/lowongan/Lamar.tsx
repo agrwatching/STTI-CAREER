@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { CircleDollarSign, MapPin } from "lucide-react";
+import Image from "next/image";
 
 // Interface untuk tipe data job detail
 interface JobDetail {
@@ -42,26 +43,32 @@ const LamarKerja: React.FC = () => {
     resume: null,
     userId: null,
   });
+  const [token, setToken] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
   const jobId = params?.id;
 
-  // Ambil token dari localStorage/session
-  const token = localStorage.getItem("token"); // sesuaikan lokasi token
+  // Ambil token hanya di client
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      setToken(storedToken);
+    }
+  }, []);
 
   // Fetch job detail dari API
   useEffect(() => {
     const fetchJobDetail = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}`
+        );
         const result = await res.json();
 
         if (result.success && result.data) {
           const data = result.data;
-
-          console.log("🔍 Job data dari API:", data);
 
           setJob({
             id: data.id,
@@ -93,10 +100,14 @@ const LamarKerja: React.FC = () => {
   // Fetch applicant profile otomatis
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!token) return;
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const result = await res.json();
         if (result.success && result.data) {
           setFormData((prev) => ({
@@ -112,10 +123,12 @@ const LamarKerja: React.FC = () => {
       }
     };
 
-    if (token) fetchProfile();
+    fetchProfile();
   }, [token]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -152,76 +165,68 @@ const LamarKerja: React.FC = () => {
     }
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    setSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
 
-    console.log("👤 userId:", formData.userId);
-    console.log("💼 jobId:", job?.id);
-    console.log("📄 resume:", formData.resume);
-
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.resume ||
-      !job?.id ||
-      !formData.userId
-    ) {
-      alert("Lengkapi semua field termasuk resume, jobId, dan userId.");
-      return;
-    }
-
-    const payload = {
-      full_name: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      portfolio_url: formData.portfolioUrl,
-      job_id: job.id,
-      user_id: formData.userId,
-      cover_letter: "", // kalau ada form cover letter bisa ditambah
-      resume_file: formData.resume?.name || "resume.pdf", // kirim nama file saja
-      status: "pending",
-    };
-
-    console.log("📦 Payload yang dikirim:", payload);
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+      if (
+        !formData.fullName ||
+        !formData.email ||
+        !formData.phone ||
+        !formData.resume ||
+        !job?.id ||
+        !formData.userId
+      ) {
+        alert("Lengkapi semua field termasuk full name, email, phone dan resume");
+        return;
       }
-    );
 
-    const result = await res.json();
-    console.log("📥 Response dari API:", result);
+      const payload = {
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        portfolio_url: formData.portfolioUrl,
+        job_id: job.id,
+        user_id: formData.userId,
+        cover_letter: "",
+        resume_file: formData.resume?.name || "resume.pdf",
+        status: "pending",
+      };
 
-    if (res.ok) {
-      setShowSuccessModal(true);
-    } else {
-      throw new Error(result.message || "Failed to submit application");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok) {
+        setShowSuccessModal(true);
+      } else {
+        throw new Error(result.message || "Failed to submit application");
+      }
+    } catch (err) {
+      console.error("Error submitting application:", err);
+      alert("Gagal mengirim lamaran. Silakan coba lagi.");
+    } finally {
+      setSubmitting(false);
     }
-  } catch (err) {
-    console.error("Error submitting application:", err);
-    alert("Gagal mengirim lamaran. Silakan coba lagi.");
-  } finally {
-    setSubmitting(false);
-  }
-};
-
-
+  };
 
   const handleGoBack = () => router.back();
-  const handleViewStatus = () => {
-    setShowSuccessModal(false);
-    router.push("/status-lamaran");
-  };
+ const handleViewStatus = () => {
+  setShowSuccessModal(false);
+  router.push("/pelamar/lamaran"); // ini ga perlu Authorization
+};
+
   const handleBackToJobs = () => {
     setShowSuccessModal(false);
     router.push("/lowongan");
@@ -239,7 +244,9 @@ const LamarKerja: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Job not found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Job not found
+          </h3>
           <button
             onClick={() => router.push("/lowongan")}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
@@ -250,7 +257,6 @@ const LamarKerja: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
@@ -269,9 +275,11 @@ const LamarKerja: React.FC = () => {
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="flex items-start space-x-4">
             {job.companyLogo ? (
-              <img
+              <Image
                 src={job.companyLogo}
                 alt={job.company}
+                width={16}
+                height={16}
                 className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
               />
             ) : (
