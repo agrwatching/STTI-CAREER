@@ -106,34 +106,37 @@ const About = () => {
               untuk menjembatani mahasiswa dan alumni dengan Dunia Usaha dan
               Dunia Industri (DUDI). Dengan misi{" "}
               <span className="italic">
-                'Membangun SDM profesional yang berkualitas tinggi dan memiliki
-                karakter esensial untuk mengatasi tantangan di era globalisasi,
-                serta tetap memiliki kewajiban moral untuk membangun bangsa'
+                &apos;Membangun SDM profesional yang berkualitas tinggi dan
+                memiliki karakter esensial untuk mengatasi tantangan di era
+                globalisasi, serta tetap memiliki kewajiban moral untuk
+                membangun bangsa&apos;
               </span>
               , Career Center memberikan layanan karir berupa info lowongan
               kerja daring (online), info magang (internship), program
               wirausaha, pelatihan persiapan karir, konseling karir, serta bursa
-              kerja "Integrated Career Days" yang rutin diselenggarakan dua kali
-              setiap tahunnya.
+              kerja &quot;Integrated Career Days&quot; yang rutin
+              diselenggarakan dua kali setiap tahunnya.
             </p>
             <p>
-              Selain itu, Career Center juga menjembatani para 'experienced
-              jobseeker' dan pihak perusahaan dalam memenuhi kebutuhan tenaga
-              profesional. Bagi DUDI sendiri, Career Center memberikan layanan
-              publikasi iklan lowongan kerja dan rekrutmen SDM, di antaranya
-              rekrutmen daring (online), penyelenggaraan rekrutmen kampus,
-              presentasi profil perusahaan, 'company branding', serta 'career
-              days' khusus bagi perusahaan.
+              Selain itu, Career Center juga menjembatani para &apos;experienced
+              jobseeker&apos; dan pihak perusahaan dalam memenuhi kebutuhan
+              tenaga profesional. Bagi DUDI sendiri, Career Center memberikan
+              layanan publikasi iklan lowongan kerja dan rekrutmen SDM, di
+              antaranya rekrutmen daring (online), penyelenggaraan rekrutmen
+              kampus, presentasi profil perusahaan, &apos;company
+              branding&apos;, serta &apos;career days&apos; khusus bagi
+              perusahaan.
             </p>
             <p>
               Sebagai bagian dari layanan pada masyarakat umum, Career Center
               membuka kesempatan yang luas bagi para mahasiswa dan alumni
               perguruan tinggi di luar Sekolah Tinggi Teknologi Informatika Sony
-              Sugema, untuk bergabung dalam keanggotaan 'jobseeker' di situs
-              Career Center. Anggota 'jobseeker' akan mendapatkan info terbaru
-              tentang lowongan, program magang, dan berbagai kegiatan rekrutmen
-              di kampus. Dan yang tak kalah menariknya, anggota Career Center
-              dapat masuk ke Titian Karir Terpadu secara gratis*.
+              Sugema, untuk bergabung dalam keanggotaan &apos;jobseeker&apos; di
+              situs Career Center. Anggota &apos;jobseeker&apos; akan
+              mendapatkan info terbaru tentang lowongan, program magang, dan
+              berbagai kegiatan rekrutmen di kampus. Dan yang tak kalah
+              menariknya, anggota Career Center dapat masuk ke Titian Karir
+              Terpadu secara gratis*.
             </p>
             <p>
               Detail Website:{" "}
