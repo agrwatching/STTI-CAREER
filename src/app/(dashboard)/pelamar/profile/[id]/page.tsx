@@ -11,6 +11,54 @@ import PengalamanSection from "@/components/pelamar/profile/pengalaman/Pengalama
 import SertifikatSection from "@/components/pelamar/profile/sertifikat/SertifikatSection";
 import KeterampilanSection from "@/components/pelamar/profile/keterampilan/KeterampilanSection";
 
+// Type untuk file
+type FileType = {
+  id?: number;
+  name?: string;
+  url?: string;
+  path?: string;
+  mime_type?: string;
+  size?: number;
+  created_at?: string;
+  updated_at?: string;
+} | null;
+
+// Type untuk pengalaman kerja
+type WorkExperience = {
+  id?: number;
+  company_name: string;
+  position: string;
+  start_date: string;
+  end_date: string | null;
+  is_current: boolean;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+// Type untuk sertifikat
+type Certificate = {
+  id?: number;
+  name: string;
+  issuing_organization: string;
+  issue_date: string;
+  expiry_date: string | null;
+  credential_id?: string;
+  credential_url?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+// Type untuk keterampilan
+type Skill = {
+  id?: number;
+  name: string;
+  level: 'pemula' | 'menengah' | 'mahir' | 'ahli';
+  category?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 // Type untuk response API
 type ProfileApiResponse = {
   success: boolean;
@@ -31,21 +79,21 @@ type ProfileApiResponse = {
     gpa: string;
     graduation_year: number;
     entry_year: number;
-    work_experience: any;
-    certificates: any[];
-    cv_file: any;
-    cover_letter_file: any;
-    portfolio_file: any;
+    work_experience: WorkExperience[];
+    certificates: Certificate[];
+    cv_file: FileType;
+    cover_letter_file: FileType;
+    portfolio_file: FileType;
     created_at: string;
     updated_at: string;
-    date_of_birth: any;
+    date_of_birth: string | null;
     user_created_at: string;
     profile_photo_url: string;
-    cv_file_url: any;
-    cover_letter_file_url: any;
-    portfolio_file_url: any;
-    work_experiences: any[];
-    skills: any[];
+    cv_file_url: string | null;
+    cover_letter_file_url: string | null;
+    portfolio_file_url: string | null;
+    work_experiences: WorkExperience[];
+    skills: Skill[];
   };
 };
 
@@ -61,6 +109,7 @@ type User = {
   address?: string | null;
   city?: string | null;
   country?: string | null;
+  date_of_birth?: string | null;
 };
 
 type Education = {
@@ -109,7 +158,7 @@ export default function ProfilePage() {
           id: apiData.user_id,
           full_name: apiData.full_name,
           email: apiData.email,
-          role: 'pelamar', // default role, sesuaikan dengan kebutuhan
+          role: 'pelamar',
           profile_photo: apiData.profile_photo,
           profile_photo_url: apiData.profile_photo_url,
           created_at: apiData.user_created_at,
@@ -117,6 +166,7 @@ export default function ProfilePage() {
           address: apiData.address,
           city: apiData.city,
           country: apiData.country,
+          date_of_birth: apiData.date_of_birth,
         };
 
         // Mapping data API ke format Education
@@ -229,9 +279,6 @@ export default function ProfilePage() {
     setUser(newUser);
     localStorage.setItem("user", JSON.stringify(newUser));
     setIsEditing(false);
-    
-    // Optional: Sync dengan API
-    // syncUserToAPI(newUser);
   };
 
   // update education
@@ -239,9 +286,6 @@ export default function ProfilePage() {
     setEducation(updated);
     localStorage.setItem("education", JSON.stringify(updated));
     setIsEditing(false);
-    
-    // Optional: Sync dengan API
-    // syncEducationToAPI(updated);
   };
 
   return (
