@@ -52,7 +52,7 @@ export default function PengalamanSection() {
       }
 
       const response = await fetch(
-        "https://apicareer-production.up.railway.app/api/profile",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
         {
           method: "GET",
           headers: {
