@@ -1,7 +1,7 @@
+// src/components/pelamar/profile/pengalaman/PengalamanSection.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
 import PengalamanForm from "./PengalamanForm";
 
 type Pengalaman = {
@@ -14,176 +14,181 @@ type Pengalaman = {
   isCurrentJob?: boolean;
 };
 
+// Type sesuai API
+interface ApiWorkExperience {
+  id: number;
+  position: string;
+  company_name: string;
+  start_date: string;
+  end_date?: string | null;
+  job_description: string;
+  is_current: number;
+}
+
 export default function PengalamanSection() {
-  const [showForm, setShowForm] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [pengalamanList, setPengalamanList] = useState<Pengalaman[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pengalaman, setPengalaman] = useState<Pengalaman[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editData, setEditData] = useState<Pengalaman | null>(null);
 
-  // Ambil data API → langsung transform ke tipe Pengalaman
-  useEffect(() => {
-    fetchWorkExperiences();
-  }, []);
-
-  const fetchWorkExperiences = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("https://apicareer-production.up.railway.app/api/profile", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch work experiences");
-
-      const result = await response.json();
-
-      if (result.success && result.data.work_experiences) {
-        const transformed: Pengalaman[] = result.data.work_experiences.map((exp: any) => ({
-          id: exp.id,
-          posisi: exp.position,
-          perusahaan: exp.company_name,
-          tahunMasuk: new Date(exp.start_date).getFullYear().toString(),
-          tahunKeluar: exp.end_date ? new Date(exp.end_date).getFullYear().toString() : "",
-          deskripsi: exp.job_description,
-          isCurrentJob: exp.is_current === 1,
-        }));
-
-        setPengalamanList(transformed);
-      }
-    } catch (error) {
-      console.error("Error fetching work experiences:", error);
-    } finally {
-      setLoading(false);
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token") || sessionStorage.getItem("token");
     }
+    return null;
   };
 
-  const handleAdd = () => {
-    setEditIndex(null);
-    setShowForm(true);
-  };
+  const fetchPengalaman = async () => {
+    setIsLoading(true);
+    setError("");
 
-  const handleEdit = (idx: number) => {
-    setEditIndex(idx);
-    setShowForm(true);
-  };
-
-  const handleDelete = async (idx: number) => {
-    if (!confirm("Yakin mau hapus pengalaman ini?")) return;
-
-    const experienceToDelete = pengalamanList[idx];
     try {
+      const token = getToken();
+      if (!token) {
+        setError("Token tidak ditemukan. Silakan login kembali.");
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(
-        `https://apicareer-production.up.railway.app/api/profile/work-experience/${experienceToDelete.id}`,
+        "https://apicareer-production.up.railway.app/api/profile/work-experience",
         {
-          method: "DELETE",
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
 
-      if (!response.ok) throw new Error("Failed to delete work experience");
+      if (!response.ok) {
+        throw new Error("Gagal memuat data pengalaman kerja");
+      }
 
-      setPengalamanList((prev) => prev.filter((_, i) => i !== idx));
-    } catch (error) {
-      console.error("Error deleting work experience:", error);
-      alert("Gagal menghapus pengalaman kerja. Silakan coba lagi.");
+      const result = await response.json();
+      const transformed: Pengalaman[] =
+        result.data?.work_experiences?.map((exp: ApiWorkExperience) => ({
+          id: exp.id,
+          posisi: exp.position,
+          perusahaan: exp.company_name,
+          tahunMasuk: exp.start_date?.split("-")[0] || "",
+          tahunKeluar: exp.is_current ? "" : exp.end_date?.split("-")[0] || "",
+          deskripsi: exp.job_description,
+          isCurrentJob: Boolean(exp.is_current),
+        })) || [];
+
+      setPengalaman(transformed);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Terjadi kesalahan saat memuat data"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSave = (values: Pengalaman) => {
-    if (editIndex !== null) {
-      setPengalamanList((prev) =>
-        prev.map((item, i) => (i === editIndex ? values : item))
-      );
-    } else {
-      setPengalamanList((prev) => [...prev, values]);
-    }
-    setShowForm(false);
-    setEditIndex(null);
+  useEffect(() => {
+    fetchPengalaman();
+  }, []);
+
+  const handleAdd = () => {
+    setEditData(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (item: Pengalaman) => {
+    setEditData(item);
+    setIsFormOpen(true);
   };
 
   const handleCancel = () => {
-    setShowForm(false);
-    setEditIndex(null);
+    setIsFormOpen(false);
+    setEditData(null);
   };
 
-  if (loading) {
-    return (
-      <div className="mt-3">
-        <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
-        <div className="text-center py-8 text-gray-500 text-xs">
-          Memuat data pengalaman kerja...
-        </div>
-      </div>
-    );
-  }
+  const handleSave = (values: Pengalaman) => {
+    // Update state setelah save
+    if (editData) {
+      setPengalaman((prev) =>
+        prev.map((p) => (p.id === values.id ? values : p))
+      );
+    } else {
+      setPengalaman((prev) => [...prev, values]);
+    }
+    setIsFormOpen(false);
+    setEditData(null);
+  };
+
+  const handleDelete = (id: string | number) => {
+    setPengalaman((prev) => prev.filter((p) => p.id !== id));
+  };
 
   return (
-    <div className="mt-3">
-      <div className="flex justify-end items-center mb-3">
-        {!showForm && (
-          <button
-            onClick={handleAdd}
-            className="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 text-sm font-medium rounded-md hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah Pengalaman
-          </button>
-        )}
+    <div className="p-4 bg-white rounded shadow-sm space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-base font-semibold text-gray-800">
+          Pengalaman Kerja
+        </h2>
+        <button
+          onClick={handleAdd}
+          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Tambah
+        </button>
       </div>
 
-      <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
+      {isLoading && <p className="text-sm text-gray-500">Memuat data...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {showForm ? (
+      {!isLoading && pengalaman.length === 0 && (
+        <p className="text-sm text-gray-500">
+          Belum ada pengalaman kerja. Klik 'Tambah Pengalaman' untuk
+          menambahkan.
+        </p>
+      )}
+
+      <div className="space-y-3">
+        {pengalaman.map((item) => (
+          <div
+            key={item.id}
+            className="border border-gray-200 rounded p-3 shadow-sm"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {item.posisi}
+                </h3>
+                <p className="text-xs text-gray-600">{item.perusahaan}</p>
+                <p className="text-xs text-gray-500">
+                  {item.tahunMasuk} -{" "}
+                  {item.isCurrentJob ? "Sekarang" : item.tahunKeluar}
+                </p>
+                <p className="text-xs text-gray-700 mt-1">{item.deskripsi}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {isFormOpen && (
         <PengalamanForm
-          mode={editIndex === null ? "add" : "edit"}
-          data={editIndex !== null ? pengalamanList[editIndex] : undefined}
+          mode={editData ? "edit" : "add"}
+          data={editData || undefined}
           onSave={handleSave}
           onCancel={handleCancel}
+          onDelete={handleDelete}
         />
-      ) : (
-        <div className="grid grid-cols-2 gap-2 max-h-[45vh] overflow-y-auto pr-1">
-          {pengalamanList.length === 0 ? (
-            <div className="col-span-2 text-center py-8 text-gray-500 text-xs">
-              Belum ada pengalaman kerja. Klik "Tambah Pengalaman" untuk menambahkan.
-            </div>
-          ) : (
-            pengalamanList.map((exp, idx) => (
-              <div
-                key={exp.id || idx}
-                className="border rounded p-2 flex justify-between text-xs bg-white"
-              >
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium truncate">{exp.posisi}</h4>
-                  <p className="text-gray-500 truncate">{exp.perusahaan}</p>
-                  <p className="text-gray-400 mt-0.5">
-                    {exp.tahunMasuk} - {exp.tahunKeluar || "Sekarang"}
-                    {exp.isCurrentJob && (
-                      <span className="ml-1 text-green-600 font-medium">(Aktif)</span>
-                    )}
-                  </p>
-                  <p className="text-gray-600 mt-0.5 break-words">
-                    {exp.deskripsi}
-                  </p>
-                </div>
-                <div className="flex gap-1 ml-1">
-                  <Pencil
-                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-blue-600"
-                    onClick={() => handleEdit(idx)}
-                  />
-                  <Trash2
-                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-red-600"
-                    onClick={() => handleDelete(idx)}
-                  />
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       )}
     </div>
   );
