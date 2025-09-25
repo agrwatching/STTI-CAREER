@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 type User = {
   full_name: string;
@@ -45,26 +46,119 @@ export default function Biodata({
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
-  // 🔧 Initialize photo preview when user data changes
-  useEffect(() => {
-    const initialPhotoUrl = user.profile_photo_url || user.profile_photo;
-    setPhotoPreview(initialPhotoUrl || null);
+  // 🔧 Format date dari API (ISO format) ke format tampilan mm/dd/yyyy
+  const formatDateForDisplay = (dateString: string | null): string => {
+    if (!dateString) return "";
     
-    // Reset form when user changes
-    setFormData({
-      full_name: user.full_name || "",
-      email: user.email || "",
-      phone: user.phone || "",
-      address: user.address || "",
-      city: user.city || "",
-      country: user.country || "",
-      date_of_birth: user.date_of_birth || "",
-      profile_photo: user.profile_photo || "",
-      profile_photo_url: user.profile_photo_url || "",
-    });
+    try {
+      // Handle ISO date format from API (2003-01-31T17:00:00.000Z)
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "";
+      
+      // Format to mm/dd/yyyy for display
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${month}/${day}/${year}`;
+    } catch (error) {
+      console.error("Error formatting date for display:", error);
+      return "";
+    }
+  };
+
+  // 🔧 Format date untuk tampilan lengkap (Indonesian format)
+  const formatDateLong = (dateString: string | null): string => {
+    if (!dateString) return "";
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "";
+      
+      return date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error("Error formatting long date:", error);
+      return "";
+    }
+  };
+
+  // 🔧 Fetch date_of_birth dari API profile
+  const fetchDateOfBirthFromAPI = async (): Promise<string | null> => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("❌ Token tidak ditemukan");
+        return null;
+      }
+
+      const response = await fetch(
+        "https://apicareer-production.up.railway.app/api/auth/profile",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("📅 API Profile Response:", data);
+
+      if (data.success && data.data && data.data.date_of_birth) {
+        console.log("📅 Date of birth dari API:", data.data.date_of_birth);
+        return data.data.date_of_birth;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("❌ Error fetching date of birth from API:", error);
+      return null;
+    }
+  };
+
+  // 🔧 Initialize form data ketika user data berubah
+  useEffect(() => {
+    const initializeFormData = async () => {
+      // Gunakan profile_photo_url jika ada, jika tidak gunakan profile_photo
+      const initialPhotoUrl = user.profile_photo_url || user.profile_photo || null;
+      setPhotoPreview(initialPhotoUrl);
+      
+      // Jika date_of_birth kosong di props user, ambil dari API
+      let dateOfBirth = user.date_of_birth;
+      if (!dateOfBirth) {
+        console.log("📅 Date of birth kosong, mengambil dari API...");
+        dateOfBirth = await fetchDateOfBirthFromAPI();
+        console.log("📅 Date of birth dari API:", dateOfBirth);
+      }
+      
+      // Reset form ketika user berubah
+      setFormData({
+        full_name: user.full_name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        city: user.city || "",
+        country: user.country || "",
+        date_of_birth: dateOfBirth || "",
+        profile_photo: user.profile_photo || "",
+        profile_photo_url: user.profile_photo_url || "",
+      });
+    };
+
+    initializeFormData();
   }, [user]);
 
-  // 🔧 Clear errors when editing mode changes
+  // 🔧 Clear errors ketika mode editing berubah
   useEffect(() => {
     if (!isEditing) {
       setErrors({});
@@ -72,7 +166,7 @@ export default function Biodata({
     }
   }, [isEditing]);
 
-  /** ✅ Validate form data */
+  /** ✅ Validasi form data */
   const validateForm = (): boolean => {
     const newErrors: {[key: string]: string} = {};
 
@@ -90,11 +184,29 @@ export default function Biodata({
       newErrors.phone = "Format nomor telepon tidak valid";
     }
 
+    // Validasi tanggal lahir (opsional) - hanya jika ada perubahan
+    if (formData.date_of_birth && formData.date_of_birth !== user.date_of_birth) {
+      const birthDate = new Date(formData.date_of_birth);
+      const today = new Date();
+      
+      if (birthDate > today) {
+        newErrors.date_of_birth = "Tanggal lahir tidak boleh di masa depan";
+      }
+      
+      // Validasi usia minimal (contoh: minimal 17 tahun)
+      const minAgeDate = new Date();
+      minAgeDate.setFullYear(today.getFullYear() - 17);
+      
+      if (birthDate > minAgeDate) {
+        newErrors.date_of_birth = "Usia minimal 17 tahun";
+      }
+    }
+
     if (photoFile && !photoFile.type.startsWith('image/')) {
       newErrors.photo = "File yang dipilih harus berupa gambar";
     }
 
-    if (photoFile && photoFile.size > 5 * 1024 * 1024) { // 5MB limit
+    if (photoFile && photoFile.size > 5 * 1024 * 1024) {
       newErrors.photo = "Ukuran file tidak boleh lebih dari 5MB";
     }
 
@@ -105,9 +217,15 @@ export default function Biodata({
   /** ✅ Update input text */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Jangan izinkan perubahan untuk date_of_birth
+    if (name === "date_of_birth") {
+      return;
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    // Clear specific error when user starts typing
+    // Clear specific error ketika user mulai mengetik
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -127,19 +245,16 @@ export default function Biodata({
       return;
     }
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setErrors(prev => ({ ...prev, photo: "File yang dipilih harus berupa gambar" }));
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setErrors(prev => ({ ...prev, photo: "Ukuran file tidak boleh lebih dari 5MB" }));
       return;
     }
 
-    // Clear photo error
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors.photo;
@@ -148,15 +263,8 @@ export default function Biodata({
 
     setPhotoFile(file);
     
-    // Create preview URL
     const tempUrl = URL.createObjectURL(file);
     setPhotoPreview(tempUrl);
-
-    console.log("📷 Photo selected:", {
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
-      type: file.type
-    });
   };
 
   /** ✅ Remove photo selection */
@@ -168,13 +276,11 @@ export default function Biodata({
     setPhotoFile(null);
     setPhotoPreview(user.profile_photo_url || user.profile_photo || null);
     
-    // Clear file input
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
 
-    // Clear photo error
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors.photo;
@@ -182,7 +288,7 @@ export default function Biodata({
     });
   };
 
-  /** ✅ Upload photo to server */
+  /** ✅ Upload photo ke server */
   const uploadPhoto = async (token: string): Promise<string | null> => {
     if (!photoFile) return null;
 
@@ -191,8 +297,6 @@ export default function Biodata({
       
       const formDataImg = new FormData();
       formDataImg.append("profile_photo", photoFile);
-
-      console.log("📤 Uploading photo:", photoFile.name);
 
       const xhr = new XMLHttpRequest();
       
@@ -210,24 +314,18 @@ export default function Biodata({
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
-              console.log("✅ Upload success response:", response);
-              
-              // Coba berbagai kemungkinan struktur response
               const photoUrl = response.url || 
                               response.profile_photo_url ||
                               response.data?.url ||
                               response.data?.profile_photo_url ||
-                              (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null) ||
-                              (response.data?.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.data.filename}` : null);
+                              (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null);
 
               if (photoUrl) {
                 resolve(photoUrl);
               } else {
-                console.error("❌ No photo URL in response:", response);
                 reject(new Error("URL foto tidak ditemukan dalam response server"));
               }
-            } catch (parseError) {
-              console.error("❌ Failed to parse upload response:", parseError);
+            } catch {
               reject(new Error("Response server tidak valid"));
             }
           } else {
@@ -250,14 +348,12 @@ export default function Biodata({
       });
 
     } catch (error) {
-      console.error("❌ Upload error:", error);
       throw new Error("Gagal upload foto: " + (error as Error).message);
     }
   };
 
-  /** ✅ Save biodata and photo */
+  /** ✅ Save biodata dan photo */
   const handleSave = async () => {
-    // Validate form before saving
     if (!validateForm()) {
       console.log("❌ Form validation failed:", errors);
       return;
@@ -272,15 +368,27 @@ export default function Biodata({
         throw new Error("Token tidak ditemukan. Silakan login ulang.");
       }
 
-      console.log("💾 Starting save process...");
+      // 1️⃣ Format data untuk dikirim ke server - date_of_birth TIDAK diubah
+      const cleanFormData: Partial<User> = {
+        full_name: formData.full_name || undefined,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
+        city: formData.city || undefined,
+        country: formData.country || undefined,
+        profile_photo: formData.profile_photo || undefined,
+      };
 
-      // 1️⃣ Update biodata text fields
-      const cleanFormData = Object.fromEntries(
-        Object.entries(formData).map(([k, v]) => [k, v || null])
-      );
+      // Hapus property yang undefined
+      Object.keys(cleanFormData).forEach(key => {
+        if (cleanFormData[key as keyof User] === undefined) {
+          delete cleanFormData[key as keyof User];
+        }
+      });
 
-      console.log("📝 Updating biodata:", cleanFormData);
+      console.log("📝 Updating biodata (date_of_birth tidak diubah):", cleanFormData);
 
+      // 2️⃣ Update biodata ke endpoint PUT
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/profile/biodata`,
         {
@@ -300,7 +408,7 @@ export default function Biodata({
         throw new Error(biodataResponse.message || "Gagal update biodata");
       }
 
-      // 2️⃣ Upload photo if selected
+      // 3️⃣ Upload photo jika dipilih
       let photoUrl: string | null = null;
       if (photoFile) {
         try {
@@ -312,24 +420,19 @@ export default function Biodata({
         }
       }
 
-      // 3️⃣ Update final data with photo URL if uploaded
-      const finalData = { ...cleanFormData };
+      // 4️⃣ Update final data dengan photo URL jika diupload
+      const finalData: Partial<User> = { ...cleanFormData };
       if (photoUrl) {
         finalData.profile_photo_url = photoUrl;
         
-        // Update local state
         setFormData(prev => ({
           ...prev,
           profile_photo_url: photoUrl
         }));
         
-        // Update preview with new URL
         setPhotoPreview(photoUrl);
-        
-        // Clear photo file since it's now uploaded
         setPhotoFile(null);
         
-        // Clear file input
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         if (fileInput) {
           fileInput.value = '';
@@ -345,11 +448,6 @@ export default function Biodata({
       console.error("❌ Save error:", err);
       const errorMessage = (err as Error).message || "Terjadi kesalahan server";
       alert(`❌ ${errorMessage}`);
-      
-      // If it's a photo upload error but biodata was saved, refresh the page data
-      if (errorMessage.includes("Biodata berhasil disimpan")) {
-        // Optionally trigger a data refresh here
-      }
     } finally {
       setLoading(false);
       setUploadProgress(0);
@@ -358,7 +456,6 @@ export default function Biodata({
 
   /** ✅ Cancel editing */
   const handleCancel = () => {
-    // Reset form to original data
     setFormData({
       full_name: user.full_name || "",
       email: user.email || "",
@@ -371,20 +468,17 @@ export default function Biodata({
       profile_photo_url: user.profile_photo_url || "",
     });
 
-    // Reset photo states
     if (photoFile && photoPreview && photoPreview.startsWith('blob:')) {
       URL.revokeObjectURL(photoPreview);
     }
     setPhotoFile(null);
     setPhotoPreview(user.profile_photo_url || user.profile_photo || null);
     
-    // Clear file input
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
 
-    // Clear errors
     setErrors({});
     setUploadProgress(0);
 
@@ -393,7 +487,7 @@ export default function Biodata({
 
   return (
     <div className="space-y-4">
-      {/* Progress bar for photo upload */}
+      {/* Progress bar untuk photo upload */}
       {loading && uploadProgress > 0 && uploadProgress < 100 && (
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
@@ -463,6 +557,44 @@ export default function Biodata({
           )}
         </div>
 
+        {/* Tanggal Lahir - TIDAK BISA DIUBAH */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Tanggal Lahir
+          </label>
+          <div className="relative">
+            {/* Input tersembunyi untuk menyimpan value */}
+            <input
+              type="hidden"
+              name="date_of_birth"
+              value={formData.date_of_birth || ""}
+            />
+            {/* Display-only field */}
+            <div className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 bg-gray-100 cursor-not-allowed min-h-[42px] flex items-center">
+              {formData.date_of_birth ? (
+                <span className="text-gray-700">
+                  {formatDateForDisplay(formData.date_of_birth)}
+                </span>
+              ) : (
+                <span className="text-gray-400">Tanggal lahir belum diatur</span>
+              )}
+            </div>
+          </div>
+          
+          {/* Informasi tambahan tentang tanggal lahir */}
+          {formData.date_of_birth && (
+            <div className="text-xs text-gray-500 mt-1 space-y-1">
+              <p>
+                <strong>Format tampilan:</strong> {formatDateForDisplay(formData.date_of_birth)} (mm/dd/yyyy)
+              </p>
+              <p>
+                <strong>Format lengkap:</strong> {formatDateLong(formData.date_of_birth)}
+              </p>
+              <p className="text-blue-600 font-medium">Tanggal lahir tidak dapat diubah</p>
+            </div>
+          )}
+        </div>
+
         {/* Alamat */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -511,21 +643,6 @@ export default function Biodata({
           />
         </div>
 
-        {/* Tanggal Lahir */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Tanggal Lahir
-          </label>
-          <input
-            type="date"
-            name="date_of_birth"
-            value={formData.date_of_birth ?? ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-          />
-        </div>
-
         {/* Upload Foto */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700">
@@ -553,15 +670,20 @@ export default function Biodata({
           {photoPreview && (
             <div className="mt-4 flex items-start space-x-4">
               <div className="relative">
-                <img
-                  src={photoPreview}
-                  alt="Preview Foto Profil"
-                  className="w-32 h-32 object-cover rounded-lg border border-gray-300 shadow-sm"
-                  onError={(e) => {
-                    console.error("❌ Error loading image:", photoPreview);
-                    e.currentTarget.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04NCA2NEw3MCA3OEw1OCA3MEw0NCA4NEg4NFY2NFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNTgiIGN5PSI1MiIgcj0iOCIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
-                  }}
-                />
+                <div className="w-32 h-32 relative">
+                  <Image
+                    src={photoPreview}
+                    alt="Preview Foto Profil"
+                    fill
+                    className="object-cover rounded-lg border border-gray-300 shadow-sm"
+                    onError={(e) => {
+                      console.error("❌ Error loading image:", photoPreview);
+                      // Fallback ke placeholder jika gambar error
+                      const target = e.target as HTMLImageElement;
+                      target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04NCA2NEw3MCA3OEw1OCA3MEw0NCA4NEg4NFY2NFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNTgiIGN5PSI1MiIgcj0iOCIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
+                    }}
+                  />
+                </div>
                 {isEditing && (photoFile || photoPreview !== (user.profile_photo_url || user.profile_photo)) && (
                   <button
                     type="button"
