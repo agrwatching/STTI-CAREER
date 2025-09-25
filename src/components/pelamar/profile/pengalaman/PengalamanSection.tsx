@@ -4,24 +4,13 @@ import { useState, useEffect } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import PengalamanForm from "./PengalamanForm";
 
-// ✅ 1️⃣ Buat type data pengalaman kerja
-interface WorkExperience {
-  id: number;
-  posisi: string;
-  perusahaan: string;
-  tahunMasuk: number;
-  tahunKeluar: number | string; // bisa "Sekarang"
-  deskripsi: string;
-  isCurrent: boolean;
-}
-
 export default function PengalamanSection() {
   const [showForm, setShowForm] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [pengalamanList, setPengalamanList] = useState<WorkExperience[]>([]);
+  const [pengalamanList, setPengalamanList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 2️⃣ Fetch data dari API saat komponen dimount
+  // Fetch data dari API saat komponen dimount
   useEffect(() => {
     fetchWorkExperiences();
   }, []);
@@ -29,98 +18,96 @@ export default function PengalamanSection() {
   const fetchWorkExperiences = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        "https://apicareer-production.up.railway.app/api/profile",
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+      const response = await fetch('https://apicareer-production.up.railway.app/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Sesuaikan dengan cara penyimpanan token Anda
+          'Content-Type': 'application/json'
         }
-      );
-
+      });
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch work experiences");
+        throw new Error('Failed to fetch work experiences');
       }
-
-      const result: {
-        success: boolean;
-        data: { work_experiences: any[] };
-      } = await response.json();
-
+      
+      const result = await response.json();
+      
       if (result.success && result.data.work_experiences) {
-        // ✅ 3️⃣ Transform API data ke format komponen
-        const transformedData: WorkExperience[] = result.data.work_experiences.map(
-          (exp) => ({
-            id: exp.id,
-            posisi: exp.position,
-            perusahaan: exp.company_name,
-            tahunMasuk: new Date(exp.start_date).getFullYear(),
-            tahunKeluar: exp.end_date
-              ? new Date(exp.end_date).getFullYear()
-              : "Sekarang",
-            deskripsi: exp.job_description,
-            isCurrent: exp.is_current === 1,
-          })
-        );
-
+        // Transform API data ke format yang digunakan komponen
+        const transformedData = result.data.work_experiences.map((exp: any) => ({
+          id: exp.id,
+          posisi: exp.position,
+          perusahaan: exp.company_name,
+          tahunMasuk: new Date(exp.start_date).getFullYear(),
+          tahunKeluar: exp.end_date ? new Date(exp.end_date).getFullYear() : 'Sekarang',
+          deskripsi: exp.job_description,
+          isCurrent: exp.is_current === 1
+        }));
+        
         setPengalamanList(transformedData);
       }
     } catch (error) {
-      console.error("Error fetching work experiences:", error);
+      console.error('Error fetching work experiences:', error);
+      // Bisa tambahkan toast/notification error di sini
     } finally {
       setLoading(false);
     }
   };
 
   const handleAdd = () => {
-    setEditIndex(null);
+    setEditIndex(null); // mode tambah
     setShowForm(true);
   };
 
   const handleEdit = (idx: number) => {
-    setEditIndex(idx);
+    setEditIndex(idx); // mode edit
     setShowForm(true);
   };
 
   const handleDelete = async (idx: number) => {
-    if (!confirm("Yakin mau hapus pengalaman ini?")) return;
+    if (!confirm("Yakin mau hapus pengalaman ini?")) {
+      return;
+    }
 
     const experienceToDelete = pengalamanList[idx];
-
+    
     try {
       const response = await fetch(
         `https://apicareer-production.up.railway.app/api/profile/work-experience/${experienceToDelete.id}`,
         {
-          method: "DELETE",
+          method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Sesuaikan dengan cara penyimpanan token Anda
+            'Content-Type': 'application/json'
+          }
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to delete work experience");
+        throw new Error('Failed to delete work experience');
       }
 
+      // Jika berhasil delete dari API, hapus dari state lokal
       setPengalamanList((prev) => prev.filter((_, i) => i !== idx));
-      console.log("Work experience deleted successfully");
+      
+      // Optional: Tampilkan notifikasi sukses
+      console.log('Work experience deleted successfully');
+      
     } catch (error) {
-      console.error("Error deleting work experience:", error);
-      alert("Gagal menghapus pengalaman kerja. Silakan coba lagi.");
+      console.error('Error deleting work experience:', error);
+      // Optional: Tampilkan notifikasi error
+      alert('Gagal menghapus pengalaman kerja. Silakan coba lagi.');
     }
   };
 
-  const handleSave = (values: WorkExperience) => {
+  const handleSave = (values: any) => {
     if (editIndex !== null) {
       // Edit existing
-      setPengalamanList((prev) =>
-        prev.map((item, i) => (i === editIndex ? values : item))
+      setPengalamanList(prev => 
+        prev.map((item, i) => i === editIndex ? values : item)
       );
     } else {
       // Add new
-      setPengalamanList((prev) => [...prev, values]);
+      setPengalamanList(prev => [...prev, values]);
     }
     setShowForm(false);
     setEditIndex(null);
@@ -158,7 +145,7 @@ export default function PengalamanSection() {
       </div>
 
       <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
-
+      
       {/* Konten */}
       {showForm ? (
         <PengalamanForm
@@ -171,13 +158,12 @@ export default function PengalamanSection() {
         <div className="grid grid-cols-2 gap-2 max-h-[45vh] overflow-y-auto pr-1">
           {pengalamanList.length === 0 ? (
             <div className="col-span-2 text-center py-8 text-gray-500 text-xs">
-              Belum ada pengalaman kerja. Klik "Tambah Pengalaman" untuk
-              menambahkan.
+              Belum ada pengalaman kerja. Klik "Tambah Pengalaman" untuk menambahkan.
             </div>
           ) : (
             pengalamanList.map((exp, idx) => (
               <div
-                key={exp.id}
+                key={exp.id || idx}
                 className="border rounded p-2 flex justify-between text-xs bg-white"
               >
                 <div className="flex-1 min-w-0">
@@ -185,11 +171,7 @@ export default function PengalamanSection() {
                   <p className="text-gray-500 truncate">{exp.perusahaan}</p>
                   <p className="text-gray-400 mt-0.5">
                     {exp.tahunMasuk} - {exp.tahunKeluar}
-                    {exp.isCurrent && (
-                      <span className="ml-1 text-green-600 font-medium">
-                        (Aktif)
-                      </span>
-                    )}
+                    {exp.isCurrent && <span className="ml-1 text-green-600 font-medium">(Aktif)</span>}
                   </p>
                   <p className="text-gray-600 mt-0.5 break-words">
                     {exp.deskripsi}
