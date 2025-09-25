@@ -145,7 +145,7 @@ export default function PengalamanSection() {
 
       {!isLoading && pengalaman.length === 0 && (
         <p className="text-sm text-gray-500">
-          Belum ada pengalaman kerja. Klik 'Tambah Pengalaman' untuk
+          Belum ada pengalaman kerja. Klik &apos;Tambah Pengalaman&apos; untuk
           menambahkan.
         </p>
       )}
