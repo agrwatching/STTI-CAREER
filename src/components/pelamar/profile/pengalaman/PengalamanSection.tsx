@@ -52,7 +52,7 @@ export default function PengalamanSection() {
       }
 
       const response = await fetch(
-        "https://apicareer-production.up.railway.app/api/profile/work-experience",
+        "https://apicareer-production.up.railway.app/api/profile",
         {
           method: "GET",
           headers: {
@@ -72,8 +72,14 @@ export default function PengalamanSection() {
           id: exp.id,
           posisi: exp.position,
           perusahaan: exp.company_name,
-          tahunMasuk: exp.start_date?.split("-")[0] || "",
-          tahunKeluar: exp.is_current ? "" : exp.end_date?.split("-")[0] || "",
+          tahunMasuk: exp.start_date
+            ? new Date(exp.start_date).getFullYear().toString()
+            : "",
+          tahunKeluar: exp.is_current
+            ? ""
+            : exp.end_date
+            ? new Date(exp.end_date).getFullYear().toString()
+            : "",
           deskripsi: exp.job_description,
           isCurrentJob: Boolean(exp.is_current),
         })) || [];
@@ -81,9 +87,7 @@ export default function PengalamanSection() {
       setPengalaman(transformed);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Terjadi kesalahan saat memuat data"
+        err instanceof Error ? err.message : "Terjadi kesalahan saat memuat data"
       );
     } finally {
       setIsLoading(false);
