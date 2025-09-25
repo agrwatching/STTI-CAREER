@@ -12,30 +12,100 @@ interface UserProfile {
   email: string;
   role: string;
   foto?: string;
+  profile_photo_url?: string;
+}
+
+interface ApiProfileResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    user_id: number;
+    full_name: string;
+    email: string;
+    profile_photo_url: string;
+    // ... other fields
+  };
 }
 
 export default function Navbar() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
 
-  useEffect(() => {
+  // Fungsi untuk fetch data profil dari API
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('https://apicareer-production.up.railway.app/api/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const result: ApiProfileResponse = await response.json();
+        
+        if (result.success && result.data) {
+          const userData: UserProfile = {
+            id: result.data.user_id,
+            full_name: result.data.full_name,
+            email: result.data.email,
+            role: 'pelamar',
+            profile_photo_url: result.data.profile_photo_url
+          };
+          
+          setUser(userData);
+          // Simpan juga ke localStorage untuk cache
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      // Fallback ke localStorage jika API gagal
+      fallbackToLocalStorage();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback ke data localStorage
+  const fallbackToLocalStorage = () => {
     try {
       const savedUser = localStorage.getItem("user");
       if (savedUser) {
         const parsed: UserProfile = JSON.parse(savedUser);
-
-        // ✅ hanya izinkan pelamar muncul di navbar
         if (parsed.role === "pelamar") {
           setUser(parsed);
-        } else {
-          setUser(null);
         }
       }
     } catch {
       localStorage.removeItem("user");
       setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    
+    if (token) {
+      // Cek dulu localStorage untuk loading cepat
+      fallbackToLocalStorage();
+      // Kemudian fetch data terbaru dari API
+      fetchProfileData();
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -54,6 +124,25 @@ export default function Navbar() {
     { name: "Perusahaan", href: "/perusahaan" },
     { name: "Tentang Kami", href: "/tentang" },
   ];
+
+  // Tentukan URL foto profil
+  const getProfilePhotoUrl = () => {
+    if (!user) return null;
+    
+    // Prioritaskan profile_photo_url dari API
+    if (user.profile_photo_url) {
+      return user.profile_photo_url;
+    }
+    
+    // Fallback ke foto lama jika ada
+    if (user.foto) {
+      return user.foto;
+    }
+    
+    return null;
+  };
+
+  const profilePhotoUrl = getProfilePhotoUrl();
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-gradient-to-r from-[#0A1FB5] to-[#0A18E0] text-white shadow-md z-50">
@@ -83,7 +172,13 @@ export default function Navbar() {
 
         {/* Right side - Desktop */}
         <div className="hidden md:flex items-center space-x-4">
-          {!user ? (
+          {loading ? (
+            // Loading state
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gray-400 animate-pulse"></div>
+              <div className="w-20 h-4 bg-gray-400 rounded animate-pulse"></div>
+            </div>
+          ) : !user ? (
             <Link
               href="/login"
               className="bg-yellow-400 text-blue-900 px-6 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors"
@@ -92,18 +187,23 @@ export default function Navbar() {
             </Link>
           ) : (
             <div className="flex items-center space-x-4">
-              {/* Profil hanya untuk pelamar */}
+              {/* Profil untuk pelamar */}
               <Link
                 href={`/pelamar/profile/${user.id}`}
                 className="flex items-center space-x-2 hover:text-yellow-400 transition-colors"
               >
-                {user.foto ? (
+                {profilePhotoUrl ? (
                   <Image
-                    src={user.foto}
+                    src={profilePhotoUrl}
                     alt={`${user.full_name} profile`}
                     width={40}
                     height={40}
                     className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    onError={(e) => {
+                      // Fallback jika gambar error
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
                   />
                 ) : (
                   <div className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold">
@@ -157,7 +257,13 @@ export default function Navbar() {
             ))}
 
             <div className="border-t border-blue-600 pt-4 mt-4 space-y-2">
-              {!user ? (
+              {loading ? (
+                // Loading state mobile
+                <div className="flex items-center space-x-2 px-3 py-2">
+                  <div className="w-8 h-8 rounded-full bg-gray-400 animate-pulse"></div>
+                  <div className="w-20 h-4 bg-gray-400 rounded animate-pulse"></div>
+                </div>
+              ) : !user ? (
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -167,19 +273,23 @@ export default function Navbar() {
                 </Link>
               ) : (
                 <>
-                  {/* Profile hanya untuk pelamar */}
+                  {/* Profile mobile */}
                   <Link
                     href={`/pelamar/profile/${user.id}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    {user.foto ? (
+                    {profilePhotoUrl ? (
                       <Image
-                        src={user.foto}
+                        src={profilePhotoUrl}
                         alt={`${user.full_name} profile`}
                         width={40}
                         height={40}
                         className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
                       />
                     ) : (
                       <div className="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-400 text-blue-900 font-bold">
@@ -189,7 +299,7 @@ export default function Navbar() {
                     <span className="truncate">{user.full_name}</span>
                   </Link>
 
-                  {/* Logout */}
+                  {/* Logout mobile */}
                   <button
                     onClick={() => {
                       handleLogout();

@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 
 type Props = {
@@ -16,7 +15,7 @@ export default function ProfileHeader({
   onEdit,
 }: Props) {
   const initial = name.charAt(0).toUpperCase();
-
+  
   return (
     <div className="flex justify-between items-center mb-5">
       {/* Avatar + Info */}
@@ -28,6 +27,20 @@ export default function ProfileHeader({
               alt={name}
               fill
               className="rounded-full object-cover"
+              onError={(e) => {
+                // Fallback jika gambar gagal dimuat
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                // Tampilkan div dengan initial sebagai fallback
+                const parentDiv = target.parentElement;
+                if (parentDiv) {
+                  parentDiv.innerHTML = `
+                    <div class="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-base">
+                      ${initial}
+                    </div>
+                  `;
+                }
+              }}
             />
           </div>
         ) : (
@@ -40,7 +53,6 @@ export default function ProfileHeader({
           <p className="text-gray-500 md:text-sm text-xs">Bergabung sejak {joined}</p>
         </div>
       </div>
-
       {/* Tombol Edit pindah ke sini */}
       <button
         onClick={onEdit}
