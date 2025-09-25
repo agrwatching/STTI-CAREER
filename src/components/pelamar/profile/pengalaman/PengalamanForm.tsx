@@ -1,8 +1,9 @@
+// src/components/pelamar/profile/pengalaman/PengalamanForm.tsx
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
 
-type Pengalaman = {
+export type Pengalaman = {
   id?: string | number;
   posisi: string;
   perusahaan: string;
@@ -725,7 +726,7 @@ export default function PengalamanForm({
             </div>
             
             <p className="text-sm text-gray-600 mb-6">
-              Apakah Anda yakin ingin menghapus pengalaman kerja <span className="font-semibold">"{values.posisi}"</span> di <span className="font-semibold">"{values.perusahaan}"</span>? 
+              Apakah Anda yakin ingin menghapus pengalaman kerja <span className="font-semibold">&quot;{values.posisi}&quot;</span> di <span className="font-semibold">&quot;{values.perusahaan}&quot;</span>? 
               <br />
               <span className="font-medium text-red-600 mt-2 block">Tindakan ini tidak dapat dibatalkan.</span>
             </p>
