@@ -3,7 +3,7 @@
 
 import { useState, FormEvent, useEffect } from "react";
 
-export type Pengalaman = {
+type Pengalaman = {
   id?: string | number;
   posisi: string;
   perusahaan: string;
@@ -16,10 +16,11 @@ export type Pengalaman = {
 type PengalamanFormProps = {
   mode?: "add" | "edit";
   data?: Pengalaman;
-  onSave?: (values: Pengalaman) => void;
-  onCancel?: () => void;
-  onDelete?: (id: string | number) => void;
+  onSave: (values: Pengalaman) => void;          // required
+  onCancel: () => void;                          // required
+  onDelete?: (id: string | number) => void;      // optional
 };
+
 
 export default function PengalamanForm({
   mode = "add",

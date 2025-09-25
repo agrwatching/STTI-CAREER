@@ -1,143 +1,215 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Pengalaman } from "./type";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import PengalamanForm from "./PengalamanForm";
 
-type Props = {
-  mode: "add" | "edit";
-  data?: Pengalaman;
-  onCancel: () => void;
-  onSave: (values: Pengalaman) => void;        
-};
+// ✅ 1️⃣ Buat type data pengalaman kerja
+interface WorkExperience {
+  id: number;
+  posisi: string;
+  perusahaan: string;
+  tahunMasuk: number;
+  tahunKeluar: number | string; // bisa "Sekarang"
+  deskripsi: string;
+  isCurrent: boolean;
+}
 
-export default function PengalamanForm({
-  mode,
-  data,
-  onCancel,
-  onSave,
-}: Props) {
-  const [posisi, setPosisi] = useState("");
-  const [perusahaan, setPerusahaan] = useState("");
-  const [tahunMasuk, setTahunMasuk] = useState("");
-  const [tahunKeluar, setTahunKeluar] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [isCurrent, setIsCurrent] = useState(false);
+export default function PengalamanSection() {
+  const [showForm, setShowForm] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [pengalamanList, setPengalamanList] = useState<WorkExperience[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Jika mode edit, isi state dengan data awal
+  // ✅ 2️⃣ Fetch data dari API saat komponen dimount
   useEffect(() => {
-    if (data) {
-      setPosisi(data.posisi);
-      setPerusahaan(data.perusahaan);
-      setTahunMasuk(String(data.tahunMasuk));
-      setTahunKeluar(String(data.tahunKeluar));
-      setDeskripsi(data.deskripsi);
-      setIsCurrent(data.isCurrent);
+    fetchWorkExperiences();
+  }, []);
+
+  const fetchWorkExperiences = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        "https://apicareer-production.up.railway.app/api/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch work experiences");
+      }
+
+      const result: {
+        success: boolean;
+        data: { work_experiences: any[] };
+      } = await response.json();
+
+      if (result.success && result.data.work_experiences) {
+        // ✅ 3️⃣ Transform API data ke format komponen
+        const transformedData: WorkExperience[] = result.data.work_experiences.map(
+          (exp) => ({
+            id: exp.id,
+            posisi: exp.position,
+            perusahaan: exp.company_name,
+            tahunMasuk: new Date(exp.start_date).getFullYear(),
+            tahunKeluar: exp.end_date
+              ? new Date(exp.end_date).getFullYear()
+              : "Sekarang",
+            deskripsi: exp.job_description,
+            isCurrent: exp.is_current === 1,
+          })
+        );
+
+        setPengalamanList(transformedData);
+      }
+    } catch (error) {
+      console.error("Error fetching work experiences:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [data]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const payload: Pengalaman = {
-      id: data?.id,
-      posisi,
-      perusahaan,
-      tahunMasuk,
-      tahunKeluar: isCurrent ? "Sekarang" : tahunKeluar,
-      deskripsi,
-      isCurrent,
-    };
-
-    onSave(payload);
   };
 
+  const handleAdd = () => {
+    setEditIndex(null);
+    setShowForm(true);
+  };
+
+  const handleEdit = (idx: number) => {
+    setEditIndex(idx);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (idx: number) => {
+    if (!confirm("Yakin mau hapus pengalaman ini?")) return;
+
+    const experienceToDelete = pengalamanList[idx];
+
+    try {
+      const response = await fetch(
+        `https://apicareer-production.up.railway.app/api/profile/work-experience/${experienceToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete work experience");
+      }
+
+      setPengalamanList((prev) => prev.filter((_, i) => i !== idx));
+      console.log("Work experience deleted successfully");
+    } catch (error) {
+      console.error("Error deleting work experience:", error);
+      alert("Gagal menghapus pengalaman kerja. Silakan coba lagi.");
+    }
+  };
+
+  const handleSave = (values: WorkExperience) => {
+    if (editIndex !== null) {
+      // Edit existing
+      setPengalamanList((prev) =>
+        prev.map((item, i) => (i === editIndex ? values : item))
+      );
+    } else {
+      // Add new
+      setPengalamanList((prev) => [...prev, values]);
+    }
+    setShowForm(false);
+    setEditIndex(null);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditIndex(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="mt-3">
+        <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
+        <div className="text-center py-8 text-gray-500 text-xs">
+          Memuat data pengalaman kerja...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border rounded p-3 bg-gray-50 space-y-2 text-xs"
-    >
-      <div>
-        <label className="block font-medium mb-1">Posisi</label>
-        <input
-          type="text"
-          className="w-full border px-2 py-1 rounded"
-          value={posisi}
-          onChange={(e) => setPosisi(e.target.value)}
-          required
-        />
+    <div className="mt-3">
+      {/* Header */}
+      <div className="flex justify-end items-center mb-3">
+        {!showForm && (
+          <button
+            onClick={handleAdd}
+            className="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 text-sm font-medium rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Pengalaman
+          </button>
+        )}
       </div>
 
-      <div>
-        <label className="block font-medium mb-1">Perusahaan</label>
-        <input
-          type="text"
-          className="w-full border px-2 py-1 rounded"
-          value={perusahaan}
-          onChange={(e) => setPerusahaan(e.target.value)}
-          required
-        />
-      </div>
+      <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium mb-1">Tahun Masuk</label>
-          <input
-            type="text"
-            className="w-full border px-2 py-1 rounded"
-            value={tahunMasuk}
-            onChange={(e) => setTahunMasuk(e.target.value)}
-            required
-          />
+      {/* Konten */}
+      {showForm ? (
+        <PengalamanForm
+          mode={editIndex === null ? "add" : "edit"}
+          data={editIndex !== null ? pengalamanList[editIndex] : undefined}
+          onCancel={handleCancel}
+          onSave={handleSave}
+        />
+      ) : (
+        <div className="grid grid-cols-2 gap-2 max-h-[45vh] overflow-y-auto pr-1">
+          {pengalamanList.length === 0 ? (
+            <div className="col-span-2 text-center py-8 text-gray-500 text-xs">
+              Belum ada pengalaman kerja. Klik "Tambah Pengalaman" untuk
+              menambahkan.
+            </div>
+          ) : (
+            pengalamanList.map((exp, idx) => (
+              <div
+                key={exp.id}
+                className="border rounded p-2 flex justify-between text-xs bg-white"
+              >
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium truncate">{exp.posisi}</h4>
+                  <p className="text-gray-500 truncate">{exp.perusahaan}</p>
+                  <p className="text-gray-400 mt-0.5">
+                    {exp.tahunMasuk} - {exp.tahunKeluar}
+                    {exp.isCurrent && (
+                      <span className="ml-1 text-green-600 font-medium">
+                        (Aktif)
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-gray-600 mt-0.5 break-words">
+                    {exp.deskripsi}
+                  </p>
+                </div>
+                <div className="flex gap-1 ml-1">
+                  <Pencil
+                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => handleEdit(idx)}
+                  />
+                  <Trash2
+                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-red-600 transition-colors"
+                    onClick={() => handleDelete(idx)}
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </div>
-        <div>
-          <label className="block font-medium mb-1">Tahun Keluar</label>
-          <input
-            type="text"
-            className="w-full border px-2 py-1 rounded"
-            value={tahunKeluar}
-            onChange={(e) => setTahunKeluar(e.target.value)}
-            disabled={isCurrent}
-            required={!isCurrent}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="inline-flex items-center gap-1">
-          <input
-            type="checkbox"
-            checked={isCurrent}
-            onChange={(e) => setIsCurrent(e.target.checked)}
-          />
-          Masih bekerja di sini
-        </label>
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Deskripsi</label>
-        <textarea
-          className="w-full border px-2 py-1 rounded min-h-[60px]"
-          value={deskripsi}
-          onChange={(e) => setDeskripsi(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className="flex justify-end gap-2 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100"
-        >
-          Batal
-        </button>
-        <button
-          type="submit"
-          className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          {mode === "add" ? "Tambah" : "Simpan"}
-        </button>
-      </div>
-    </form>
+      )}
+    </div>
   );
 }
