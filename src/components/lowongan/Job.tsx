@@ -25,6 +25,36 @@ interface JobFilters {
   search?: string;
 }
 
+// helper untuk format waktu jadi "1 jam yang lalu"
+function timeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = (now.getTime() - date.getTime()) / 1000; // selisih detik
+
+  const units: { unit: Intl.RelativeTimeFormatUnit; seconds: number }[] = [
+    { unit: "year", seconds: 60 * 60 * 24 * 365 },
+    { unit: "month", seconds: 60 * 60 * 24 * 30 },
+    { unit: "week", seconds: 60 * 60 * 24 * 7 },
+    { unit: "day", seconds: 60 * 60 * 24 },
+    { unit: "hour", seconds: 60 * 60 },
+    { unit: "minute", seconds: 60 },
+    { unit: "second", seconds: 1 },
+  ];
+
+  for (const { unit, seconds } of units) {
+    const value = Math.floor(diff / seconds);
+    if (value >= 1) {
+      return new Intl.RelativeTimeFormat("id", { numeric: "auto" }).format(
+        -value,
+        unit
+      );
+    }
+  }
+
+  return "baru saja";
+}
+
+
 const Job: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,130 +75,76 @@ const Job: React.FC = () => {
   const router = useRouter();
 
   // Mock data - akan diganti dengan API call
-  const mockJobs = React.useMemo<Job[]>(
-    () => [
-      {
-        id: 1,
-        title: "Senior Frontend Developer",
-        company: "PT Perusahaan Lokal",
-        location: "Surabaya, Indonesia",
-        type: "Full Time",
-        description:
-          "Kami mencari Senior Frontend Developer berpengalaman untuk memimpin pengembangan antarmuka aplikasi web modern. Kandidat ideal memiliki kemampuan teknis yang mendalam pada framework frontend populer serta mampu memimpin tim dalam menciptakan produk yang skalabel, responsif, dan berpererforma tinggi.",
-        tags: ["Remote", "Senior"],
-        salary: "Rp 15.000.000 – Rp 25.000.000",
-        postedAt: "2 days ago",
-      },
-      {
-        id: 2,
-        title: "Junior Backend Developer",
-        company: "PT Teknologi Maju",
-        location: "Jakarta, Indonesia",
-        type: "Full Time",
-        description:
-          "Bergabunglah dengan tim backend kami untuk mengembangkan sistem yang robust dan scalable. Posisi ini cocok untuk fresh graduate atau developer dengan pengalaman 1-2 tahun yang ingin berkembang di bidang backend development.",
-        tags: ["Onsite", "Junior"],
-        salary: "Rp 8.000.000 – Rp 12.000.000",
-        postedAt: "1 week ago",
-      },
-      {
-        id: 3,
-        title: "UI/UX Designer",
-        company: "PT Creative Studio",
-        location: "Bandung, Indonesia",
-        type: "Contract",
-        description:
-          "Kami membutuhkan UI/UX Designer kreatif untuk merancang pengalaman pengguna yang menarik dan intuitif. Kandidat ideal memiliki portfolio yang kuat dan pemahaman mendalam tentang design thinking.",
-        tags: ["Remote", "Contract"],
-        salary: "Rp 10.000.000 – Rp 18.000.000",
-        postedAt: "3 days ago",
-      },
-      {
-        id: 4,
-        title: "DevOps Engineer",
-        company: "PT Cloud Solutions",
-        location: "Yogyakarta, Indonesia",
-        type: "Full Time",
-        description:
-          "Bergabunglah dengan tim DevOps kami untuk mengelola infrastruktur cloud dan mengoptimalkan proses deployment. Pengalaman dengan AWS, Docker, dan Kubernetes sangat diharapkan.",
-        tags: ["Remote", "Senior"],
-        salary: "Rp 18.000.000 – Rp 28.000.000",
-        postedAt: "5 days ago",
-      },
-      {
-        id: 5,
-        title: "Full Stack Developer",
-        company: "PT Digital Inovasi",
-        location: "Jakarta, Indonesia",
-        type: "Full Time",
-        description:
-          "Kami mencari Full Stack Developer yang passionate untuk mengembangkan aplikasi end-to-end. Pengalaman dengan React, Node.js, dan database management sangat dihargai.",
-        tags: ["Onsite", "Senior"],
-        salary: "Rp 12.000.000 – Rp 20.000.000",
-        postedAt: "4 days ago",
-      },
-      {
-        id: 6,
-        title: "Mobile App Developer",
-        company: "PT Mobile Tech",
-        location: "Surabaya, Indonesia",
-        type: "Full Time",
-        description:
-          "Bergabunglah dengan tim mobile development kami untuk menciptakan aplikasi mobile yang inovatif. Pengalaman dengan React Native atau Flutter akan menjadi nilai tambah.",
-        tags: ["Remote", "Junior"],
-        salary: "Rp 9.000.000 – Rp 15.000.000",
-        postedAt: "6 days ago",
-      },
-      {
-        id: 7,
-        title: "Data Scientist",
-        company: "PT Analytics Pro",
-        location: "Bandung, Indonesia",
-        type: "Full Time",
-        description:
-          "Kami membutuhkan Data Scientist untuk menganalisis data besar dan memberikan insights bisnis yang valuable. Pengalaman dengan Python, R, dan machine learning sangat dibutuhkan.",
-        tags: ["Remote", "Senior"],
-        salary: "Rp 16.000.000 – Rp 24.000.000",
-        postedAt: "1 week ago",
-      },
-      {
-        id: 8,
-        title: "Product Manager",
-        company: "PT Startup Unicorn",
-        location: "Jakarta, Indonesia",
-        type: "Full Time",
-        description:
-          "Bergabunglah sebagai Product Manager untuk memimpin pengembangan produk digital yang revolusioner. Pengalaman di startup dan pemahaman teknis sangat dihargai.",
-        tags: ["Onsite", "Senior"],
-        salary: "Rp 20.000.000 – Rp 35.000.000",
-        postedAt: "3 days ago",
-      },
-    ],
-    []
-  );
+const fetchJobs = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`);
+    const result = await response.json();
+
+    console.log("Data dari API:", result);
+
+ if (result.success && Array.isArray(result.data)) {
+  // Map API response ke struktur Job
+  const mappedJobs: Job[] = result.data.map((job: unknown) => {
+    const j = job as {
+      id: number;
+      job_title: string;
+      company_name?: string;
+      location?: string;
+      employment_type?: string;
+      job_description: string;
+      tags?: string;
+      salary_min?: number;
+      salary_max?: number;
+      created_at?: string;
+    };
+
+    let salaryText = "";
+    if (j.salary_min && j.salary_max) {
+      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")} - Rp ${j.salary_max.toLocaleString("id-ID")}`;
+    } else if (j.salary_min) {
+      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")}`;
+    } else if (j.salary_max) {
+      salaryText = `Rp ${j.salary_max.toLocaleString("id-ID")}`;
+    } else {
+      salaryText = "Negotable";
+    }
+
+    return {
+      id: j.id,
+      title: j.job_title,
+      company: j.company_name || "Unknown Company",
+      location: j.location || "Indonesia",
+      type: j.employment_type || "Full Time",
+      description: j.job_description,
+      tags: j.tags ? j.tags.split(",") : [],
+      salary: salaryText,
+      postedAt: j.created_at ? timeAgo(j.created_at) : "",
+    };
+  });
+
+
+      setJobs(mappedJobs);
+      setFilteredJobs(mappedJobs);
+    } else {
+      setJobs([]);
+      setFilteredJobs([]);
+    }
+  } catch (err) {
+    setError("Failed to fetch jobs");
+    console.error("Error fetching jobs:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
 
   // Fetch jobs from API - replace mock data
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/jobs');
-      // const data = await response.json();
-      // setJobs(data.jobs);
-
-      // Mock API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setJobs(mockJobs);
-      setFilteredJobs(mockJobs);
-    } catch (err) {
-      setError("Failed to fetch jobs");
-      console.error("Error fetching jobs:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Apply filters
   const applyFilters = useCallback((): void => {
@@ -284,7 +260,6 @@ const Job: React.FC = () => {
   // Load jobs on component mount
   useEffect(() => {
     fetchJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Apply filters when filters change

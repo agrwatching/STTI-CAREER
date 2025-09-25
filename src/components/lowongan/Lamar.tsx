@@ -1,8 +1,9 @@
-//src/components/lowongan/Lamar.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { CircleDollarSign, MapPin } from "lucide-react";
+import Image from "next/image";
 
 // Interface untuk tipe data job detail
 interface JobDetail {
@@ -13,7 +14,8 @@ interface JobDetail {
   type: string;
   description: string;
   tags: string[];
-  salary: string;
+  salary_min: number;
+  salary_max: number;
   postedAt: string;
   companyLogo?: string;
 }
@@ -25,6 +27,7 @@ interface ApplicationForm {
   phone: string;
   portfolioUrl: string;
   resume: File | null;
+  userId: number | null;
 }
 
 const LamarKerja: React.FC = () => {
@@ -38,35 +41,48 @@ const LamarKerja: React.FC = () => {
     phone: "",
     portfolioUrl: "",
     resume: null,
+    userId: null,
   });
+  const [token, setToken] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
   const jobId = params?.id;
 
-  // Fetch job detail (dummy dulu)
+  // Ambil token hanya di client
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      setToken(storedToken);
+    }
+  }, []);
+
+  // Fetch job detail dari API
   useEffect(() => {
     const fetchJobDetail = async () => {
       try {
         setLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}`
+        );
+        const result = await res.json();
 
-        // Mock job detail data
-        const mockJobDetail: JobDetail = {
-          id: 1,
-          title: "Senior Frontend Developer",
-          company: "PT Pelagenda Code",
-          location: "Karawang, Indonesia",
-          type: "Full Time",
-          description:
-            "Kami mencari Senior Frontend Developer berpengalaman untuk memimpin pengembangan antarmuka aplikasi web modern. Kandidat ideal memiliki kemampuan teknis yang mendalam pada framework frontend populer serta mampu memimpin tim dalam menciptakan produk yang skalabel, responsif, dan berperforma tinggi.",
-          tags: ["Remote", "Senior"],
-          salary: "Rp 15.000.000 – Rp 25.000.000 per bulan",
-          postedAt: "2 days ago",
-        };
+        if (result.success && result.data) {
+          const data = result.data;
 
-        if (jobId === "1") {
-          setJob(mockJobDetail);
+          setJob({
+            id: data.id,
+            title: data.job_title,
+            company: data.company_name || "Perusahaan",
+            location: data.location || "-",
+            type: data.job_type || "Full Time",
+            description: data.job_description,
+            tags: data.tags || [],
+            salary_min: data.salary_min ?? 0,
+            salary_max: data.salary_max ?? 0,
+            postedAt: new Date().toISOString(),
+            companyLogo: data.company_logo,
+          });
         } else {
           throw new Error("Job not found");
         }
@@ -78,79 +94,50 @@ const LamarKerja: React.FC = () => {
       }
     };
 
-    if (jobId) {
-      fetchJobDetail();
-    }
-  }, [jobId, router]); // ✅ fix: mockJobDetail tidak jadi dependency
+    if (jobId) fetchJobDetail();
+  }, [jobId, router]);
 
-  // Handle form input changes
+  // Fetch applicant profile otomatis
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const result = await res.json();
+        if (result.success && result.data) {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: result.data.full_name || "",
+            email: result.data.email || "",
+            phone: result.data.phone || "",
+            userId: result.data.id ?? null,
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      }
+    };
+
+    fetchProfile();
+  }, [token]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData((prev) => ({
-      ...prev,
-      resume: file,
-    }));
+    setFormData((prev) => ({ ...prev, resume: file }));
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      setSubmitting(true);
-
-      // Validasi form
-      if (
-        !formData.fullName ||
-        !formData.email ||
-        !formData.phone ||
-        !formData.resume
-      ) {
-        alert("Please fill in all required fields");
-        return;
-      }
-
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Show success modal
-      setShowSuccessModal(true);
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      alert("Gagal mengirim lamaran. Silakan coba lagi.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Handle success modal actions
-  const handleViewStatus = () => {
-    setShowSuccessModal(false);
-    router.push("/status-lamaran");
-  };
-
-  const handleBackToJobs = () => {
-    setShowSuccessModal(false);
-    router.push("/lowongan");
-  };
-
-  // Handle back button
-  const handleGoBack = () => {
-    router.back();
-  };
-
-  // Handle drag and drop
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -159,7 +146,6 @@ const LamarKerja: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       const file = files[0];
@@ -172,46 +158,105 @@ const LamarKerja: React.FC = () => {
         "image/jpg",
       ];
       if (allowedTypes.includes(file.type)) {
-        setFormData((prev) => ({
-          ...prev,
-          resume: file,
-        }));
+        setFormData((prev) => ({ ...prev, resume: file }));
       } else {
         alert("Please upload a valid file (PDF, DOC, DOCX, PNG, JPG, JPEG)");
       }
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+
+      if (
+        !formData.fullName ||
+        !formData.email ||
+        !formData.phone ||
+        !formData.resume ||
+        !job?.id ||
+        !formData.userId
+      ) {
+        alert("Lengkapi semua field termasuk full name, email, phone dan resume");
+        return;
+      }
+
+      const payload = {
+        full_name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        portfolio_url: formData.portfolioUrl,
+        job_id: job.id,
+        user_id: formData.userId,
+        cover_letter: "",
+        resume_file: formData.resume?.name || "resume.pdf",
+        status: "pending",
+      };
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await res.json();
+
+      if (res.ok) {
+        setShowSuccessModal(true);
+      } else {
+        throw new Error(result.message || "Failed to submit application");
+      }
+    } catch (err) {
+      console.error("Error submitting application:", err);
+      alert("Gagal mengirim lamaran. Silakan coba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGoBack = () => router.back();
+ const handleViewStatus = () => {
+  setShowSuccessModal(false);
+  router.push("/pelamar/lamaran"); // ini ga perlu Authorization
+};
+
+  const handleBackToJobs = () => {
+    setShowSuccessModal(false);
+    router.push("/lowongan");
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20">
-        <div className="max-w-4xl mx-auto p-6">
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Job not found
-            </h3>
-            <button
-              onClick={() => router.push("/lowongan")}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Back
-            </button>
-          </div>
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Job not found
+          </h3>
+          <button
+            onClick={() => router.push("/lowongan")}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Back
+          </button>
         </div>
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
@@ -220,130 +265,133 @@ const LamarKerja: React.FC = () => {
           onClick={handleGoBack}
           className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors"
         >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
           Back
         </button>
 
-        {/* Job Information Card */}
+        {/* Job Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="flex items-start space-x-4">
-            {/* Company Logo */}
-            <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z" />
-                <path d="M10 12h4v4h-4z" fill="white" />
-                <circle cx="8" cy="8" r="1" fill="white" />
-                <circle cx="16" cy="8" r="1" fill="white" />
-              </svg>
-            </div>
+            {job.companyLogo ? (
+              <Image
+                src={job.companyLogo}
+                alt={job.company}
+                width={16}
+                height={16}
+                className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-lg">{job.company[0]}</span>
+              </div>
+            )}
 
-            {/* Job Info */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                {job.title}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">{job.title}</h1>
               <p className="text-gray-600 mb-2">{job.company}</p>
-              <div className="text-gray-700 text-sm leading-relaxed mb-3 select-text">
-                {job.description}
-              </div>
 
-              {/* Tags */}
+              <div className="text-gray-700 text-sm leading-relaxed mb-3 select-text">{job.description}</div>
+
               <div className="flex flex-wrap gap-2 mb-3">
-                {job.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      tag === "Remote"
-                        ? "bg-green-100 text-green-800"
-                        : tag === "Senior"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {tag}
-                  </span>
-                ))}
+                {/* Tags dari API */}
+                {job.tags &&
+                  job.tags.length > 0 &&
+                  job.tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        tag.toLowerCase().includes("remote")
+                          ? "bg-green-100 text-green-800"
+                          : tag.toLowerCase().includes("senior")
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+
+                {/* Work Mode - Static Tags */}
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Remote
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Senior Level
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                  {job.type || "Full Time"}
+                </span>
               </div>
 
-              <p className="text-gray-600 text-sm">{job.location}</p>
+              {/* Location dan Salary dalam satu baris */}
+              <div className="flex items-center gap-4 text-gray-600 text-sm">
+                {/* Salary */}
+                <div className="flex items-center">
+                  <CircleDollarSign className="w-4 h-4 mr-1" />
+                  {job.salary_min > 0 && job.salary_max > 0
+                    ? `Rp ${job.salary_min.toLocaleString("id-ID")} – Rp ${job.salary_max.toLocaleString("id-ID")}`
+                    : job.salary_min > 0
+                    ? `Rp ${job.salary_min.toLocaleString("id-ID")}`
+                    : job.salary_max > 0
+                    ? `Rp ${job.salary_max.toLocaleString("id-ID")}`
+                    : "Gaji dapat dinegosiasi"}
+                </div>
+
+                {/* Location */}
+                <div className="flex items-center">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {job.location && job.location.trim() !== "" ? job.location : "-"}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Application Form Card */}
+        {/* Application Form */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Submit Your Application
-          </h2>
-
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Submit Your Application</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              {/* Full Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                 <input
                   type="text"
                   name="fullName"
-                  required
-                  value={formData.fullName}
-                  onChange={handleInputChange}
+                  value={formData.fullName || ""}
+                  readOnly
+                  placeholder={formData.fullName ? "" : "Silakan lengkapi profile Anda"}
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
-              {/* Email Address */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
                 <input
                   type="email"
                   name="email"
-                  required
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={formData.email || ""}
+                  readOnly
+                  placeholder={formData.email ? "" : "Silakan lengkapi profile Anda"}
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
-              {/* Phone Number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                 <input
                   type="tel"
                   name="phone"
-                  required
-                  value={formData.phone}
-                  onChange={handleInputChange}
+                  value={formData.phone || ""}
+                  readOnly
+                  placeholder={formData.phone ? "" : "Silakan lengkapi profile Anda"}
                   className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
-              {/* Portfolio/Website URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Portfolio/Website URL
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Portfolio/Website URL</label>
                 <input
                   type="url"
                   name="portfolioUrl"
@@ -356,9 +404,7 @@ const LamarKerja: React.FC = () => {
 
             {/* Resume Upload */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Your Resume
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload Your Resume</label>
               <div
                 className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors relative"
                 onDragOver={handleDragOver}
@@ -380,17 +426,12 @@ const LamarKerja: React.FC = () => {
                   </svg>
                 </div>
                 <div className="mb-2">
-                  <label
-                    htmlFor="resume-upload"
-                    className="text-blue-600 hover:text-blue-700 cursor-pointer"
-                  >
+                  <label htmlFor="resume-upload" className="text-blue-600 hover:text-blue-700 cursor-pointer">
                     upload file
                   </label>
                   <span className="text-gray-600"> atau seret dan simpan</span>
                 </div>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG, PDF up to 10MB
-                </p>
+                <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
@@ -400,14 +441,9 @@ const LamarKerja: React.FC = () => {
                   required
                 />
               </div>
-              {formData.resume && (
-                <p className="text-sm text-gray-600 mt-2">
-                  Selected: {formData.resume.name}
-                </p>
-              )}
+              {formData.resume && <p className="text-sm text-gray-600 mt-2">Selected: {formData.resume.name}</p>}
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-end">
               <button
                 type="submit"
@@ -427,30 +463,16 @@ const LamarKerja: React.FC = () => {
           <div className="bg-white rounded-lg max-w-md w-full p-8 text-center">
             <div className="mb-6">
               <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Lamaran Anda Telah Berhasil Dikirim
-              </h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Lamaran Anda Telah Berhasil Dikirim</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Terima kasih telah melamar posisi ini. Kami akan meninjau
-                lamaran Anda dan menghubungi Anda jika ada perkembangan lebih
-                lanjut.
+                Terima kasih telah melamar posisi ini. Kami akan meninjau lamaran Anda dan menghubungi Anda jika ada
+                perkembangan lebih lanjut.
               </p>
             </div>
-
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleViewStatus}
