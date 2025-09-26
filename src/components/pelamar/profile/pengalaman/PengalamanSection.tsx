@@ -1,180 +1,198 @@
+// src/components/pelamar/profile/pengalaman/PengalamanSection.tsx
 "use client";
 
-import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react"; // 👉 tambah Trash2
+import { useState, useEffect } from "react";
 import PengalamanForm from "./PengalamanForm";
 
+type Pengalaman = {
+  id?: string | number;
+  posisi: string;
+  perusahaan: string;
+  deskripsi: string;
+  tahunMasuk: string;
+  tahunKeluar: string;
+  isCurrentJob?: boolean;
+};
+
+// Type sesuai API
+interface ApiWorkExperience {
+  id: number;
+  position: string;
+  company_name: string;
+  start_date: string;
+  end_date?: string | null;
+  job_description: string;
+  is_current: number;
+}
+
 export default function PengalamanSection() {
-  const [showForm, setShowForm] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [pengalaman, setPengalaman] = useState<Pengalaman[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editData, setEditData] = useState<Pengalaman | null>(null);
 
-  // 👉 jadikan state supaya bisa dihapus
-  const [pengalamanList, setPengalamanList] = useState([
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "Overstack Dev",
-      deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "UI/UX Designer",
-      perusahaan: "PT Digital Kreatif",
-      deskripsi:
-        "Mendesain interface dan pengalaman pengguna untuk aplikasi mobile dan website.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Backend Developer",
-      perusahaan: "PT Solusi Teknologi",
-      deskripsi:
-        "Mengembangkan REST API, mengatur database, serta optimasi performa server.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Intern Web Developer",
-      perusahaan: "Startup Inovatif",
-      deskripsi:
-        "Membantu tim dev membuat fitur dasar aplikasi e-commerce dan belajar CI/CD.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-    {
-      posisi: "Freelance Developer",
-      perusahaan: "Remote Project",
-      deskripsi:
-        "Menghandle proyek kecil pembuatan landing page dan integrasi API pembayaran.",
-       tahunMasuk: "2022",
-    tahunKeluar: "2023",
-    },
-     {
-    posisi: "Frontend Developer",
-    perusahaan: "Overstack Dev",
-    deskripsi: "Membangun antarmuka aplikasi web dengan React dan Tailwind CSS.",
-    tahunMasuk: "2023",
-    tahunKeluar: "2026",
-  },
-  {
-    posisi: "UI/UX Designer",
-    perusahaan: "PT Digital Kreatif",
-    deskripsi: "Mendesain interface aplikasi mobile dan website.",
-    tahunMasuk: "2022",
-    tahunKeluar: "2023",
-  },
-  ]);
-
-  const handleAdd = () => {
-    setEditIndex(null); // mode tambah
-    setShowForm(true);
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token") || sessionStorage.getItem("token");
+    }
+    return null;
   };
 
-  const handleEdit = (idx: number) => {
-    setEditIndex(idx); // mode edit
-    setShowForm(true);
-  };
+  const fetchPengalaman = async () => {
+    setIsLoading(true);
+    setError("");
 
-  const handleDelete = (idx: number) => {
-    if (confirm("Yakin mau hapus pengalaman ini?")) {
-      setPengalamanList((prev) => prev.filter((_, i) => i !== idx));
+    try {
+      const token = getToken();
+      if (!token) {
+        setError("Token tidak ditemukan. Silakan login kembali.");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Gagal memuat data pengalaman kerja");
+      }
+
+      const result = await response.json();
+      const transformed: Pengalaman[] =
+        result.data?.work_experiences?.map((exp: ApiWorkExperience) => ({
+          id: exp.id,
+          posisi: exp.position,
+          perusahaan: exp.company_name,
+          tahunMasuk: exp.start_date
+            ? new Date(exp.start_date).getFullYear().toString()
+            : "",
+          tahunKeluar: exp.is_current
+            ? ""
+            : exp.end_date
+            ? new Date(exp.end_date).getFullYear().toString()
+            : "",
+          deskripsi: exp.job_description,
+          isCurrentJob: Boolean(exp.is_current),
+        })) || [];
+
+      setPengalaman(transformed);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Terjadi kesalahan saat memuat data"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchPengalaman();
+  }, []);
+
+  const handleAdd = () => {
+    setEditData(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (item: Pengalaman) => {
+    setEditData(item);
+    setIsFormOpen(true);
+  };
+
   const handleCancel = () => {
-    setShowForm(false);
-    setEditIndex(null);
+    setIsFormOpen(false);
+    setEditData(null);
+  };
+
+  const handleSave = (values: Pengalaman) => {
+    // Update state setelah save
+    if (editData) {
+      setPengalaman((prev) =>
+        prev.map((p) => (p.id === values.id ? values : p))
+      );
+    } else {
+      setPengalaman((prev) => [...prev, values]);
+    }
+    setIsFormOpen(false);
+    setEditData(null);
+  };
+
+  const handleDelete = (id: string | number) => {
+    setPengalaman((prev) => prev.filter((p) => p.id !== id));
   };
 
   return (
-    <div className="mt-3">
-      {/* Header */}
-    <div className="flex justify-end items-center mb-3">
-  {!showForm && (
-    <button
-      onClick={handleAdd}
-      className="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 text-sm font-medium rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
-    >
-      <Plus className="w-4 h-4" />
-      Tambah Pengalaman
-    </button>
-  )}
-</div>
+    <div className="p-4 bg-white rounded shadow-sm space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-base font-semibold text-gray-800">
+          Pengalaman Kerja
+        </h2>
+        <button
+          onClick={handleAdd}
+          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Tambah
+        </button>
+      </div>
 
-    <h2 className="text-sm font-semibold mb-2">Pengalaman Kerja</h2>
-      {/* Konten */}
-      {showForm ? (
-        <PengalamanForm
-          mode={editIndex === null ? "add" : "edit"}
-          data={editIndex !== null ? pengalamanList[editIndex] : undefined}
-          onCancel={handleCancel}
-          onSave={handleCancel}
-        />
-      ) : (
-        <div className="grid grid-cols-2 gap-2 max-h-[45vh] overflow-y-auto pr-1">
-          {pengalamanList.map((exp, idx) => (
-            <div
-              key={idx}
-              className="border rounded p-2 flex justify-between text-xs bg-white"
-            >
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium truncate">{exp.posisi}</h4>
-                <p className="text-gray-500 truncate">{exp.perusahaan}</p>
-                <p className="text-gray-400 mt-0.5">
-                  {exp.tahunMasuk} - {exp.tahunKeluar}
+      {isLoading && <p className="text-sm text-gray-500">Memuat data...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {!isLoading && pengalaman.length === 0 && (
+        <p className="text-sm text-gray-500">
+          Belum ada pengalaman kerja. Klik &apos;Tambah Pengalaman&apos; untuk
+          menambahkan.
+        </p>
+      )}
+
+      <div className="space-y-3">
+        {pengalaman.map((item) => (
+          <div
+            key={item.id}
+            className="border border-gray-200 rounded p-3 shadow-sm"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">
+                  {item.posisi}
+                </h3>
+                <p className="text-xs text-gray-600">{item.perusahaan}</p>
+                <p className="text-xs text-gray-500">
+                  {item.tahunMasuk} -{" "}
+                  {item.isCurrentJob ? "Sekarang" : item.tahunKeluar}
                 </p>
-                <p className="text-gray-600 mt-0.5 break-words">
-                  {exp.deskripsi}
-                </p>
+                <p className="text-xs text-gray-700 mt-1">{item.deskripsi}</p>
               </div>
-              <div className="flex gap-1 ml-1">
-                <Pencil
-                  className="w-3 h-3 text-gray-500 cursor-pointer hover:text-blue-600"
-                  onClick={() => handleEdit(idx)}
-                />
-                <Trash2
-                  className="w-3 h-3 text-gray-500 cursor-pointer hover:text-red-600"
-                  onClick={() => handleDelete(idx)}
-                />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
+
+      {isFormOpen && (
+        <PengalamanForm
+          mode={editData ? "edit" : "add"}
+          data={editData || undefined}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onDelete={handleDelete}
+        />
       )}
     </div>
   );
