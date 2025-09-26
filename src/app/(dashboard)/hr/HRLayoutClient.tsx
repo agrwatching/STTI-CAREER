@@ -10,12 +10,17 @@ export default function HRLayoutClient({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-    const role = user ? JSON.parse(user).role : null;
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    const role = user?.role;
 
     if (!token || role !== "hr") {
       router.replace("/login");
     } else {
+      // simpan hrId supaya bisa dipakai StatsSection
+      if (user?.id) {
+        localStorage.setItem("hrId", user.id);
+      }
       setAuthorized(true);
     }
   }, [router]);
