@@ -50,7 +50,7 @@ export default function BuatLowonganContent() {
               statusColor = "text-blue-600";
               icon = <Clock className="w-5 h-5 text-blue-600" />;
               break;
-            case "approved":
+            case "verified":
               statusLabel = "Terverifikasi";
               statusColor = "text-green-600";
               icon = <CheckCircle2 className="w-5 h-5 text-green-600" />;
@@ -115,16 +115,16 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Job ditambahkan:", data);
-        router.refresh();
+        setJobs((prev) => [...prev, data.data]);
         setShowForm(false);
         setEditJob(null);
-        router.push("/hr/buat-lowongan");
+        alert("Lowongan berhasil ditambahkan ✅");
       } else {
-        console.error("Gagal tambah job:", data.message);
+        alert(`Gagal tambah job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 
@@ -149,15 +149,18 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Job diupdate:", data);
-        router.refresh();
+        setJobs((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, ...job } : j))
+        );
         setShowForm(false);
         setEditJob(null);
+        alert("Lowongan berhasil diperbarui ✏️");
       } else {
-        console.error("Gagal update job:", data.message);
+        alert(`Gagal update job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 
@@ -178,14 +181,15 @@ export default function BuatLowonganContent() {
       });
 
       if (res.ok) {
-        console.log("Job dihapus");
         setJobs((prev) => prev.filter((job) => job.id !== id));
+        alert("Lowongan berhasil dihapus 🗑️");
       } else {
         const data = await res.json();
-        console.error("Gagal hapus job:", data.message);
+        alert(`Gagal hapus job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 

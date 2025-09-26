@@ -1,13 +1,27 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { JobFormValues, JobType } from "./types";
+import type { JobFormValues, JobType, WorkTime, WorkType } from "./types";
+import Image from "next/image";
 
 interface JobFormProps {
   onCancel: () => void;
   onSubmit: (data: JobFormValues) => void;
   initialValues?: JobType;
 }
+
+// mapping antara type (UI) <-> work_type (backend)
+const typeToWorkType: Record<WorkType, "on_site" | "remote" | "hybrid"> = {
+  "Remote": "remote",
+  "On-site": "on_site",
+  "Hybrid": "hybrid",
+};
+const workTypeToType: Record<"on_site" | "remote" | "hybrid" | "field", WorkType> = {
+  "remote": "Remote",
+  "on_site": "On-site",
+  "hybrid": "Hybrid",
+  "field": "On-site", // fallback
+};
 
 export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormProps) {
   const [formData, setFormData] = useState<JobFormValues>({
@@ -18,6 +32,8 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
     salary_max: null,
     location: "",
     type: "Remote",
+    work_type: "remote",
+    work_time: "full_time",
     logo: "",
   });
 
@@ -33,7 +49,9 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
         salary_min: initialValues.salary_min,
         salary_max: initialValues.salary_max,
         location: initialValues.location,
-        type: initialValues.type,
+        type: workTypeToType[initialValues.work_type],
+        work_type: initialValues.work_type,
+        work_time: initialValues.work_time || "full_time",
         logo: initialValues.logo || "",
       });
     }
@@ -56,14 +74,21 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
       setLogoFile(file);
       setFormData((prev) => ({
         ...prev,
-        logo: URL.createObjectURL(file), // preview
+        logo: URL.createObjectURL(file),
       }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // pastikan mapping type -> work_type sebelum submit
+    const finalData: JobFormValues = {
+      ...formData,
+      work_type: typeToWorkType[formData.type],
+    };
+
+    onSubmit(finalData);
   };
 
   return (
@@ -71,6 +96,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
       <div className="bg-white rounded-lg shadow-md p-4 w-full mx-auto text-xl my-4">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="col-span-2 space-y-2">
+            {/* Job Title */}
             <div>
               <label className="block font-semibold mb-1 text-lg">Job Title</label>
               <input
@@ -82,6 +108,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="block font-semibold mb-1 text-base">Description</label>
               <textarea
@@ -93,6 +120,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               />
             </div>
 
+            {/* Requirements */}
             <div>
               <label className="block font-semibold mb-1 text-base">Requirements</label>
               <textarea
@@ -104,6 +132,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               />
             </div>
 
+            {/* Work Type */}
             <div>
               <label className="block font-semibold mb-1 text-base">Work Type</label>
               <div className="flex gap-2 mb-1">
@@ -115,7 +144,11 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
                       formData.type === label ? "bg-blue-600" : "bg-gray-300"
                     }`}
                     onClick={() =>
-                      setFormData((prev) => ({ ...prev, type: label as JobFormValues["type"] }))
+                      setFormData((prev) => ({
+                        ...prev,
+                        type: label as WorkType,
+                        work_type: typeToWorkType[label as WorkType],
+                      }))
                     }
                   >
                     {label}
@@ -124,6 +157,36 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               </div>
             </div>
 
+            {/* Work Time */}
+            <div>
+              <label className="block font-semibold mb-1 text-base">Work Time</label>
+              <div className="flex flex-wrap gap-2 mb-1">
+                {[
+                  "full_time",
+                  "part_time",
+                  "freelance",
+                  "internship",
+                  "contract",
+                  "volunteer",
+                  "seasonal",
+                ].map((label) => (
+                  <button
+                    type="button"
+                    key={label}
+                    className={`px-4 py-1 rounded-full text-xs font-semibold text-white transition-colors ${
+                      formData.work_time === label ? "bg-blue-600" : "bg-gray-300"
+                    }`}
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, work_time: label as WorkTime }))
+                    }
+                  >
+                    {label.replace("_", " ")}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Salary Min */}
             <div>
               <label className="block font-semibold mb-1 text-base">Salary Min</label>
               <input
@@ -136,6 +199,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               />
             </div>
 
+            {/* Salary Max */}
             <div>
               <label className="block font-semibold mb-1 text-base">Salary Max</label>
               <input
@@ -148,6 +212,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               />
             </div>
 
+            {/* Location */}
             <div>
               <label className="block font-semibold mb-1 text-base">Location</label>
               <input
@@ -160,6 +225,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
             </div>
           </div>
 
+          {/* Logo */}
           <div className="col-span-1 flex flex-col items-center">
             <label className="block font-semibold mb-1 text-base">Company Logo</label>
             <div
@@ -167,9 +233,11 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
               className="w-44 h-28 border-2 border-dashed rounded flex items-center justify-center text-gray-500 text-xs cursor-pointer hover:bg-gray-50"
             >
               {logoFile || formData.logo ? (
-                <img
-                  src={logoFile ? URL.createObjectURL(logoFile) : formData.logo}
+                <Image
+                  src={logoFile ? URL.createObjectURL(logoFile) : formData.logo || "/default-logo.png"}
                   alt="Logo Preview"
+                  width={176}
+                  height={112}
                   className="w-full h-full object-contain p-2"
                 />
               ) : (
@@ -185,6 +253,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
             />
           </div>
 
+          {/* Buttons */}
           <div className="col-span-3 flex justify-end gap-2 mt-6 pt-4 border-t">
             <button
               type="button"
