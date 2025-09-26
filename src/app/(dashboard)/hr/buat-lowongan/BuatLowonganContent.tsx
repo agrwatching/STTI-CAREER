@@ -17,21 +17,33 @@ export default function BuatLowonganContent() {
   const [editJob, setEditJob] = useState<JobType | null>(null);
 
   // Ambil data dari backend
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          router.push("/login");
-          return;
-        }
+    // Ambil data dari backend
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const token = localStorage.getItem("token");
+      // ASUMSI: hrId juga disimpan di localStorage, misalnya saat login
+      // Ubah "hrId" sesuai dengan nama key yang Anda gunakan di localStorage
+      const hrId = localStorage.getItem("hrId"); 
+      
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      // Tambahkan pengecekan hrId
+      if (!hrId) {
+        console.error("HR ID not found in localStorage.");
+        // Anda mungkin ingin mengarahkan pengguna ke halaman yang sesuai
+        return; 
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?hrId=${hrId}`, {
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
 
@@ -50,7 +62,7 @@ export default function BuatLowonganContent() {
               statusColor = "text-blue-600";
               icon = <Clock className="w-5 h-5 text-blue-600" />;
               break;
-            case "approved":
+            case "verified":
               statusLabel = "Terverifikasi";
               statusColor = "text-green-600";
               icon = <CheckCircle2 className="w-5 h-5 text-green-600" />;
@@ -103,7 +115,7 @@ export default function BuatLowonganContent() {
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,16 +127,16 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Job ditambahkan:", data);
-        router.refresh();
+        setJobs((prev) => [...prev, data.data]);
         setShowForm(false);
         setEditJob(null);
-        router.push("/hr/buat-lowongan");
+        alert("Lowongan berhasil ditambahkan ✅");
       } else {
-        console.error("Gagal tambah job:", data.message);
+        alert(`Gagal tambah job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 
@@ -149,15 +161,18 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log("Job diupdate:", data);
-        router.refresh();
+        setJobs((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, ...job } : j))
+        );
         setShowForm(false);
         setEditJob(null);
+        alert("Lowongan berhasil diperbarui ✏️");
       } else {
-        console.error("Gagal update job:", data.message);
+        alert(`Gagal update job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 
@@ -178,14 +193,15 @@ export default function BuatLowonganContent() {
       });
 
       if (res.ok) {
-        console.log("Job dihapus");
         setJobs((prev) => prev.filter((job) => job.id !== id));
+        alert("Lowongan berhasil dihapus 🗑️");
       } else {
         const data = await res.json();
-        console.error("Gagal hapus job:", data.message);
+        alert(`Gagal hapus job: ${data.message}`);
       }
     } catch (err) {
       console.error(err);
+      alert("Terjadi kesalahan server ❌");
     }
   };
 

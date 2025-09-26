@@ -1,6 +1,17 @@
 import React from "react";
 
-// Data mentah dari backend
+// ENUMS
+export type WorkType = "Remote" | "On-site" | "Hybrid";
+export type WorkTime =
+  | "full_time"
+  | "part_time"
+  | "freelance"
+  | "internship"
+  | "contract"
+  | "volunteer"
+  | "seasonal";
+
+// Data asli dari backend
 export interface JobApiResponse {
   id: number;
   job_title: string;
@@ -9,34 +20,37 @@ export interface JobApiResponse {
   salary_min: number | null;
   salary_max: number | null;
   location: string;
-  type: "Remote" | "On-site" | "Hybrid";
-  verification_status: "pending" | "approved" | "rejected";
+  type: WorkType; // UI friendly (Remote, On-site, Hybrid)
+  verification_status: "pending" | "verified" | "rejected"; // Status dari backend
   is_active?: number;
   company_id?: number | null;
   category_id?: number | null;
   created_at?: string;
   updated_at?: string;
   logo?: string;
+  work_type: "on_site" | "remote" | "hybrid" | "field"; // backend
+  work_time: WorkTime;
 }
 
-// Data hasil mapping → siap dipakai di UI
+// Data hasil mapping → untuk UI
+// Disimpan properti yang dibutuhkan JobCard dari data yang sudah diproses/disiapkan
 export interface JobType extends JobApiResponse {
-  title: string;         // alias dari job_title
-  description: string;   // alias dari job_description
-  requirements: string;  // alias dari qualifications
-  salary_range: string;  // ex: "Rp 5.000.000 - Rp 7.000.000"
-  statusLabel: string;   // ex: "Tunggu Verifikasi"
-  statusColor: string;   // warna status
-  icon: React.ReactNode; // icon status
+  title: string;
+  description: string;
+  requirements: string; // alias dari qualifications
+  salary_range: string; // representasi string dari salary_min & salary_max
+  statusLabel: "Tunggu Verifikasi" | "Terverifikasi" | "Tidak Terverifikasi" | string; // Label status yang ditampilkan di UI
 }
 
-// Data dari form
+// Data untuk form (create/update)
 export interface JobFormValues {
   job_title: string;
   job_description: string;
   qualifications: string;
   location: string;
-  type: "Remote" | "On-site" | "Hybrid";
+  type: WorkType; // UI friendly
+  work_type: "on_site" | "remote" | "hybrid" | "field"; // backend
+  work_time: WorkTime;
   salary_min: number | null;
   salary_max: number | null;
   logo?: string;
