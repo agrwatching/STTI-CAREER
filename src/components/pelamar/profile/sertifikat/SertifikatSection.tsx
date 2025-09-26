@@ -1,46 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import SertifikatForm from "./SertifikatForm";
 
+type Certificate = {
+  id: number;
+  certificate_name: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date: string;
+  certificate_file: string; // ← pakai nama file saja
+};
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+// 👉 helper mapping data API ke Form
+function mapCertToForm(cert: Certificate) {
+  return {
+    id: cert.id.toString(),
+    nama: cert.certificate_name,
+    penerbit: cert.issuer,
+    gambar: `${BASE_URL}/uploads/files/${cert.certificate_file}`,
+    tanggal_terbit: cert.issue_date,
+    tanggal_berakhir: cert.expiry_date,
+  };
+}
+
 export default function SertifikatSection() {
   const [showForm, setShowForm] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [sertifikatList, setSertifikatList] = useState<Certificate[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // 👉 jadikan state agar bisa dihapus/tambah/edit
-  const [sertifikatList, setSertifikatList] = useState([
-    {
-      nama: "UI/UX Design",
-      penerbit: "PT Palugada Code",
-      gambar:
-        "https://dummyimage.com/250x160/4f46e5/ffffff&text=UI%2FUX+Design",
-    },
-    {
-      nama: "React Developer",
-      penerbit: "Meta Academy",
-      gambar:
-        "https://dummyimage.com/250x160/06b6d4/ffffff&text=React+Developer",
-    },
-    {
-      nama: "JavaScript Expert",
-      penerbit: "Google Developers",
-      gambar:
-        "https://dummyimage.com/250x160/f59e0b/ffffff&text=JavaScript+Expert",
-    },
-    {
-      nama: "Next.js Mastery",
-      penerbit: "Vercel Academy",
-      gambar:
-        "https://dummyimage.com/250x160/10b981/ffffff&text=Next.js+Mastery",
-    },
-    {
-      nama: "Cloud Practitioner",
-      penerbit: "AWS",
-      gambar: "https://dummyimage.com/250x160/ef4444/ffffff&text=AWS+Cloud",
-    },
-  ]);
+  const getToken = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token") || sessionStorage.getItem("token");
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    const fetchCertificates = async () => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const token = getToken();
+        if (!token) {
+          setError("Token tidak ditemukan. Silakan login kembali.");
+          setIsLoading(false);
+          return;
+        }
+
+        const res = await fetch(`${BASE_URL}/api/profile`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error("Gagal mengambil data sertifikat");
+        }
+
+        const json = await res.json();
+        if (json.data?.certificates) {
+          setSertifikatList(json.data.certificates);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Terjadi kesalahan saat fetch"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCertificates();
+  }, []);
 
   const handleAdd = () => {
     setEditIndex(null);
@@ -64,65 +106,80 @@ export default function SertifikatSection() {
   };
 
   return (
-    <div className="mt-3">
-      {/* Header */}
-      <div className="flex justify-end items-center mb-3">
+    <div className="mt-3 p-4 bg-white rounded shadow-sm space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-base font-semibold text-gray-800">Sertifikat</h2>
         {!showForm && (
           <button
             onClick={handleAdd}
-            className="inline-flex items-center bg-blue-600 text-white px-2 py-1 text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
+            className="inline-flex items-center bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 transition-colors"
           >
-            <Plus className="w-3 h-3 mr-1" />
-            Tambah Sertifikat
+            <Plus className="w-4 h-4 mr-1" />
+            Tambah
           </button>
         )}
       </div>
 
-      <h2 className="text-sm font-semibold pb-1">Sertifikat</h2>
+      {isLoading && <p className="text-sm text-gray-500">Memuat data...</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {/* Konten */}
       {showForm ? (
         <SertifikatForm
           mode={editIndex === null ? "add" : "edit"}
-          data={editIndex !== null ? sertifikatList[editIndex] : undefined}
+          data={
+            editIndex !== null
+              ? mapCertToForm(sertifikatList[editIndex])
+              : undefined
+          }
           onCancel={handleCancel}
           onSave={handleCancel}
         />
       ) : (
-        <div className="grid grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto pr-1">
-          {sertifikatList.map((cert, idx) => (
-            <div
-              key={idx}
-              className="border rounded overflow-hidden flex flex-col bg-white"
-            >
-              <div className="relative w-full h-28">
-                <Image
-                  src={cert.gambar}
-                  alt={cert.nama}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-1.5 flex justify-between items-start">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-xs truncate">{cert.nama}</h4>
-                  <p className="text-xs text-gray-500 truncate">
-                    {cert.penerbit}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  <Pencil
-                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-blue-600"
-                    onClick={() => handleEdit(idx)}
-                  />
-                  <Trash2
-                    className="w-3 h-3 text-gray-500 cursor-pointer hover:text-red-600"
-                    onClick={() => handleDelete(idx)}
+        <div className="grid grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+          {sertifikatList.length > 0 ? (
+            sertifikatList.map((cert, idx) => (
+              <div
+                key={cert.id}
+                className="border border-gray-200 rounded overflow-hidden flex flex-col bg-white shadow-sm"
+              >
+                <div className="relative w-full h-28">
+                  <Image
+                    src={`${BASE_URL}/uploads/files/${cert.certificate_file}`}
+                    alt={cert.certificate_name}
+                    fill
+                    className="object-cover"
                   />
                 </div>
+                <div className="p-2 flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-xs truncate">
+                      {cert.certificate_name}
+                    </h4>
+                    <p className="text-xs text-gray-500 truncate">
+                      {cert.issuer}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Pencil
+                      className="w-4 h-4 text-gray-500 cursor-pointer hover:text-blue-600"
+                      onClick={() => handleEdit(idx)}
+                    />
+                    <Trash2
+                      className="w-4 h-4 text-gray-500 cursor-pointer hover:text-red-600"
+                      onClick={() => handleDelete(idx)}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            !isLoading &&
+            !error && (
+              <p className="text-xs text-gray-500">
+                Belum ada sertifikat yang tersimpan.
+              </p>
+            )
+          )}
         </div>
       )}
     </div>
