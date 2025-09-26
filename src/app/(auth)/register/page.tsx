@@ -16,12 +16,11 @@ export default function RegisterPelamar() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     if (password !== confirmPassword) {
       setError("Password dan Konfirmasi Password tidak sama!");
@@ -56,8 +55,7 @@ export default function RegisterPelamar() {
 
       if (!res.ok) throw new Error(data.message || "Registrasi gagal");
 
-      setSuccess("Registrasi berhasil! Mengarahkan ke halaman login...");
-      setTimeout(() => router.push("/login"), 2000);
+      setShowSuccess(true);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Terjadi kesalahan tak terduga");
@@ -66,14 +64,27 @@ export default function RegisterPelamar() {
     }
   };
 
+  const handleSuccessOk = () => {
+    setShowSuccess(false);
+    router.push("/login");
+  };
+
   return (
     <section className="relative flex items-center justify-center min-h-screen">
+      {/* Background */}
       <Image src="/job.jpg" alt="Background" fill className="object-cover" />
 
       <div className="relative z-10 bg-white/90 rounded-lg shadow-lg w-11/12 md:w-4/5 lg:w-3/4 flex flex-col md:flex-row p-8 md:p-12 gap-8 my-4">
-        <div className="flex-1">
+        {/* Logo di atas (hanya mobile) */}
+        <div className="flex flex-col items-center justify-center mb-6 md:hidden">
+          <Image src="/logo-stti.png" alt="Logo STTIS" width={120} height={120} />
+          <h1 className="mt-2 text-xl font-bold text-[#0A1FB5]">STTICAREER</h1>
+        </div>
+
+        {/* Form */}
+        <div className="flex-1 overflow-y-auto">
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <label>
+            <label className="block text-sm font-medium">
               Full Name:
               <input
                 type="text"
@@ -85,7 +96,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Address:
               <input
                 type="text"
@@ -97,7 +108,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Date of Birth:
               <input
                 type="date"
@@ -108,7 +119,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Phone:
               <input
                 type="text"
@@ -120,7 +131,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Email:
               <input
                 type="email"
@@ -132,7 +143,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Password:
               <input
                 type="password"
@@ -144,7 +155,7 @@ export default function RegisterPelamar() {
               />
             </label>
 
-            <label>
+            <label className="block text-sm font-medium">
               Confirm Password:
               <input
                 type="password"
@@ -157,7 +168,6 @@ export default function RegisterPelamar() {
             </label>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
-            {success && <p className="text-green-600 text-sm">{success}</p>}
 
             <button
               type="submit"
@@ -179,13 +189,31 @@ export default function RegisterPelamar() {
           </p>
         </div>
 
-        <div className="flex flex-col items-center justify-center flex-1">
+        {/* Logo Section (hanya desktop) */}
+        <div className="hidden md:flex flex-col items-center justify-center flex-1">
           <Image src="/logo-stti.png" alt="Logo STTIS" width={200} height={200} />
           <h1 className="mt-4 text-2xl md:text-3xl font-bold text-[#0A1FB5]">
             STTICAREER
           </h1>
         </div>
       </div>
+
+      {/* Modal Success */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 text-center w-80">
+            <h2 className="text-lg font-bold text-green-600 mb-4">
+              Registrasi berhasil 🎉
+            </h2>
+            <button
+              onClick={handleSuccessOk}
+              className="px-4 py-2 bg-yellow-400 rounded font-semibold hover:bg-yellow-500"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

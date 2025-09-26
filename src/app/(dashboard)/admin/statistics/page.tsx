@@ -1,30 +1,15 @@
+// src/app/(dashboard)/admin/statistics/page.tsx
+"use client";
+
 import React from "react";
 
-const Dashboard = () => {
+const Statistics: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-8">
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-12">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Statistics & Analytics
-          </h1>
-        </div>
-
-        {/* Admin Profile */}
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-            <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-              alt="Admin"
-              className="w-full h-full object-cover rounded-full"
-            />
-          </div>
-          <div>
-            <div className="text-white font-semibold">Admin</div>
-            <div className="text-gray-400 text-sm">AdminCareer@gmail.com</div>
-          </div>
-        </div>
+    <>
+    <div className="px-6">
+      {/* Page Title */}
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold text-white">Statistics & Analytics</h1>
       </div>
 
       {/* Statistics Cards */}
@@ -47,13 +32,7 @@ const Dashboard = () => {
           <div className="h-24 relative">
             <svg viewBox="0 0 200 60" className="w-full h-full">
               <defs>
-                <linearGradient
-                  id="gradient1"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%"
-                >
+                <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
                 </linearGradient>
@@ -90,13 +69,7 @@ const Dashboard = () => {
           <div className="h-24 relative">
             <svg viewBox="0 0 200 60" className="w-full h-full">
               <defs>
-                <linearGradient
-                  id="gradient2"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%"
-                >
+                <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
                 </linearGradient>
@@ -133,13 +106,7 @@ const Dashboard = () => {
           <div className="h-24 relative">
             <svg viewBox="0 0 200 60" className="w-full h-full">
               <defs>
-                <linearGradient
-                  id="gradient3"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%"
-                >
+                <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
                 </linearGradient>
@@ -159,7 +126,8 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
-export default Dashboard;
+export default Statistics;

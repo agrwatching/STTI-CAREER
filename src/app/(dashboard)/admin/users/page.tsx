@@ -1,229 +1,242 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 
-// ✅ Tambahin tipe User
+interface ApiUser {
+  id: number;
+  full_name: string;
+  email: string;
+  role: "pelamar" | "hr" | "admin";
+  is_active: number;
+}
+
 interface User {
   id: number;
   name: string;
   email: string;
-  role: string;
-  status: string;
+  role: "Applicant" | "HR Representative";
+  status: "Active" | "Inactive";
 }
 
-const UserManagement = () => {
-  const [activeTab, setActiveTab] = useState("Applicant");
+const UserManagement: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"Applicant" | "HR Representatives">(
+    "Applicant"
+  );
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null); // ✅ kasih tipe User
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const applicants: User[] = [
-    {
-      id: 1,
-      name: "Sulaer",
-      email: "sulaerbolbol@gmail.com",
-      role: "Applicant",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Agra ganesilia",
-      email: "agraelisapobolic@gmail.com",
-      role: "Applicant",
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Sumiho",
-      email: "sumihokunkun@gmail.com",
-      role: "Applicant",
-      status: "Inactive",
-    },
-  ];
+  // ✅ Fetch users from backend
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
 
-  const hrRepresentatives: User[] = [
-    {
-      id: 4,
-      name: "John Doe",
-      email: "john.doe@company.com",
-      role: "HR Representative",
-      status: "Active",
-    },
-    {
-      id: 5,
-      name: "Jane Smith",
-      email: "jane.smith@company.com",
-      role: "HR Representative",
-      status: "Active",
-    },
-  ];
+        const mapped: User[] = json.data.users
+          .filter((u: ApiUser) => u.role === "pelamar" || u.role === "hr")
+          .map((u: ApiUser) => ({
+            id: u.id,
+            name: u.full_name,
+            email: u.email,
+            role: u.role === "pelamar" ? "Applicant" : "HR Representative",
+            status: u.is_active === 1 ? "Active" : "Inactive",
+          }));
 
-  const currentUsers: User[] =
-    activeTab === "Applicant" ? applicants : hrRepresentatives;
+        setUsers(mapped);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUsers();
+  }, []);
 
-  // ✅ kasih typing ke parameter user
+  // ✅ Filter users by tab
+  const currentUsers = users.filter((u) =>
+    activeTab === "Applicant"
+      ? u.role === "Applicant"
+      : u.role === "HR Representative"
+  );
+
+  // ✅ Edit handler
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setShowEditModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowEditModal(false);
-    setEditingUser(null);
+  const handleSave = async () => {
+    if (!editingUser) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${editingUser.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: editingUser.name,
+            email: editingUser.email,
+            role: editingUser.role === "Applicant" ? "pelamar" : "hr",
+            is_active: editingUser.status === "Active" ? 1 : 0,
+          }),
+        }
+      );
+      if (!res.ok) throw new Error("Gagal update user");
+
+      setShowEditModal(false);
+      setEditingUser(null);
+
+      // refresh users
+      const refreshed = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`
+      ).then((r) => r.json());
+      const mapped: User[] = refreshed.data.users
+        .filter((u: ApiUser) => u.role === "pelamar" || u.role === "hr")
+        .map((u: ApiUser) => ({
+          id: u.id,
+          name: u.full_name,
+          email: u.email,
+          role: u.role === "pelamar" ? "Applicant" : "HR Representative",
+          status: u.is_active === 1 ? "Active" : "Inactive",
+        }));
+
+      setUsers(mapped);
+    } catch {
+      alert("Error update user");
+    }
   };
 
-  const handleSave = () => {
-    console.log("Saving user:", editingUser);
-    handleCloseModal();
+  // ✅ Delete handler
+  const handleDelete = async (id: number) => {
+    if (!confirm("Yakin ingin hapus user ini?")) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${id}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) throw new Error("Gagal hapus user");
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch {
+      alert("Error hapus user");
+    }
   };
+
+  if (loading) return <div className="p-6 text-gray-300">Loading users...</div>;
+  if (error) return <div className="p-6 text-red-400">Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-700">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Manajemen Users</h1>
-          <div className="flex items-center mt-4 space-x-8 relative">
-            {/* Applicant Tab */}
-            <div className="relative">
-              <button
-                onClick={() => setActiveTab("Applicant")}
-                className={`text-sm pb-2 transition-colors ${
-                  activeTab === "Applicant"
-                    ? "text-yellow-400"
-                    : "text-gray-400"
-                }`}
-              >
-                Applicant
-              </button>
-              {activeTab === "Applicant" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400"></div>
-              )}
-            </div>
+    <div className="h-screen text-white">
+      <h2 className="text-3xl px-6 pb-4 font-bold">Management Users</h2>
 
-            {/* HR Representatives Tab */}
-            <div className="relative">
-              <button
-                onClick={() => setActiveTab("HR Representatives")}
-                className={`text-sm pb-2 transition-colors ${
-                  activeTab === "HR Representatives"
-                    ? "text-yellow-400"
-                    : "text-gray-400"
-                }`}
-              >
-                HR Representatives
-              </button>
-              {activeTab === "HR Representatives" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yellow-400"></div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Admin Profile */}
-        <div className="flex items-center space-x-3">
-          <div className="text-right">
-            <div className="text-white font-medium">Admin</div>
-            <div className="text-gray-400 text-sm">AdminCareer@gmail.com</div>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-gray-600 overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-              alt="Admin"
-              className="w-full h-full object-cover"
-            />
-          </div>
+      {/* Tabs */}
+      <div className="px-6">
+        <div className="flex items-center space-x-8">
+          <button
+            onClick={() => setActiveTab("Applicant")}
+            className={`text-sm pb-2 transition-colors ${
+              activeTab === "Applicant"
+                ? "text-yellow-400 border-b-2 border-yellow-400"
+                : "text-gray-400"
+            }`}
+          >
+            Applicant
+          </button>
+          <button
+            onClick={() => setActiveTab("HR Representatives")}
+            className={`text-sm pb-2 transition-colors ${
+              activeTab === "HR Representatives"
+                ? "text-yellow-400 border-b-2 border-yellow-400"
+                : "text-gray-400"
+            }`}
+          >
+            HR Representatives
+          </button>
         </div>
       </div>
 
-      {/* Search and Filter */}
+      {/* Table */}
       <div className="p-6">
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder={`Search ${activeTab.toLowerCase()}`}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white hover:bg-gray-700 transition-colors">
-            <Filter className="w-4 h-4" />
-            <span>Filter</span>
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">
-                  NAME
-                </th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">
-                  EMAIL
-                </th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">
-                  ROLE
-                </th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">
-                  STATUS
-                </th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">
-                  ACTIONS
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-b border-gray-700 hover:bg-gray-700"
-                >
-                  <td className="py-4 px-6 text-white">{user.name}</td>
-                  <td className="py-4 px-6 text-gray-400">{user.email}</td>
-                  <td className="py-4 px-6 text-gray-400">{user.role}</td>
-                  <td className="py-4 px-6">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === "Active"
-                          ? "bg-green-600 text-white"
-                          : "bg-gray-600 text-gray-300"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                      >
-                        Edit
-                      </button>
-                      <span className="text-gray-600">|</span>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
+        <div className="bg-gray-800 rounded-lg p-4 mb-6">
+          <div className="max-h-80 overflow-y-auto rounded-md">
+            <table className="w-full">
+              <thead className="sticky top-0 bg-gray-700/90 z-10">
+                <tr>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                    NAME
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                    EMAIL
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                    ROLE
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                    STATUS
+                  </th>
+                  <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                    ACTIONS
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-700">
+                    <td className="py-4 px-6 text-white">{user.name}</td>
+                    <td className="py-4 px-6 text-gray-400">{user.email}</td>
+                    <td className="py-4 px-6 text-gray-400">{user.role}</td>
+                    <td className="py-4 px-6">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          user.status === "Active"
+                            ? "bg-green-600 text-white"
+                            : "bg-gray-600 text-gray-300"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                        <span className="text-gray-600">|</span>
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="text-red-400 hover:text-red-300 text-sm font-medium"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 w-96 max-w-md mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-white">Edit User</h3>
               <button
-                onClick={handleCloseModal}
+                onClick={() => setShowEditModal(false)}
                 className="text-gray-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
@@ -233,31 +246,53 @@ const UserManagement = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={editingUser.name}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Email
                 </label>
                 <input
                   type="email"
-                  placeholder="Masukkan Email"
-                  defaultValue={editingUser?.email}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                  value={editingUser.email}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, email: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Password
+                  Status
                 </label>
-                <input
-                  type="password"
-                  placeholder="Masukkan Password"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                />
+                <select
+                  value={editingUser.status}
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      status: e.target.value as "Active" | "Inactive",
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
               </div>
             </div>
 
             <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={handleCloseModal}
+                onClick={() => setShowEditModal(false)}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
               >
                 Batal

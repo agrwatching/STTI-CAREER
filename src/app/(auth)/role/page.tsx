@@ -17,7 +17,7 @@ export default function ChooseRole() {
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute inset-0 flex items-center justify-center">
           <Link
-            href="/login-company"
+            href="/register-company"
             className="bg-white/80 px-10 py-4 rounded-lg text-xl font-bold text-black hover:bg-white transition"
           >
             Company

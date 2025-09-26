@@ -1,3 +1,4 @@
+// src/app/(dashboard)/admin/job/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -15,7 +16,7 @@ const JobPostsVerification: React.FC = () => {
     "Pending" | "Verified" | "Rejected"
   >("Pending");
 
-  // Sample data - dalam implementasi nyata, ini akan datang dari API
+  // Sample data - ini bisa diganti dari API
   const [jobPosts, setJobPosts] = useState<JobPost[]>([
     {
       id: 1,
@@ -61,34 +62,15 @@ const JobPostsVerification: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      {/* Header Section */}
-      <div className="bg-slate-900 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-white">
-            Job Posts Verification
-          </h1>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-                alt="Admin"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <div className="text-white font-medium text-sm">Admin</div>
-              <div className="text-slate-400 text-xs">
-                AdminCareer@gmail.com
-              </div>
-            </div>
-          </div>
-        </div>
+    <>
+      {/* Page Title */}
+      <div className="mb-6 px-6">
+        <h2 className="text-3xl font-semibold mb-4">Job Posts Verification</h2>
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-slate-900 px-6">
-        <div className="flex gap-0 border-b border-slate-700">
+      <div className="px-6">
+        <div className="flex gap-0 border-b border-slate-700 mb-6">
           {(["Pending", "Verified", "Rejected"] as const).map((tab) => (
             <button
               key={tab}
@@ -109,7 +91,7 @@ const JobPostsVerification: React.FC = () => {
       </div>
 
       {/* Table Container */}
-      <div className="p-6">
+      <div className="px-6">
         <div className="bg-slate-800 rounded-lg overflow-hidden">
           {/* Table Header */}
           <div className="bg-slate-700 px-6 py-3">
@@ -191,15 +173,15 @@ const JobPostsVerification: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {/* Empty State */}
-        {filteredJobs.length === 0 && (
-          <div className="text-center py-12 text-slate-400">
-            No {activeTab.toLowerCase()} job posts found.
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Empty State */}
+      {filteredJobs.length === 0 && (
+        <div className="text-center py-12 text-slate-400">
+          No {activeTab.toLowerCase()} job posts found.
+        </div>
+      )}
+    </>
   );
 };
 

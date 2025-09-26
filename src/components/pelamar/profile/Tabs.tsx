@@ -16,7 +16,7 @@ const tabs = [
 
 export default function Tabs({ activeTab, onTabChange }: TabsProps) {
   return (
-    <div className="flex gap-6 border-b mb-4">
+    <div className="flex gap-6 border-b mb-4 overflow-x-auto whitespace-nowrap">
       {tabs.map((tab) => (
         <button
           key={tab.key}

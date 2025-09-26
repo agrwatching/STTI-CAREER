@@ -1,4 +1,4 @@
-// app/hr/lowongan-saya/page.tsx
+// app/(dashboard)/hr/lowongan-saya/page.tsx
 import LowonganSayaTable from "@/components/hr/lowongan-saya/LowonganSayaTable";
 
 // Export type Job dari LowonganSayaTable biar bisa dipakai ulang

@@ -1,38 +1,63 @@
-// src/components/hr/buat-lowongan/JobForm.tsx
 "use client";
 
-import { useState, useRef } from "react";
-import type { JobType } from "./types";
+import { useState, useEffect, useRef } from "react";
+import type { JobFormValues, JobType } from "./types";
 
 interface JobFormProps {
   onCancel: () => void;
-  onSubmit: (data: Omit<JobType, "status" | "statusColor" | "icon" | "logo">) => void;
+  onSubmit: (data: JobFormValues) => void;
+  initialValues?: JobType;
 }
 
-export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
-  const [formData, setFormData] = useState({
-    company: "",
-    title: "",
-    desc: "",
-    qualification: "",
-    type: "Remote",
-    salary: "",
+export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormProps) {
+  const [formData, setFormData] = useState<JobFormValues>({
+    job_title: "",
+    job_description: "",
+    qualifications: "",
+    salary_min: null,
+    salary_max: null,
     location: "",
+    type: "Remote",
     logo: "",
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    if (initialValues) {
+      setFormData({
+        job_title: initialValues.job_title,
+        job_description: initialValues.job_description,
+        qualifications: initialValues.qualifications,
+        salary_min: initialValues.salary_min,
+        salary_max: initialValues.salary_max,
+        location: initialValues.location,
+        type: initialValues.type,
+        logo: initialValues.logo || "",
+      });
+    }
+  }, [initialValues]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "salary_min" || name === "salary_max"
+          ? value === "" ? null : Number(value)
+          : value,
+    }));
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setLogoFile(file);
-      setFormData({ ...formData, logo: URL.createObjectURL(file) });
+      setFormData((prev) => ({
+        ...prev,
+        logo: URL.createObjectURL(file), // preview
+      }));
     }
   };
 
@@ -42,41 +67,56 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
   };
 
   return (
-    <div className="max-h-screen flex justify-center items-center bg-gray-50 p-4">
-      <div className="bg-white rounded-lg shadow-md p-4 w-full mx-auto text-xl">
+    <div className="max-h-screen flex justify-center items-start bg-gray-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-md p-4 w-full mx-auto text-xl my-4">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="col-span-2 space-y-2">
             <div>
-              <label className="block font-semibold mb-1 text-lg">Company Name</label>
-              <input type="text" name="company" value={formData.company} onChange={handleChange} className="w-full border rounded px-2 py-1 text-sm" />
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-1 text-base">Job Title</label>
-              <input type="text" name="title" value={formData.title} onChange={handleChange} className="w-full border rounded px-2 py-1 text-sm" />
+              <label className="block font-semibold mb-1 text-lg">Job Title</label>
+              <input
+                type="text"
+                name="job_title"
+                value={formData.job_title}
+                onChange={handleChange}
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
 
             <div>
               <label className="block font-semibold mb-1 text-base">Description</label>
-              <textarea name="desc" value={formData.desc} onChange={handleChange} rows={2} className="w-full border rounded px-2 py-1 text-sm" />
+              <textarea
+                name="job_description"
+                value={formData.job_description}
+                onChange={handleChange}
+                rows={2}
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-base">Required Qualification</label>
-              <textarea name="qualification" value={formData.qualification} onChange={handleChange} rows={2} className="w-full border rounded px-2 py-1 text-sm" />
+              <label className="block font-semibold mb-1 text-base">Requirements</label>
+              <textarea
+                name="qualifications"
+                value={formData.qualifications}
+                onChange={handleChange}
+                rows={2}
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
 
             <div>
               <label className="block font-semibold mb-1 text-base">Work Type</label>
               <div className="flex gap-2 mb-1">
-                {["Remote", "On-site", "Hybrid"].map(label => (
+                {["Remote", "On-site", "Hybrid"].map((label) => (
                   <button
                     type="button"
                     key={label}
                     className={`w-24 py-1 rounded-full text-xs font-semibold text-white transition-colors ${
                       formData.type === label ? "bg-blue-600" : "bg-gray-300"
                     }`}
-                    onClick={() => setFormData({ ...formData, type: label })}
+                    onClick={() =>
+                      setFormData((prev) => ({ ...prev, type: label as JobFormValues["type"] }))
+                    }
                   >
                     {label}
                   </button>
@@ -85,27 +125,80 @@ export default function JobForm({ onCancel, onSubmit }: JobFormProps) {
             </div>
 
             <div>
-              <label className="block font-semibold mb-1 text-base">Salary</label>
-              <input type="text" name="salary" value={formData.salary} onChange={handleChange} placeholder="Contoh: Rp. 5.000.000 - Rp. 8.000.000" className="w-full border rounded px-2 py-1 text-sm" />
+              <label className="block font-semibold mb-1 text-base">Salary Min</label>
+              <input
+                type="number"
+                name="salary_min"
+                value={formData.salary_min ?? ""}
+                onChange={handleChange}
+                placeholder="Contoh: 5000000"
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold mb-1 text-base">Salary Max</label>
+              <input
+                type="number"
+                name="salary_max"
+                value={formData.salary_max ?? ""}
+                onChange={handleChange}
+                placeholder="Contoh: 8000000"
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
 
             <div>
               <label className="block font-semibold mb-1 text-base">Location</label>
-              <input type="text" name="location" value={formData.location} onChange={handleChange} className="w-full border rounded px-2 py-1 text-sm" />
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                className="w-full border rounded px-2 py-1 text-sm"
+              />
             </div>
           </div>
 
           <div className="col-span-1 flex flex-col items-center">
             <label className="block font-semibold mb-1 text-base">Company Logo</label>
-            <div onClick={() => fileInputRef.current?.click()} className="w-44 h-28 border-2 border-dashed rounded flex items-center justify-center text-gray-500 text-xs cursor-pointer hover:bg-gray-50">
-              {logoFile ? <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="w-full h-full object-contain p-2" /> : "Unggah"}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-44 h-28 border-2 border-dashed rounded flex items-center justify-center text-gray-500 text-xs cursor-pointer hover:bg-gray-50"
+            >
+              {logoFile || formData.logo ? (
+                <img
+                  src={logoFile ? URL.createObjectURL(logoFile) : formData.logo}
+                  alt="Logo Preview"
+                  className="w-full h-full object-contain p-2"
+                />
+              ) : (
+                "Unggah"
+              )}
             </div>
-            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleLogoChange} className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleLogoChange}
+              className="hidden"
+            />
           </div>
 
-          <div className="col-span-3 flex justify-end gap-2 mt-2">
-            <button type="button" onClick={onCancel} className="px-3 py-1 text-base rounded bg-gray-300 hover:bg-gray-400">Kembali</button>
-            <button type="submit" className="px-3 py-1 text-base rounded bg-blue-600 text-white hover:bg-blue-700">Submit</button>
+          <div className="col-span-3 flex justify-end gap-2 mt-6 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3 py-1 text-base rounded bg-gray-300 hover:bg-gray-400"
+            >
+              Kembali
+            </button>
+            <button
+              type="submit"
+              className="px-3 py-1 text-base rounded bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {initialValues ? "Update" : "Submit"}
+            </button>
           </div>
         </form>
       </div>

@@ -1,3 +1,4 @@
+//src/app/(auth)/login/page.tsx
 "use client";
 
 import Image from "next/image";
@@ -51,7 +52,8 @@ export default function Login() {
   }
 
   return (
-    <section className="flex h-screen relative">
+    <section className="flex flex-col md:flex-row h-screen relative">
+      {/* Tombol Back */}
       <button
         onClick={() => window.history.back()}
         className="absolute top-4 left-4 z-20"
@@ -59,20 +61,47 @@ export default function Login() {
         <Image src="/back.png" alt="Back" width={32} height={32} />
       </button>
 
-      <div className="w-2/5 flex flex-col items-center justify-center bg-white relative z-10">
-        <Image src="/logo-stti.png" alt="Logo STTIS" width={180} height={180} />
-        <h1 className="mt-6 text-3xl font-bold text-[#0A1FB5]">STTICAREER</h1>
+      {/* Bagian Logo */}
+      <div
+        className="
+          w-full 
+          md:w-2/5 
+          flex flex-col items-center justify-center 
+          bg-white relative z-10 p-8
+          h-2/5 md:h-full
+        "
+      >
+        <Image
+          src="/logo-stti.png"
+          alt="Logo STTIS"
+          width={180}
+          height={180}
+          className="w-24 sm:w-32 md:w-44 h-auto"
+        />
+        <h1 className="mt-6 text-2xl sm:text-3xl font-bold text-[#0A1FB5]">
+          STTICAREER
+        </h1>
       </div>
 
-      <div className="w-4/5 relative flex items-center justify-center">
+      {/* Bagian Form */}
+      <div
+        className="
+          w-full 
+          md:w-3/5 
+          relative flex items-center justify-center 
+          bg-[#0A1FB5] md:bg-transparent
+          h-3/5 md:h-full
+        "
+      >
+        {/* Background miring hanya muncul di desktop */}
         <div
-          className="absolute inset-0 bg-[#0A1FB5]"
+          className="hidden md:block absolute inset-0 bg-[#0A1FB5]"
           style={{ clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)" }}
         />
 
         <form
           onSubmit={handleLogin}
-          className="relative z-10 w-3/4 max-w-md text-white"
+          className="relative z-10 w-11/12 sm:w-3/4 max-w-md text-white py-6 md:py-0"
         >
           {error && <p className="mb-4 text-red-300">{error}</p>}
 

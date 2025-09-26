@@ -1,23 +1,14 @@
 import "@/app/globals.css";
-import SidebarAdmin from "@/app/(dashboard)/admin/adminSidebar";
+import AdminLayoutClient from "./AdminLayoutClient";
 
 export const metadata = {
-  title: "STICAREER Admin",
-  description: "Admin Dashboard STICAREER",
+  title: "STTI CAREERS - Admin",
+  description: "Dashboard Admin STTI CAREERS",
   icons: {
     icon: "/logo-stti.png",
   },
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-slate-900">
-      <SidebarAdmin />
-      <main className="flex-1 min-h-screen">{children}</main>
-    </div>
-  );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }

@@ -1,10 +1,11 @@
+// src/app/(dashboard)/admin/notification/page.tsx
 "use client";
 
 import { Construction } from "lucide-react";
 
 export default function NotificationPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
+    <main className="flex h-full flex-col items-center justify-center bg-gray-900 rounded-lg">
       <div className="text-center p-8 rounded-2xl shadow-md bg-white">
         <Construction className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold mb-2">Halaman ini sedang dalam pengembangan</h1>

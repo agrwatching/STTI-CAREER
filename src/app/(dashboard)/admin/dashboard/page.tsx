@@ -1,97 +1,139 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
+
+interface ApplicationType {
+  id?: number;
+  status?: string;
+  [key: string]: unknown; // fleksibel untuk field tambahan
+}
+
+interface DashboardData {
+  users: {
+    total_users: number;
+    total_pelamar: string;
+    total_hr: string;
+    total_admin: string;
+    active_users: string;
+    inactive_users: string;
+  };
+  companies: {
+    total_companies: number;
+    active_companies: number | null;
+  };
+  jobs: {
+    verification_status: string;
+    total: number;
+  }[];
+  applications: ApplicationType[];
+}
 
 const Dashboard: React.FC = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    // Hapus token dan user di localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Unauthorized");
+          return;
+        }
 
-    // Redirect ke login
-    window.location.href = "/login";
-  };
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Gagal ambil data dashboard");
+
+        const json = await res.json();
+        setData(json.data);
+      } catch (err) {
+        console.error(err);
+        setError("Gagal memuat data dashboard");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  if (loading) {
+    return <div className="px-6 py-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="px-6 py-4 text-red-500">{error}</div>;
+  }
+
+  if (!data) return null;
+
+  // Hitung data dari jobs
+  const pendingJobs =
+    data.jobs.find((j) => j.verification_status === "pending")?.total ?? 0;
+  const rejectedJobs =
+    data.jobs.find((j) => j.verification_status === "rejected")?.total ?? 0;
+  const approvedJobs =
+    data.jobs.find((j) => j.verification_status === "approved")?.total ?? 0;
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8 relative">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="flex items-center space-x-3 relative">
-          {/* Foto Profil */}
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-10 h-10 bg-orange-500 rounded-full overflow-hidden focus:outline-none"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-              alt="Admin"
-              className="w-full h-full object-cover"
-            />
-          </button>
-
-          <div>
-            <div className="text-sm font-medium">Admin</div>
-            <div className="text-xs text-gray-400">
-              AdminCareer@gmail.com
-            </div>
-          </div>
-
-          {/* Dropdown */}
-          {dropdownOpen && (
-            <div className="absolute right-0 top-12 w-40 bg-slate-800 rounded-md shadow-lg overflow-hidden z-20">
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm hover:bg-slate-700"
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
+    <>
       {/* Overview Section */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Overview</h2>
+        <h2 className="text-2xl font-semibold mb-4 px-6">Overview</h2>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-4 max-w-4xl">
-        {/* Row 1 */}
+      <div className="grid grid-cols-3 gap-4 max-w-5xl px-6">
+        {/* Users */}
         <div className="bg-slate-800 p-6 rounded-lg">
           <div className="text-gray-400 text-sm mb-2">Total Users</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-2xl font-bold">{data.users.total_users}</div>
         </div>
 
+        {/* Companies */}
         <div className="bg-slate-800 p-6 rounded-lg">
-          <div className="text-gray-400 text-sm mb-2">Total Job Posts</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-gray-400 text-sm mb-2">Total Companies</div>
+          <div className="text-2xl font-bold">
+            {data.companies.total_companies}
+          </div>
         </div>
 
+        {/* Pending Verification */}
         <div className="bg-slate-800 p-6 rounded-lg">
           <div className="text-gray-400 text-sm mb-2">Pending Verification</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-2xl font-bold">{pendingJobs}</div>
         </div>
 
-        {/* Row 2 */}
+        {/* Approved Jobs */}
         <div className="bg-slate-800 p-6 rounded-lg">
-          <div className="text-gray-400 text-sm mb-2">Verified Job</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-gray-400 text-sm mb-2">Verified Jobs</div>
+          <div className="text-2xl font-bold">{approvedJobs}</div>
         </div>
 
+        {/* Rejected Jobs */}
         <div className="bg-slate-800 p-6 rounded-lg">
-          <div className="text-gray-400 text-sm mb-2">Rejected Job</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-gray-400 text-sm mb-2">Rejected Jobs</div>
+          <div className="text-2xl font-bold">{rejectedJobs}</div>
         </div>
 
+        {/* Applications */}
         <div className="bg-slate-800 p-6 rounded-lg">
-          <div className="text-gray-400 text-sm mb-2">Total Application</div>
-          <div className="text-2xl font-bold">1.234</div>
+          <div className="text-gray-400 text-sm mb-2">Total Applications</div>
+          <div className="text-2xl font-bold">{data.applications.length}</div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

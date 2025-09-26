@@ -2,14 +2,14 @@
 import "@/app/globals.css";
 
 export const metadata = {
-  title: "Rules - STTI CAREERS",
+  title: "Register - Company",
   description: "Website resmi STTI CAREERS",
   icons: {
     icon: "/logo-stti.png",
   },
 };
 
-export default function RulesLayout({ children }: { children: React.ReactNode }) {
+export default function RegisterLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head />
