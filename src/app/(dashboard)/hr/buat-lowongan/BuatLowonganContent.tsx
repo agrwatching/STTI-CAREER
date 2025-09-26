@@ -17,21 +17,33 @@ export default function BuatLowonganContent() {
   const [editJob, setEditJob] = useState<JobType | null>(null);
 
   // Ambil data dari backend
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          router.push("/login");
-          return;
-        }
+    // Ambil data dari backend
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const token = localStorage.getItem("token");
+      // ASUMSI: hrId juga disimpan di localStorage, misalnya saat login
+      // Ubah "hrId" sesuai dengan nama key yang Anda gunakan di localStorage
+      const hrId = localStorage.getItem("hrId"); 
+      
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      // Tambahkan pengecekan hrId
+      if (!hrId) {
+        console.error("HR ID not found in localStorage.");
+        // Anda mungkin ingin mengarahkan pengguna ke halaman yang sesuai
+        return; 
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?hrId=${hrId}`, {
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
 
@@ -103,7 +115,7 @@ export default function BuatLowonganContent() {
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -20,27 +20,26 @@ export interface JobApiResponse {
   salary_min: number | null;
   salary_max: number | null;
   location: string;
-  type: WorkType;
-  verification_status: "pending" | "verified" | "rejected";
+  type: WorkType; // UI friendly (Remote, On-site, Hybrid)
+  verification_status: "pending" | "verified" | "rejected"; // Status dari backend
   is_active?: number;
   company_id?: number | null;
   category_id?: number | null;
   created_at?: string;
   updated_at?: string;
   logo?: string;
-  work_type: "on_site" | "remote" | "hybrid" | "field";
+  work_type: "on_site" | "remote" | "hybrid" | "field"; // backend
   work_time: WorkTime;
 }
 
 // Data hasil mapping → untuk UI
+// Disimpan properti yang dibutuhkan JobCard dari data yang sudah diproses/disiapkan
 export interface JobType extends JobApiResponse {
   title: string;
   description: string;
-  requirements: string;  // alias dari qualifications
-  salary_range: string;  // dari salary_min & salary_max
-  statusLabel: string;
-  statusColor: string;
-  icon: React.ReactNode;
+  requirements: string; // alias dari qualifications
+  salary_range: string; // representasi string dari salary_min & salary_max
+  statusLabel: "Tunggu Verifikasi" | "Terverifikasi" | "Tidak Terverifikasi" | string; // Label status yang ditampilkan di UI
 }
 
 // Data untuk form (create/update)
@@ -49,7 +48,7 @@ export interface JobFormValues {
   job_description: string;
   qualifications: string;
   location: string;
-  type: WorkType;  // UI friendly
+  type: WorkType; // UI friendly
   work_type: "on_site" | "remote" | "hybrid" | "field"; // backend
   work_time: WorkTime;
   salary_min: number | null;
