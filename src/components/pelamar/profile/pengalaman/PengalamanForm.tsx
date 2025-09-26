@@ -155,12 +155,12 @@ export default function PengalamanForm({
     }
 
     const payload = formatPayload(data);
-    console.log("POST Request - URL:", "https://apicareer-production.up.railway.app/api/profile/work-experience");
+    console.log("POST Request - URL:", `${process.env.NEXT_PUBLIC_API_URL}/api/profile/work-experience`);
     console.log("POST Request - Payload:", payload);
 
     try {
       const response = await fetch(
-        "https://apicareer-production.up.railway.app/api/profile/work-experience",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile/work-experience`,
         {
           method: "POST",
           headers: {
@@ -325,7 +325,7 @@ export default function PengalamanForm({
       throw new Error("ID pengalaman kerja tidak ditemukan untuk penghapusan.");
     }
 
-    const deleteUrl = `https://apicareer-production.up.railway.app/api/profile/work-experience/${id}`;
+    const deleteUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/work-experience/${id}`;
     console.log("DELETE Request - URL:", deleteUrl);
     console.log("DELETE Request - ID:", id);
 
