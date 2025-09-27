@@ -15,35 +15,32 @@ export default function BuatLowonganContent() {
   const [showForm, setShowForm] = useState(false);
   const [jobs, setJobs] = useState<JobType[]>([]);
   const [editJob, setEditJob] = useState<JobType | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Ambil data dari backend
-    // Ambil data dari backend
-  useEffect(() => {
-    const fetchJobs = async () => {
-      const token = localStorage.getItem("token");
-      // ASUMSI: hrId juga disimpan di localStorage, misalnya saat login
-      // Ubah "hrId" sesuai dengan nama key yang Anda gunakan di localStorage
-      const hrId = localStorage.getItem("hrId"); 
+  // Fetch jobs from API
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const token = localStorage.getItem("token");
+      const hrId = localStorage.getItem("hrId");
       
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      // Tambahkan pengecekan hrId
-      if (!hrId) {
-        console.error("HR ID not found in localStorage.");
-        // Anda mungkin ingin mengarahkan pengguna ke halaman yang sesuai
-        return; 
+      if (!token) {
+        router.push("/login");
+        return;
       }
 
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/?hrId=${hrId}`, {
-         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      if (!hrId) {
+        console.error("HR ID not found in localStorage.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs?hrId=${hrId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
 
@@ -72,17 +69,19 @@ export default function BuatLowonganContent() {
               statusColor = "text-red-600";
               icon = <XCircle className="w-5 h-5 text-red-600" />;
               break;
+            default:
+              statusLabel = "Tunggu Verifikasi";
+              statusColor = "text-blue-600";
+              icon = <Clock className="w-5 h-5 text-blue-600" />;
           }
 
           return {
             ...job,
-            title: job.job_title,
-            description: job.job_description,
+            title: job.job_title?.trim() || "Untitled Position",
+            description: job.job_description?.trim() || "No description available",
             requirements: job.qualifications || "-",
-            salary_range:
-              job.salary_min && job.salary_max
-                ? `Rp ${job.salary_min} - Rp ${job.salary_max}`
-                : "Negotiable",
+            salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`,
+            type: job.work_type === 'remote' ? 'Remote' : job.work_type === 'on_site' ? 'On-site' : 'Hybrid',
             logo: job.logo || "/logo-stti.png",
             statusLabel,
             statusColor,
@@ -92,21 +91,24 @@ export default function BuatLowonganContent() {
 
         setJobs(mappedJobs);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching jobs:", err);
+        alert("Gagal memuat data lowongan");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchJobs();
   }, [router]);
 
-  // Kalau URL ada ?mode=form → buka form
+  // Check URL params for form mode
   useEffect(() => {
     if (searchParams.get("mode") === "form") {
       setShowForm(true);
     }
   }, [searchParams]);
 
-  // Tambah job
+  // Add job via API
   const handleAddJob = async (job: JobFormValues) => {
     try {
       const token = localStorage.getItem("token");
@@ -132,15 +134,15 @@ export default function BuatLowonganContent() {
         setEditJob(null);
         alert("Lowongan berhasil ditambahkan ✅");
       } else {
-        alert(`Gagal tambah job: ${data.message}`);
+        alert(`Gagal tambah job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error adding job:", err);
       alert("Terjadi kesalahan server ❌");
     }
   };
 
-  // Edit job
+  // Edit job via API
   const handleEditJob = async (job: JobFormValues, id: number) => {
     try {
       const token = localStorage.getItem("token");
@@ -161,24 +163,36 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
+        // Update local state
         setJobs((prev) =>
-          prev.map((j) => (j.id === id ? { ...j, ...job } : j))
+          prev.map((j) => (j.id === id ? { 
+            ...j, 
+            ...job,
+            title: job.job_title,
+            description: job.job_description,
+            requirements: job.qualifications,
+            salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`
+          } : j))
         );
         setShowForm(false);
         setEditJob(null);
         alert("Lowongan berhasil diperbarui ✏️");
       } else {
-        alert(`Gagal update job: ${data.message}`);
+        alert(`Gagal update job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error updating job:", err);
       alert("Terjadi kesalahan server ❌");
     }
   };
 
-  // Hapus job
+  // Delete job via API
   const handleDeleteJob = async (id: number) => {
     try {
+      if (!confirm("Apakah Anda yakin ingin menghapus lowongan ini?")) {
+        return;
+      }
+
       const token = localStorage.getItem("token");
       if (!token) {
         router.push("/login");
@@ -197,10 +211,10 @@ export default function BuatLowonganContent() {
         alert("Lowongan berhasil dihapus 🗑️");
       } else {
         const data = await res.json();
-        alert(`Gagal hapus job: ${data.message}`);
+        alert(`Gagal hapus job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error deleting job:", err);
       alert("Terjadi kesalahan server ❌");
     }
   };
@@ -222,14 +236,23 @@ export default function BuatLowonganContent() {
             }
           />
         ) : (
-          <JobList
-            jobs={jobs}
-            onEdit={(job) => {
-              setEditJob(job);
-              setShowForm(true);
-            }}
-            onDelete={handleDeleteJob}
-          />
+          <>
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-500 mt-4">Memuat data lowongan...</p>
+              </div>
+            ) : (
+              <JobList
+                jobs={jobs}
+                onEdit={(job) => {
+                  setEditJob(job);
+                  setShowForm(true);
+                }}
+                onDelete={handleDeleteJob}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

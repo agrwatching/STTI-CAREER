@@ -1,5 +1,4 @@
-import { Pencil, Trash2, Wallet, MapPin } from "lucide-react";
-import Image from "next/image";
+import { Pencil, Trash2 } from "lucide-react";
 import type { JobType } from "./types";
 
 interface JobCardProps {
@@ -23,29 +22,33 @@ export default function JobCard({ job, onEdit, onDelete }: JobCardProps) {
     }
   };
 
-  // Warna status berdasarkan teks dari gambar
+  // Status configuration
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "Terverifikasi":
         return {
           color: "text-green-600",
           borderColor: "border-green-400",
+          bgColor: "bg-green-50"
         };
       case "Tunggu Verifikasi":
         return {
           color: "text-blue-600",
           borderColor: "border-blue-400",
+          bgColor: "bg-blue-50"
         };
       case "Tidak Terverifikasi":
       case "Ditolak":
         return {
           color: "text-red-600",
           borderColor: "border-red-400",
+          bgColor: "bg-red-50"
         };
       default:
         return {
           color: "text-gray-600",
           borderColor: "border-gray-400",
+          bgColor: "bg-gray-50"
         };
     }
   };
@@ -54,82 +57,79 @@ export default function JobCard({ job, onEdit, onDelete }: JobCardProps) {
   const workTypeLabel = getTypeLabel(job.type);
 
   return (
-    // Border samping kiri dihilangkan, hanya border luar
-    <div
-      className={`border-l-4 rounded-xl p-5 mb-4 shadow-md bg-white border-t border-r border-b ${statusConfig.borderColor}`}
-    >
-      
-      {/* Container utama untuk Logo, Detail, dan Badge WFH/WFO */}
+    <div className={`border-l-4 rounded-lg p-5 mb-4 shadow-sm bg-white ${statusConfig.borderColor} border border-gray-200`}>
+      {/* Top section with status and work type badge */}
       <div className="flex justify-between items-start mb-3">
-        {/* Konten Kiri: Logo dan Detail */}
+        {/* Left content: Logo and details */}
         <div className="flex gap-4 flex-1">
-            {/* Logo perusahaan (menggunakan logo dummy PT sesuai gambar) */}
-            <div className="flex-shrink-0 w-16 h-16 relative">
-                <div className="w-full h-full bg-red-600 flex items-center justify-center rounded-md border border-gray-300 overflow-hidden">
-                <span className="text-4xl font-black text-yellow-300 [text-shadow:1px_1px_2px_rgba(0,0,0,0.5)]">
-                    PT
+          {/* Company logo */}
+          <div className="flex-shrink-0 w-16 h-16 relative">
+            <div className="w-full h-full rounded-full bg-red-600 flex items-center justify-center border border-gray-300 overflow-hidden">
+              <span className="text-2xl font-black text-yellow-300 drop-shadow-sm">
+                PT
+              </span>
+            </div>
+          </div>
+
+          {/* Job details */}
+          <div className="flex-1 min-w-0">
+            {/* Status label */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`text-sm font-semibold ${statusConfig.color}`}>
+                {job.statusLabel}
+              </span>
+            </div>
+            
+            {/* Job title */}
+            <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+              {job.title}
+            </h2>
+
+            {/* Job description */}
+            <p className="text-gray-700 text-sm mb-3 leading-relaxed line-clamp-3">
+              {job.description}
+            </p>
+
+            {/* Salary and location info */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600">
+              {/* Salary */}
+              <div className="flex items-center gap-1">
+                <span className="font-medium">
+                  Rp {job.salary_range}
                 </span>
-                </div>
+              </div>
+              {/* Location */}
+              <div className="flex items-center gap-1">
+                <span className="font-medium">
+                  📍 {job.location}
+                </span>
+              </div>
             </div>
-
-            {/* Detail lowongan */}
-            <div className="flex-1 min-w-0">
-                {/* Status Label (di atas Judul) */}
-                <h3 className={`text-sm font-semibold mb-1 ${statusConfig.color}`}>
-                    {job.statusLabel}
-                </h3>
-                
-                {/* Judul lowongan */}
-                <h2 className="text-xl font-bold text-gray-900 mb-2 truncate">{job.title}</h2>
-
-                {/* Deskripsi */}
-                <p className="text-gray-700 text-sm mb-3 line-clamp-2">
-                    {job.description}
-                </p>
-
-                {/* Informasi gaji dan lokasi (Tanpa Ikon) */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
-                    {/* Gaji */}
-                    <span className="flex items-center gap-1.5 font-medium">
-                        {/* Hapus ikon Wallet */}
-                        Rp. {job.salary_range}
-                    </span>
-                    {/* Lokasi */}
-                    <span className="flex items-center gap-1.5 font-medium">
-                        {/* Hapus ikon MapPin */}
-                        {job.location}
-                    </span>
-                </div>
-            </div>
+          </div>
         </div>
 
-        {/* Konten Kanan Atas: Work Type Badge */}
-        <div className="flex-shrink-0">
-            <span
-                // Warna badge WFH/WFO selalu hijau sesuai gambar terbaru
-                className={`bg-green-500 text-white text-xs font-bold px-3 py-0.5 rounded-full uppercase ml-4`}
-            >
-                {workTypeLabel}
-            </span>
+        {/* Work type badge */}
+        <div className="flex-shrink-0 ml-4">
+          <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
+            {workTypeLabel}
+          </span>
         </div>
       </div>
       
-      {/* Action buttons (Di bawah, rata kanan) */}
-      <div className="flex justify-end gap-2 mt-4">
-        {/* Tombol Edit */}
+      {/* Action buttons */}
+      <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
         <button
           onClick={() => onEdit?.(job)}
-          className="flex items-center bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+          className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          {/* Hapus ikon Pencil */}
+          <Pencil className="w-4 h-4" />
           Edit
         </button>
-        {/* Tombol Delete */}
         <button
           onClick={() => job.id && onDelete?.(job.id)}
-          className="flex items-center bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-sm"
+          className="flex items-center gap-1 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
         >
-          {/* Hapus ikon Trash2 */}
+          <Trash2 className="w-4 h-4" />
           Delete
         </button>
       </div>
