@@ -17,8 +17,8 @@ export interface JobApiResponse {
   job_title: string;
   job_description: string;
   qualifications: string;
-  salary_min: number | null;
-  salary_max: number | null;
+  salary_min: number;
+  salary_max: number;
   location: string;
   type: WorkType; // UI friendly (Remote, On-site, Hybrid)
   verification_status: "pending" | "verified" | "rejected"; // Status dari backend
@@ -51,7 +51,7 @@ export interface JobFormValues {
   type: WorkType; // UI friendly
   work_type: "on_site" | "remote" | "hybrid" | "field"; // backend
   work_time: WorkTime;
-  salary_min: number | null;
-  salary_max: number | null;
+  salary_min: number ;
+  salary_max: number ;
   logo?: string;
 }
