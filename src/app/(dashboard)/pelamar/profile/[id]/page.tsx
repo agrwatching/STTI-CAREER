@@ -78,7 +78,7 @@ export default function ProfilePage() {
         throw new Error("Token tidak ditemukan");
       }
 
-      const response = await fetch("https://apicareer-production.up.railway.app/api/profile", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
