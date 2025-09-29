@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 
 type Job = {
   id: number;
-  job_title: string; // ganti ke job_title
+  job_title: string;
   total_applicants: number;
   is_active: number; // 1 = aktif, 0 = ditutup
+  verification_status: "pending" | "verified" | "rejected"; // tambahin field ini
 };
 
 export default function LowonganTable() {
@@ -16,10 +17,9 @@ export default function LowonganTable() {
     const fetchJobs = async () => {
       try {
         const token = localStorage.getItem("token") ?? "";
-        const user = JSON.parse(localStorage.getItem("user") ?? "{}"); // misal user data disimpan di localStorage
+        const user = JSON.parse(localStorage.getItem("user") ?? "{}");
         let url = `${process.env.NEXT_PUBLIC_API_URL}/api/jobs`;
 
-        // kalau role HR → tambahkan hrId
         if (user.role === "hr") {
           url += `?hrId=${user.id}`;
         }
@@ -58,19 +58,23 @@ export default function LowonganTable() {
             </tr>
           </thead>
           <tbody>
-            {jobs.map((job) => (
-              <tr key={job.id} className="border-t hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-3">{job.job_title}</td>
-                <td className="px-6 py-3 text-center">{job.total_applicants ?? 0}</td>
-                <td className="px-6 py-3 text-center">
-                  {job.is_active ? <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Aktif</span> : <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">Ditutup</span>}
-                </td>
-              </tr>
-            ))}
-            {jobs.length === 0 && (
+            {jobs
+              .filter((job) => job.verification_status === "verified") // hanya ambil yang verified
+              .map((job) => (
+                <tr key={job.id} className="border-t hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-3">{job.job_title}</td>
+                  <td className="px-6 py-3 text-center">{job.total_applicants ?? 0}</td>
+                  <td className="px-6 py-3 text-center">
+                    {job.is_active ? <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">Aktif</span> : <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm">Ditutup</span>}
+                  </td>
+                </tr>
+              ))}
+
+            {/* kalau setelah filter ternyata kosong */}
+            {jobs.filter((job) => job.verification_status === "verified").length === 0 && (
               <tr>
                 <td colSpan={3} className="px-6 py-2 text-center text-gray-500 italic">
-                  Belum ada lowongan
+                  Belum ada lowongan terverifikasi 
                 </td>
               </tr>
             )}
