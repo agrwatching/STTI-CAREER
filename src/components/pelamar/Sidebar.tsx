@@ -6,7 +6,13 @@ import Image from "next/image";
 import { Home, BriefcaseBusiness, FileText, Settings, Menu, X } from "lucide-react";
 import { useState } from "react";
 
-const menuItems = [
+interface MenuItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number }>;
+}
+
+const menuItems: MenuItem[] = [
   { name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
   { name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness },
   { name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText },
