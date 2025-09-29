@@ -66,7 +66,7 @@ export default function KeterampilanSection() {
   // Add new skill
   const addSkill = async (skillData: SkillFormData) => {
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/profile`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill`;
       const body = {
         skill_name: skillData.nama,
         skill_level: skillData.level || "Beginner", // default level if not provided
@@ -112,7 +112,7 @@ export default function KeterampilanSection() {
   // Update skill
   const updateSkill = async (skillId: number | string, skillData: SkillFormData) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/${skillId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill/${skillId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
