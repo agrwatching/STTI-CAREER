@@ -130,7 +130,7 @@ export default function Navbar() {
         return;
       }
 
-      const response = await fetch('https://apicareer-production.up.railway.app/api/profile', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
