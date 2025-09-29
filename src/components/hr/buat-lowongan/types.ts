@@ -39,8 +39,11 @@ export interface JobType extends JobApiResponse {
   description: string;
   requirements: string; // alias dari qualifications
   salary_range: string; // representasi string dari salary_min & salary_max
-  statusLabel: "Tunggu Verifikasi" | "Terverifikasi" | "Tidak Terverifikasi" | string; // Label status yang ditampilkan di UI
+  statusLabel: "Tunggu Verifikasi" | "Terverifikasi" | "Ditolak" | string; // Label status
+  statusColor: string; // 🔥 tambahan
+  icon: React.ReactNode; // 🔥 tambahan
 }
+
 
 // Data untuk form (create/update)
 export interface JobFormValues {

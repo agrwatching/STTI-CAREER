@@ -95,7 +95,7 @@ export default function JobCard({ job, onEdit, onDelete }: JobCardProps) {
               {/* Salary */}
               <div className="flex items-center gap-1">
                 <span className="font-medium">
-                  Rp {job.salary_range}
+                  {job.salary_range}
                 </span>
               </div>
               {/* Location */}
