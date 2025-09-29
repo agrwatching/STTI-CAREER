@@ -1,18 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import KeterampilanForm from "./KeterampilanForm";
 
+interface Skill {
+  id?: number | string;
+  _id?: number | string;
+  skill_name?: string;
+  nama?: string;
+  name?: string;
+  skill_level?: string;
+  level?: string;
+  deskripsi?: string; // ⬅️ tambah ini biar match dengan Form
+
+}
+
+interface SkillFormData {
+  nama: string;
+  level?: string;
+}
+
+
 export default function KeterampilanSection() {
   const [showForm, setShowForm] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
-  const [skills, setSkills] = useState([]);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // API Base URL - sesuaikan dengan URL API Anda
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   
   // Get JWT token from localStorage or wherever you store it
   const getAuthToken = () => {
@@ -20,10 +36,10 @@ export default function KeterampilanSection() {
   };
 
   // Fetch skills from API
-  const fetchSkills = async () => {
+  const fetchSkills = useCallback (async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -44,12 +60,12 @@ export default function KeterampilanSection() {
     } finally {
       setLoading(false);
     }
-  };
+  },[]);
 
   // Add new skill
-  const addSkill = async (skillData) => {
+  const addSkill = async (skillData: SkillFormData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,9 +92,9 @@ export default function KeterampilanSection() {
   };
 
   // Update skill
-  const updateSkill = async (skillId, skillData) => {
+  const updateSkill = async (skillId: number | string, skillData: SkillFormData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill/${skillId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -105,9 +121,9 @@ export default function KeterampilanSection() {
   };
 
   // Delete skill
-  const deleteSkill = async (skillId) => {
+  const deleteSkill = async (skillId: number | string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/skill/${skillId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -132,22 +148,22 @@ export default function KeterampilanSection() {
   // Load skills on component mount
   useEffect(() => {
     fetchSkills();
-  }, []);
+  }, [fetchSkills]);
 
   const handleAdd = () => {
     setEditIndex(null);
     setShowForm(true);
   };
 
-  const handleEdit = (idx) => {
+  const handleEdit = (idx: number) => {
     setEditIndex(idx);
     setShowForm(true);
   };
 
-  const handleDelete = async (idx) => {
+  const handleDelete = async (idx: number) => {
     if (confirm("Yakin mau hapus keterampilan ini?")) {
       const skill = skills[idx];
-      const success = await deleteSkill(skill.id || skill._id);
+      const success = await deleteSkill(skill.id ?? skill._id ?? "");
       if (!success) {
         alert('Gagal menghapus keterampilan. Silakan coba lagi.');
       }
@@ -159,13 +175,13 @@ export default function KeterampilanSection() {
     setEditIndex(null);
   };
 
-  const handleSave = async (data) => {
+  const handleSave = async (data: SkillFormData) => {
     let success = false;
     
     if (editIndex !== null) {
       // Update existing skill
       const skill = skills[editIndex];
-      success = await updateSkill(skill.id || skill._id, data);
+      success = await updateSkill(skill.id ?? skill._id ?? "", data);
     } else {
       // Add new skill
       success = await addSkill(data);
@@ -229,12 +245,20 @@ export default function KeterampilanSection() {
 
         {/* Content */}
         {showForm ? (
-          <KeterampilanForm 
+         <KeterampilanForm 
             mode={editIndex === null ? "add" : "edit"} 
-            initialData={editIndex !== null ? skills[editIndex] : undefined} 
+            initialData={
+              editIndex !== null 
+                ? {
+                    nama: skills[editIndex].nama || skills[editIndex].skill_name || "",
+                    deskripsi: skills[editIndex].deskripsi || ""
+                  } 
+                : undefined
+            }
             onCancel={handleCancel} 
             onSave={handleSave} 
           />
+
         ) : (
           <div className="max-h-80 overflow-y-auto pr-1">
             {skills.length === 0 ? (
