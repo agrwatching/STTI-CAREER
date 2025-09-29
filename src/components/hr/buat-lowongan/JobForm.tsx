@@ -92,7 +92,7 @@ export default function JobForm({ onCancel, onSubmit, initialValues }: JobFormPr
   };
 
   return (
-    <div className="max-h-screen flex justify-center items-start bg-gray-50 p-4 overflow-y-auto">
+    <div className="max-h-screen flex justify-center items-start bg-gray-50 p-4">
       <div className="bg-white rounded-lg shadow-md p-4 w-full mx-auto text-xl my-4">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="col-span-2 space-y-2">
