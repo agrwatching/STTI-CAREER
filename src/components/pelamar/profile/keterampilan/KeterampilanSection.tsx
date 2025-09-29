@@ -1,29 +1,52 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Edit, X, Upload, AlertCircle, CheckCircle, Wifi, WifiOff } from "lucide-react";
+import { Pencil, Trash2, Plus, X, WifiOff, CheckCircle, AlertCircle, Wifi, Edit, Upload } from "lucide-react";
 import KeterampilanForm from "./KeterampilanForm";
+
+interface Skill {
+  id?: number | string;
+  _id?: number | string;
+  skill_name?: string;
+  nama?: string;
+  name?: string;
+  skill_level?: string;
+  level?: string;
+  deskripsi?: string;
+}
+
+interface SkillFormData {
+  nama: string;
+  level?: string;
+}
+
+interface FileData {
+  projectFiles: any;
+  cv: any;
+  certificate: any;
+}
 
 export default function KeterampilanSection() {
   const [showForm, setShowForm] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [skills, setSkills] = useState([]);
-  const [portfolioLinks, setPortfolioLinks] = useState([]);
-  const [files, setFiles] = useState({
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [authStatus, setAuthStatus] = useState('checking');
+  const [portfolioLinks, setPortfolioLinks] = useState<string[]>([]);
+  const [files, setFiles] = useState<FileData>({
     projectFiles: null,
     cv: null,
     certificate: null
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [authStatus, setAuthStatus] = useState('checking'); // 'checking', 'authenticated', 'unauthenticated', 'expired'
-  const [isOnline, setIsOnline] = useState(true);
 
-  // API Base URL
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://apicareer-production.up.railway.app';
+  // API Base URL - sesuaikan dengan URL API Anda
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   
   // Token management with multiple possible keys
-  const getAuthToken = () => {
+  const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
     
     const possibleKeys = ['jwt_token', 'token', 'authToken', 'accessToken'];
@@ -37,78 +60,84 @@ export default function KeterampilanSection() {
   };
 
   // Check if user is authenticated
-  const isAuthenticated = () => {
+  const isAuthenticated = (): boolean => {
     const token = getAuthToken();
-    return token && token !== 'YOUR_JWT_TOKEN' && token.length > 10;
+    return !!(token && token !== 'YOUR_JWT_TOKEN' && token.length > 10);
   };
 
-  // Clear all possible token keys
-  const clearAuthTokens = () => {
-    const possibleKeys = ['jwt_token', 'token', 'authToken', 'accessToken'];
-    possibleKeys.forEach(key => {
-      localStorage.removeItem(key);
-    });
-  };
-
-  // Check online status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Initial check
-    setIsOnline(navigator.onLine);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Load dummy data for offline/demo mode
-  const loadDummyData = (reason = 'offline') => {
-    setSkills(['Html', 'Javascript', 'TypeScript', 'Figma']);
-    setPortfolioLinks(['http://moohzhal.vercel.app']);
+  // Clear auth tokens
+  const clearAuthTokens = (): void => {
+    if (typeof window === 'undefined') return;
     
-    if (reason === 'offline') {
-      setError('Mode offline - menampilkan data demo');
-      setAuthStatus('unauthenticated');
-    } else if (reason === 'expired') {
-      setError('Token kedaluwarsa - menampilkan data demo');
-      setAuthStatus('expired');
-    } else if (reason === 'no-token') {
-      setError('Belum login - menampilkan data demo');
-      setAuthStatus('unauthenticated');
+    const possibleKeys = ['jwt_token', 'token', 'authToken', 'accessToken'];
+    possibleKeys.forEach(key => localStorage.removeItem(key));
+  };
+
+  // Load dummy data for different scenarios
+  const loadDummyData = (scenario: string): void => {
+    const dummySkills: Skill[] = [
+      { id: 1, nama: 'JavaScript', level: 'Advanced' },
+      { id: 2, nama: 'React', level: 'Intermediate' },
+      { id: 3, nama: 'TypeScript', level: 'Intermediate' }
+    ];
+
+    const dummyPortfolioLinks = ['https://github.com/example', 'https://portfolio.example.com'];
+
+    switch (scenario) {
+      case 'expired':
+        setSkills(dummySkills);
+        setPortfolioLinks(dummyPortfolioLinks);
+        setAuthStatus('expired');
+        break;
+      case 'no-permission':
+        setSkills(dummySkills.slice(0, 2));
+        setPortfolioLinks([dummyPortfolioLinks[0]]);
+        setAuthStatus('unauthenticated');
+        break;
+      case 'error':
+        setSkills(dummySkills);
+        setPortfolioLinks(dummyPortfolioLinks);
+        setAuthStatus('unauthenticated');
+        break;
+      default:
+        setSkills(dummySkills);
+        setPortfolioLinks(dummyPortfolioLinks);
+        setAuthStatus('unauthenticated');
     }
   };
 
-  // Fetch skills from API with comprehensive error handling
-  const fetchSkills = async () => {
+  // Save skills data to API
+  const saveSkillsData = async (data: any): Promise<boolean> => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      return response.ok;
+    } catch (err) {
+      console.error('Error saving skills:', err);
+      return false;
+    }
+  };
+
+  // Fetch skills from API
+  const fetchSkills = async (): Promise<void> => {
     try {
       setLoading(true);
-      setError(null);
-
-      // Check online status
-      if (!isOnline) {
-        loadDummyData('offline');
-        setLoading(false);
-        return;
-      }
-
-      // Check authentication
-      if (!isAuthenticated()) {
-        console.warn('No valid authentication token found');
-        loadDummyData('no-token');
-        setLoading(false);
-        return;
-      }
-
       const token = getAuthToken();
-      setAuthStatus('checking');
+      
+      if (!token || !isAuthenticated()) {
+        loadDummyData('no-permission');
+        setLoading(false);
+        return;
+      }
 
-      const response = await fetch(`${API_BASE_URL}/api/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -143,13 +172,17 @@ export default function KeterampilanSection() {
       // Process skills data
       if (data.skills) {
         const skillsArray = typeof data.skills === 'string' 
-          ? data.skills.split(', ').filter(skill => skill.trim()) 
+          ? data.skills.split(', ').filter((skill: string) => skill.trim()).map((skill: string, index: number) => ({ id: index + 1, nama: skill }))
           : Array.isArray(data.skills) 
-            ? data.skills.map(skill => {
+            ? data.skills.map((skill: any, index: number) => {
                 if (typeof skill === 'object') {
-                  return skill.skill_name || skill.name || skill.nama || skill;
+                  return {
+                    id: skill.id || skill._id || index + 1,
+                    nama: skill.skill_name || skill.name || skill.nama || skill,
+                    level: skill.skill_level || skill.level || 'Beginner'
+                  };
                 }
-                return skill;
+                return { id: index + 1, nama: skill };
               })
             : [];
         setSkills(skillsArray);
@@ -175,7 +208,7 @@ export default function KeterampilanSection() {
         });
       }
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching skills:', err);
       
       if (err.name === 'NetworkError' || err.message.includes('Failed to fetch')) {
@@ -191,45 +224,50 @@ export default function KeterampilanSection() {
     }
   };
 
-  // Save skills data with comprehensive error handling
-  const saveSkillsData = async (skillsData) => {
+  // Add new skill
+  const addSkill = async (skillData: SkillFormData): Promise<boolean> => {
     try {
-      const newSkillsArray = skillsData.nama.split(', ').filter(skill => skill.trim());
-
-      // Always update local state first for immediate feedback
-      setSkills(newSkillsArray);
-
-      // If offline or not authenticated, just save locally
-      if (!isOnline || !isAuthenticated()) {
-        if (!isOnline) {
-          setError('Mode offline - perubahan disimpan lokal');
-        } else {
-          setError('Belum login - perubahan disimpan lokal');
-        }
-        return true;
-      }
-
       const token = getAuthToken();
-      
-      // Try to save to API
-      const response = await fetch(`${API_BASE_URL}/api/profile/skills`, {
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          skills: skillsData.nama,
+          skills: skillData.nama,
           portfolio_links: portfolioLinks,
         }),
       });
 
-      if (response.status === 401) {
-        clearAuthTokens();
-        setAuthStatus('expired');
-        setError('Token kedaluwarsa - perubahan disimpan lokal');
-        return true;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      // Refresh skills list
+      await fetchSkills();
+      return true;
+    } catch (err) {
+      console.error('Error adding skill:', err);
+      setError('Gagal menambah keterampilan');
+      return false;
+    }
+  };
+
+  // Update skill
+  const updateSkill = async (skillId: string | number, skillData: SkillFormData): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({
+          skill_name: skillData.nama,
+          skill_level: skillData.level || 'Beginner',
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -240,21 +278,37 @@ export default function KeterampilanSection() {
       setAuthStatus('authenticated');
       
       // Optionally refresh data from server
-      // await fetchSkills();
+      await fetchSkills();
       
       return true;
     } catch (err) {
-      console.error('Error saving skills:', err);
-      
-      // Even if API fails, we've already updated local state
-      if (err.name === 'NetworkError' || err.message.includes('Failed to fetch')) {
-        setError('Koneksi bermasalah - perubahan disimpan lokal');
-        setIsOnline(false);
-      } else {
-        setError(`API error - perubahan disimpan lokal: ${err.message}`);
+      console.error('Error updating skill:', err);
+      setError('Gagal mengupdate keterampilan');
+      return false;
+    }
+  };
+
+  // Delete skill
+  const deleteSkill = async (skillId: string | number): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return true; // Return true because local save succeeded
+      await fetchSkills();
+      return true;
+    } catch (err) {
+      console.error('Error deleting skill:', err);
+      setError('Gagal menghapus keterampilan');
+      return false;
     }
   };
 
@@ -265,32 +319,104 @@ export default function KeterampilanSection() {
 
   // Auto retry when coming back online
   useEffect(() => {
-    if (isOnline && authStatus === 'unauthenticated' && isAuthenticated()) {
-      fetchSkills();
-    }
-  }, [isOnline, authStatus]);
+    const handleOnline = () => {
+      setIsOnline(true);
+      if (authStatus === 'unauthenticated' && isAuthenticated()) {
+        fetchSkills();
+      }
+    };
 
-  const handleEditClick = () => {
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [authStatus]);
+
+  const handleEditClick = (): void => {
     setEditMode(true);
     setShowForm(true);
   };
 
-  const handleAddSkill = () => {
-    setEditMode(false);
+  const handleEdit = (idx: number): void => {
+    setEditIndex(idx);
     setShowForm(true);
+    setEditMode(true);
   };
 
-  const handleCancel = () => {
+  const handleDelete = async (idx: number): Promise<void> => {
+    if (confirm("Yakin mau hapus keterampilan ini?")) {
+      const skill = skills[idx];
+      
+      if (isOnline && isAuthenticated() && (skill.id || skill._id)) {
+        const success = await deleteSkill(skill.id || skill._id!);
+        if (!success) {
+          alert('Gagal menghapus keterampilan. Silakan coba lagi.');
+        }
+      } else {
+        // Local delete
+        const newSkills = skills.filter((_, index) => index !== idx);
+        setSkills(newSkills);
+        setError('Skill dihapus - perubahan disimpan lokal');
+      }
+    }
+  };
+
+  const handleAddSkill = (): void => {
+    setEditIndex(null);
+    setShowForm(true);
+    setEditMode(true);
+  };
+
+  const handleCancel = (): void => {
     setShowForm(false);
     setEditMode(false);
+    setEditIndex(null);
   };
 
-  const handleSave = async (data) => {
-    const success = await saveSkillsData(data);
+  const handleSave = async (data: SkillFormData): Promise<void> => {
+    let success = false;
     
+    if (editIndex !== null) {
+      // Update existing skill
+      const skill = skills[editIndex];
+      if (isOnline && isAuthenticated() && (skill.id || skill._id)) {
+        success = await updateSkill(skill.id || skill._id!, data);
+      } else {
+        // Local update
+        const newSkills = [...skills];
+        newSkills[editIndex] = { ...newSkills[editIndex], ...data };
+        setSkills(newSkills);
+        success = true;
+        setError('Perubahan disimpan lokal');
+      }
+    } else {
+      // Add new skill
+      if (isOnline && isAuthenticated()) {
+        success = await addSkill(data);
+      } else {
+        // Local add
+        const newSkill: Skill = {
+          id: Date.now(),
+          nama: data.nama,
+          level: data.level
+        };
+        setSkills([...skills, newSkill]);
+        success = true;
+        setError('Skill ditambahkan - perubahan disimpan lokal');
+      }
+    }
+
     if (success) {
       setShowForm(false);
       setEditMode(false);
+      setEditIndex(null);
       
       // Show success message briefly
       const originalError = error;
@@ -303,20 +429,20 @@ export default function KeterampilanSection() {
     }
   };
 
-  const removeSkill = async (skillToRemove) => {
+  const removeSkill = async (skillToRemove: Skill): Promise<void> => {
     const updatedSkills = skills.filter(skill => skill !== skillToRemove);
     setSkills(updatedSkills);
     
     // Try to save to API if possible
     if (isOnline && isAuthenticated()) {
-      await saveSkillsData({ nama: updatedSkills.join(', ') });
+      await saveSkillsData({ nama: updatedSkills.map(s => s.nama).join(', ') });
     } else {
       setError('Skill dihapus - perubahan disimpan lokal');
     }
   };
 
   // Retry function for failed requests
-  const handleRetry = () => {
+  const handleRetry = (): void => {
     fetchSkills();
   };
 
@@ -360,8 +486,8 @@ export default function KeterampilanSection() {
       <div className="max-w-5xl mx-auto">
         {showForm ? (
           <KeterampilanForm 
-            mode={editMode ? "edit" : "add"} 
-            initialData={editMode ? { nama: skills.join(', ') } : undefined} 
+            mode={editIndex === null ? "add" : "edit"} 
+            initialData={editIndex !== null ? skills[editIndex] : undefined} 
             onCancel={handleCancel} 
             onSave={handleSave} 
           />
@@ -441,7 +567,7 @@ export default function KeterampilanSection() {
                       key={index}
                       className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 transition-colors"
                     >
-                      {skill}
+                      {skill.nama || skill.name || skill.skill_name}
                       <button
                         onClick={() => removeSkill(skill)}
                         className="ml-2 hover:text-blue-600 transition-colors"
@@ -511,9 +637,9 @@ export default function KeterampilanSection() {
                       <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center mb-3">
                         <Upload className="w-6 h-6 text-gray-500" />
                       </div>
-                      {files[item.key] ? (
+                      {files[item.key as keyof FileData] ? (
                         <p className="text-xs text-green-600 font-medium">
-                          📎 {files[item.key].name || `${item.key}_file.pdf`}
+                          📎 {files[item.key as keyof FileData]?.name || `${item.key}_file.pdf`}
                         </p>
                       ) : (
                         <p className="text-xs text-gray-500">

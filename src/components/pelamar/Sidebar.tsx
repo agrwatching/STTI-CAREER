@@ -56,9 +56,9 @@ const translations: TranslationSet = {
 };
 
 const menuItems: MenuItem[] = [
-  { name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home, key: "Data Pribadi" },
-  { name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness, key: "Simpan Lowongan" },
-  { name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText, key: "Lamaran saya" },
+  { key: "Data Pribadi", name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
+  { key: "Simpan Lowongan", name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness },
+  { key: "Lamaran saya", name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText },
 ];
 
 export default function Sidebar() {
