@@ -28,10 +28,8 @@ export default function ProfileHeader({
               fill
               className="rounded-full object-cover"
               onError={(e) => {
-                // Fallback jika gambar gagal dimuat
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
-                // Tampilkan div dengan initial sebagai fallback
                 const parentDiv = target.parentElement;
                 if (parentDiv) {
                   parentDiv.innerHTML = `
