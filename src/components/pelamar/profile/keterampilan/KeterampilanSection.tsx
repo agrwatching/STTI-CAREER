@@ -257,7 +257,7 @@ export default function KeterampilanSection() {
   });
   const [currentLanguage, setCurrentLanguage] = useState('id');
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backendstticareer-123965511401.asia-southeast2.run.app';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
   
   // Translation helper function
   const t = (key: keyof typeof translations): string => {
