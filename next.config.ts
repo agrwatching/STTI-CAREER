@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       // ✅ tambahkan domain API kamu di sini
       {
         protocol: "https",
-        hostname: "apicareer-production.up.railway.app",
+        hostname: "backendstticareer-123965511401.asia-southeast2.run.app",
       },
     ],
   },
