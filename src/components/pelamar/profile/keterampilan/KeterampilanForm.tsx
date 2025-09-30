@@ -3,11 +3,17 @@
 import { useState, useEffect } from "react";
 import { Plus, X, Upload } from "lucide-react";
 
+type SkillFormData = {
+  nama: string;
+  level?: string;
+  deskripsi?: string;
+};
+
 type Props = {
   mode: "add" | "edit";
-  initialData?: { nama: string };
+  initialData?: SkillFormData;
   onCancel: () => void;
-  onSave: (data: { nama: string }) => void;
+  onSave: (data: SkillFormData) => void;
 };
 
 // Translation object
