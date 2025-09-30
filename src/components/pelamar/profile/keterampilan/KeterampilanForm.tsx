@@ -352,7 +352,7 @@ export default function KeterampilanForm({
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('id');
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+  const API_BASE_URL = 'https://backendstticareer-123965511401.asia-southeast2.run.app';
 
   // Translation helper function
   const t = (key: keyof typeof translations): string => {
