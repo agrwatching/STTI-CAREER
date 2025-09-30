@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Pencil, Trash2, Plus, X, WifiOff, CheckCircle, AlertCircle, Wifi, Edit, Upload } from "lucide-react";
 import KeterampilanForm from "./KeterampilanForm";
 
@@ -15,11 +15,13 @@ interface Skill {
   user_id?: number;
   created_at?: string;
   updated_at?: string;
+  deskripsi?: string;
 }
 
 interface SkillFormData {
   nama: string;
   level?: string;
+  deskripsi?: string;
 }
 
 interface FileData {
@@ -50,7 +52,7 @@ export default function KeterampilanSection() {
     cover_letter_file_url: null
   });
 
-  const API_BASE_URL = 'https://backendstticareer-123965511401.asia-southeast2.run.app';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backendstticareer-123965511401.asia-southeast2.run.app';
   
   const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
@@ -109,7 +111,7 @@ export default function KeterampilanSection() {
     }
   };
 
-  const fetchSkills = async (): Promise<void> => {
+  const fetchSkills = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
       const token = getAuthToken();
@@ -175,10 +177,11 @@ export default function KeterampilanSection() {
           user_id: skill.user_id,
           skill_name: skill.skill_name,
           skill_level: skill.skill_level,
-          nama: skill.skill_name, // alias untuk compatibility
-          level: skill.skill_level, // alias untuk compatibility
+          nama: skill.skill_name,
+          level: skill.skill_level,
           created_at: skill.created_at,
-          updated_at: skill.updated_at
+          updated_at: skill.updated_at,
+          deskripsi: skill.deskripsi || ''
         }));
         
         setSkills(skillsArray);
@@ -201,8 +204,6 @@ export default function KeterampilanSection() {
       setFiles(fileData);
       console.log('Files loaded:', fileData);
 
-      // Portfolio links - bisa ditambahkan jika ada di response
-      // Untuk sementara kosongkan karena tidak ada di response
       setPortfolioLinks([]);
       
     } catch (err: any) {
@@ -219,7 +220,7 @@ export default function KeterampilanSection() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE_URL]);
 
   const addSkill = async (skillData: SkillFormData): Promise<boolean> => {
     try {
@@ -352,7 +353,7 @@ export default function KeterampilanSection() {
 
   useEffect(() => {
     fetchSkills();
-  }, []);
+  }, [fetchSkills]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -373,7 +374,7 @@ export default function KeterampilanSection() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [authStatus]);
+  }, [authStatus, fetchSkills]);
 
   const handleEditClick = (): void => {
     setEditMode(true);
@@ -420,7 +421,7 @@ export default function KeterampilanSection() {
 
   const handleSave = async (data: SkillFormData): Promise<void> => {
     let success = false;
-    
+
     if (editIndex !== null) {
       const skill = skills[editIndex];
       if (isOnline && isAuthenticated() && skill.id) {
@@ -432,7 +433,8 @@ export default function KeterampilanSection() {
           skill_name: data.nama,
           nama: data.nama,
           skill_level: data.level,
-          level: data.level
+          level: data.level,
+          deskripsi: data.deskripsi
         };
         setSkills(newSkills);
         success = true;
@@ -447,7 +449,8 @@ export default function KeterampilanSection() {
           skill_name: data.nama,
           nama: data.nama,
           skill_level: data.level || 'Beginner',
-          level: data.level || 'Beginner'
+          level: data.level || 'Beginner',
+          deskripsi: data.deskripsi
         };
         setSkills([...skills, newSkill]);
         success = true;
@@ -468,7 +471,7 @@ export default function KeterampilanSection() {
         }, 2000);
       }
     } else {
-      alert('Gagal menyimpan keterampilan. Silakan coba lagi.');
+      alert("Gagal menyimpan keterampilan. Silakan coba lagi.");
     }
   };
 
@@ -536,7 +539,8 @@ export default function KeterampilanSection() {
             mode={editIndex === null ? "add" : "edit"} 
             initialData={editIndex !== null ? {
               nama: skills[editIndex]?.skill_name || skills[editIndex]?.nama || '',
-              level: skills[editIndex]?.skill_level || skills[editIndex]?.level
+              level: skills[editIndex]?.skill_level || skills[editIndex]?.level,
+              deskripsi: skills[editIndex]?.deskripsi || ''
             } : undefined} 
             onCancel={handleCancel} 
             onSave={handleSave} 

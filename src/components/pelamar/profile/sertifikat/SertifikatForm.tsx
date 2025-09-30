@@ -1,7 +1,7 @@
   "use client";
   import { useRef, useState } from "react";
 
-  const API_BASE_URL = "https://apicareer-production.up.railway.app/api/profile";
+  const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/profile`;
 
   type SertifikatFormProps = {
     mode?: "add" | "edit";

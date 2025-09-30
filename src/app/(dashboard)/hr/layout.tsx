@@ -1,4 +1,5 @@
 //src/app/%28dashboard%29/hr/layout.tsx
+import { Toaster } from "react-hot-toast";
 import HRLayoutClient from "./HRLayoutClient";
 import "@/app/globals.css";
 
@@ -11,5 +12,7 @@ export const metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <HRLayoutClient>{children}</HRLayoutClient>;
+  return <HRLayoutClient>{children}
+    <Toaster />
+  </HRLayoutClient>;
 }

@@ -484,7 +484,7 @@ export default function PengalamanForm({
     }
 
     const payload = formatPayload(data);
-    const updateUrl = `https://apicareer-production.up.railway.app/api/profile/work-experience/${data.id}`;
+    const updateUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/work-experience/${data.id}`;
     
     console.log("PUT Request - URL:", updateUrl);
     console.log("PUT Request - ID:", data.id);
