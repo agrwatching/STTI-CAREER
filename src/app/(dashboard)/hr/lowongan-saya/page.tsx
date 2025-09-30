@@ -1,6 +1,13 @@
 import LowonganSayaTable from "@/components/hr/lowongan-saya/LowonganSayaTable";
 import type { Job } from "@/components/hr/lowongan-saya/LowonganSayaTable";
 
+interface JobApiResponseItem {
+  hr_id: string;
+  job_title: string;
+  created_at: string;
+  verification_status: string;
+}
+
 export default async function LowonganSayaPage() {
   // Mengirim request ke API untuk mendapatkan data lowongan pekerjaan
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
@@ -19,9 +26,9 @@ export default async function LowonganSayaPage() {
   // Memeriksa apakah data yang diterima sesuai format yang diharapkan
   if (data?.data && Array.isArray(data.data)) {
     // Memetakan data dari API ke format yang dibutuhkan oleh komponen LowonganSayaTable
-    jobs = data.data.map((item: any) => ({
+    jobs = data.data.map((item: JobApiResponseItem) => ({
       hr_id: item.hr_id,
-      posisi: item.job_title, 
+      posisi: item.job_title,
       tanggal: new Date(item.created_at).toLocaleDateString("id-ID"), // Mengubah tanggal pembuatan ke format tanggal Indonesia
       status: convertStatus(item.verification_status), // Mengkonversi status verifikasi ke status yang dapat ditampilkan
     }));
