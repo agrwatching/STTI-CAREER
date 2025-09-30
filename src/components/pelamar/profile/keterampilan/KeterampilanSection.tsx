@@ -12,7 +12,9 @@ interface Skill {
   name?: string;
   skill_level?: string;
   level?: string;
-  deskripsi?: string;
+  user_id?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface SkillFormData {
@@ -21,9 +23,12 @@ interface SkillFormData {
 }
 
 interface FileData {
-  projectFiles: any;
-  cv: any;
-  certificate: any;
+  portfolio_file: string | null;
+  cv_file: string | null;
+  cover_letter_file: string | null;
+  portfolio_file_url?: string | null;
+  cv_file_url?: string | null;
+  cover_letter_file_url?: string | null;
 }
 
 export default function KeterampilanSection() {
@@ -37,15 +42,16 @@ export default function KeterampilanSection() {
   const [authStatus, setAuthStatus] = useState('checking');
   const [portfolioLinks, setPortfolioLinks] = useState<string[]>([]);
   const [files, setFiles] = useState<FileData>({
-    projectFiles: null,
-    cv: null,
-    certificate: null
+    portfolio_file: null,
+    cv_file: null,
+    cover_letter_file: null,
+    portfolio_file_url: null,
+    cv_file_url: null,
+    cover_letter_file_url: null
   });
 
-  // API Base URL - sesuaikan dengan URL API Anda
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const API_BASE_URL = 'https://backendstticareer-123965511401.asia-southeast2.run.app';
   
-  // Token management with multiple possible keys
   const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
     
@@ -59,13 +65,11 @@ export default function KeterampilanSection() {
     return null;
   };
 
-  // Check if user is authenticated
   const isAuthenticated = (): boolean => {
     const token = getAuthToken();
     return !!(token && token !== 'YOUR_JWT_TOKEN' && token.length > 10);
   };
 
-  // Clear auth tokens
   const clearAuthTokens = (): void => {
     if (typeof window === 'undefined') return;
     
@@ -73,12 +77,11 @@ export default function KeterampilanSection() {
     possibleKeys.forEach(key => localStorage.removeItem(key));
   };
 
-  // Load dummy data for different scenarios
   const loadDummyData = (scenario: string): void => {
     const dummySkills: Skill[] = [
-      { id: 1, nama: 'JavaScript', level: 'Advanced' },
-      { id: 2, nama: 'React', level: 'Intermediate' },
-      { id: 3, nama: 'TypeScript', level: 'Intermediate' }
+      { id: 1, skill_name: 'JavaScript', skill_level: 'Advanced' },
+      { id: 2, skill_name: 'React', skill_level: 'Intermediate' },
+      { id: 3, skill_name: 'TypeScript', skill_level: 'Intermediate' }
     ];
 
     const dummyPortfolioLinks = ['https://github.com/example', 'https://portfolio.example.com'];
@@ -106,50 +109,36 @@ export default function KeterampilanSection() {
     }
   };
 
-  // Save skills data to API
-  const saveSkillsData = async (data: any): Promise<boolean> => {
-    try {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      });
-      return response.ok;
-    } catch (err) {
-      console.error('Error saving skills:', err);
-      return false;
-    }
-  };
-
-  // Fetch skills from API
   const fetchSkills = async (): Promise<void> => {
     try {
       setLoading(true);
       const token = getAuthToken();
       
       if (!token || !isAuthenticated()) {
+        console.warn('No valid token found');
         loadDummyData('no-permission');
         setLoading(false);
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
+      console.log('Fetching profile data from:', `${API_BASE_URL}/api/profile`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/profile`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
       });
 
-      // Handle different response statuses
+      console.log('Response status:', response.status);
+
       if (response.status === 401) {
         console.warn('Authentication token expired or invalid');
         clearAuthTokens();
         loadDummyData('expired');
+        setError('Token kedaluwarsa. Silakan login ulang.');
         setLoading(false);
         return;
       }
@@ -163,53 +152,61 @@ export default function KeterampilanSection() {
       }
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setAuthStatus('authenticated');
+      const result = await response.json();
+      console.log('Profile data received:', result);
 
-      // Process skills data
-      if (data.skills) {
-        const skillsArray = typeof data.skills === 'string' 
-          ? data.skills.split(', ').filter((skill: string) => skill.trim()).map((skill: string, index: number) => ({ id: index + 1, nama: skill }))
-          : Array.isArray(data.skills) 
-            ? data.skills.map((skill: any, index: number) => {
-                if (typeof skill === 'object') {
-                  return {
-                    id: skill.id || skill._id || index + 1,
-                    nama: skill.skill_name || skill.name || skill.nama || skill,
-                    level: skill.skill_level || skill.level || 'Beginner'
-                  };
-                }
-                return { id: index + 1, nama: skill };
-              })
-            : [];
+      if (!result.success || !result.data) {
+        throw new Error('Invalid response format');
+      }
+
+      const profileData = result.data;
+      setAuthStatus('authenticated');
+      setError(null);
+
+      // Extract skills dari response
+      if (profileData.skills && Array.isArray(profileData.skills)) {
+        const skillsArray = profileData.skills.map((skill: any) => ({
+          id: skill.id,
+          user_id: skill.user_id,
+          skill_name: skill.skill_name,
+          skill_level: skill.skill_level,
+          nama: skill.skill_name, // alias untuk compatibility
+          level: skill.skill_level, // alias untuk compatibility
+          created_at: skill.created_at,
+          updated_at: skill.updated_at
+        }));
+        
         setSkills(skillsArray);
+        console.log('Skills loaded:', skillsArray.length, 'items');
       } else {
         setSkills([]);
+        console.log('No skills found in profile');
       }
       
-      // Process portfolio links
-      if (data.portfolio_links) {
-        setPortfolioLinks(Array.isArray(data.portfolio_links) ? data.portfolio_links : [data.portfolio_links]);
-      } else if (data.portfolioLinks) {
-        setPortfolioLinks(Array.isArray(data.portfolioLinks) ? data.portfolioLinks : [data.portfolioLinks]);
-      } else {
-        setPortfolioLinks([]);
-      }
+      // Extract file URLs dari response
+      const fileData: FileData = {
+        portfolio_file: profileData.portfolio_file,
+        cv_file: profileData.cv_file,
+        cover_letter_file: profileData.cover_letter_file,
+        portfolio_file_url: profileData.portfolio_file_url,
+        cv_file_url: profileData.cv_file_url,
+        cover_letter_file_url: profileData.cover_letter_file_url
+      };
+      
+      setFiles(fileData);
+      console.log('Files loaded:', fileData);
 
-      // Process files if available
-      if (data.files) {
-        setFiles({
-          projectFiles: data.files.projectFiles || null,
-          cv: data.files.cv || null,
-          certificate: data.files.certificate || null
-        });
-      }
+      // Portfolio links - bisa ditambahkan jika ada di response
+      // Untuk sementara kosongkan karena tidak ada di response
+      setPortfolioLinks([]);
       
     } catch (err: any) {
-      console.error('Error fetching skills:', err);
+      console.error('Error fetching profile:', err);
       
       if (err.name === 'NetworkError' || err.message.includes('Failed to fetch')) {
         setError('Koneksi bermasalah - menampilkan data demo');
@@ -224,44 +221,22 @@ export default function KeterampilanSection() {
     }
   };
 
-  // Add new skill
   const addSkill = async (skillData: SkillFormData): Promise<boolean> => {
     try {
       const token = getAuthToken();
+      
+      if (!token) {
+        throw new Error('Token tidak ditemukan');
+      }
+
+      console.log('Adding skill:', skillData);
+      
       const response = await fetch(`${API_BASE_URL}/api/profile/skill`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          skills: skillData.nama,
-          portfolio_links: portfolioLinks,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Refresh skills list
-      await fetchSkills();
-      return true;
-    } catch (err) {
-      console.error('Error adding skill:', err);
-      setError('Gagal menambah keterampilan');
-      return false;
-    }
-  };
-
-  // Update skill
-  const updateSkill = async (skillId: string | number, skillData: SkillFormData): Promise<boolean> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           skill_name: skillData.nama,
@@ -269,55 +244,116 @@ export default function KeterampilanSection() {
         }),
       });
 
+      console.log('Add skill response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        console.error('Add skill error:', errorData);
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
 
-      // Success - clear any previous errors
-      setError(null);
-      setAuthStatus('authenticated');
-      
-      // Optionally refresh data from server
+      const result = await response.json();
+      console.log('Skill added successfully:', result);
+
       await fetchSkills();
-      
       return true;
-    } catch (err) {
-      console.error('Error updating skill:', err);
-      setError('Gagal mengupdate keterampilan');
+    } catch (err: any) {
+      console.error('Error adding skill:', err);
+      setError(`Gagal menambah keterampilan: ${err.message}`);
       return false;
     }
   };
 
-  // Delete skill
+  const updateSkill = async (skillId: string | number, skillData: SkillFormData): Promise<boolean> => {
+    try {
+      const token = getAuthToken();
+      
+      if (!token) {
+        throw new Error('Token tidak ditemukan');
+      }
+
+      console.log('Updating skill:', skillId, skillData);
+      
+      const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          skill_name: skillData.nama,
+          skill_level: skillData.level || 'Beginner',
+        }),
+      });
+
+      console.log('Update skill response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Update skill error:', errorData);
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Skill updated successfully:', result);
+
+      setError(null);
+      setAuthStatus('authenticated');
+      
+      await fetchSkills();
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error updating skill:', err);
+      setError(`Gagal mengupdate keterampilan: ${err.message}`);
+      return false;
+    }
+  };
+
   const deleteSkill = async (skillId: string | number): Promise<boolean> => {
     try {
+      const token = getAuthToken();
+      
+      if (!token) {
+        throw new Error('Token tidak ditemukan');
+      }
+
+      console.log('Deleting skill:', skillId);
+      
       const response = await fetch(`${API_BASE_URL}/api/profile/skill/${skillId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
       });
 
+      console.log('Delete skill response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        console.error('Delete skill error:', errorData);
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      console.log('Skill deleted successfully:', result);
       
       await fetchSkills();
       return true;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting skill:', err);
-      setError('Gagal menghapus keterampilan');
+      setError(`Gagal menghapus keterampilan: ${err.message}`);
       return false;
     }
   };
 
-  // Load skills on component mount
   useEffect(() => {
     fetchSkills();
   }, []);
 
-  // Auto retry when coming back online
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -354,13 +390,15 @@ export default function KeterampilanSection() {
     if (confirm("Yakin mau hapus keterampilan ini?")) {
       const skill = skills[idx];
       
-      if (isOnline && isAuthenticated() && (skill.id || skill._id)) {
-        const success = await deleteSkill(skill.id || skill._id!);
+      if (isOnline && isAuthenticated() && skill.id) {
+        const success = await deleteSkill(skill.id);
         if (!success) {
           alert('Gagal menghapus keterampilan. Silakan coba lagi.');
+        } else {
+          setError('Keterampilan berhasil dihapus');
+          setTimeout(() => setError(null), 2000);
         }
       } else {
-        // Local delete
         const newSkills = skills.filter((_, index) => index !== idx);
         setSkills(newSkills);
         setError('Skill dihapus - perubahan disimpan lokal');
@@ -384,28 +422,32 @@ export default function KeterampilanSection() {
     let success = false;
     
     if (editIndex !== null) {
-      // Update existing skill
       const skill = skills[editIndex];
-      if (isOnline && isAuthenticated() && (skill.id || skill._id)) {
-        success = await updateSkill(skill.id || skill._id!, data);
+      if (isOnline && isAuthenticated() && skill.id) {
+        success = await updateSkill(skill.id, data);
       } else {
-        // Local update
         const newSkills = [...skills];
-        newSkills[editIndex] = { ...newSkills[editIndex], ...data };
+        newSkills[editIndex] = { 
+          ...newSkills[editIndex], 
+          skill_name: data.nama,
+          nama: data.nama,
+          skill_level: data.level,
+          level: data.level
+        };
         setSkills(newSkills);
         success = true;
         setError('Perubahan disimpan lokal');
       }
     } else {
-      // Add new skill
       if (isOnline && isAuthenticated()) {
         success = await addSkill(data);
       } else {
-        // Local add
         const newSkill: Skill = {
           id: Date.now(),
+          skill_name: data.nama,
           nama: data.nama,
-          level: data.level
+          skill_level: data.level || 'Beginner',
+          level: data.level || 'Beginner'
         };
         setSkills([...skills, newSkill]);
         success = true;
@@ -418,35 +460,40 @@ export default function KeterampilanSection() {
       setEditMode(false);
       setEditIndex(null);
       
-      // Show success message briefly
-      const originalError = error;
-      setError('✓ Perubahan berhasil disimpan');
-      setTimeout(() => {
-        setError(originalError);
-      }, 2000);
+      if (isOnline && isAuthenticated()) {
+        const originalError = error;
+        setError('Perubahan berhasil disimpan');
+        setTimeout(() => {
+          setError(originalError);
+        }, 2000);
+      }
     } else {
       alert('Gagal menyimpan keterampilan. Silakan coba lagi.');
     }
   };
 
   const removeSkill = async (skillToRemove: Skill): Promise<void> => {
-    const updatedSkills = skills.filter(skill => skill !== skillToRemove);
-    setSkills(updatedSkills);
-    
-    // Try to save to API if possible
-    if (isOnline && isAuthenticated()) {
-      await saveSkillsData({ nama: updatedSkills.map(s => s.nama).join(', ') });
+    if (!confirm('Yakin ingin menghapus keterampilan ini?')) {
+      return;
+    }
+
+    if (isOnline && isAuthenticated() && skillToRemove.id) {
+      const success = await deleteSkill(skillToRemove.id);
+      if (!success) {
+        alert('Gagal menghapus keterampilan. Silakan coba lagi.');
+      }
     } else {
+      const updatedSkills = skills.filter(skill => skill !== skillToRemove);
+      setSkills(updatedSkills);
       setError('Skill dihapus - perubahan disimpan lokal');
     }
   };
 
-  // Retry function for failed requests
   const handleRetry = (): void => {
+    setError(null);
     fetchSkills();
   };
 
-  // Get status info for display
   const getStatusInfo = () => {
     if (!isOnline) {
       return { type: 'offline', message: 'Mode Offline', icon: WifiOff, color: 'orange' };
@@ -487,13 +534,15 @@ export default function KeterampilanSection() {
         {showForm ? (
           <KeterampilanForm 
             mode={editIndex === null ? "add" : "edit"} 
-            initialData={editIndex !== null ? skills[editIndex] : undefined} 
+            initialData={editIndex !== null ? {
+              nama: skills[editIndex]?.skill_name || skills[editIndex]?.nama || '',
+              level: skills[editIndex]?.skill_level || skills[editIndex]?.level
+            } : undefined} 
             onCancel={handleCancel} 
             onSave={handleSave} 
           />
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            {/* Header with Status and Edit Button */}
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-gray-900">Keterampilan</h2>
@@ -517,10 +566,9 @@ export default function KeterampilanSection() {
               </button>
             </div>
 
-            {/* Error/Status Messages */}
             {error && (
               <div className={`mb-4 p-3 rounded-md flex items-start justify-between ${
-                error.includes('✓') ? 'bg-green-100 border border-green-300' :
+                error.includes('berhasil') ? 'bg-green-100 border border-green-300' :
                 error.includes('offline') || error.includes('Offline') ? 'bg-orange-100 border border-orange-300' :
                 error.includes('kedaluwarsa') || error.includes('expired') ? 'bg-yellow-100 border border-yellow-300' :
                 error.includes('demo') || error.includes('Demo') ? 'bg-blue-100 border border-blue-300' :
@@ -528,7 +576,7 @@ export default function KeterampilanSection() {
               }`}>
                 <div>
                   <p className={`text-sm font-medium ${
-                    error.includes('✓') ? 'text-green-800' :
+                    error.includes('berhasil') ? 'text-green-800' :
                     error.includes('offline') || error.includes('Offline') ? 'text-orange-800' :
                     error.includes('kedaluwarsa') || error.includes('expired') ? 'text-yellow-800' :
                     error.includes('demo') || error.includes('Demo') ? 'text-blue-800' :
@@ -558,16 +606,21 @@ export default function KeterampilanSection() {
               </div>
             )}
 
-            {/* Skills Display */}
             <div className="mb-6">
               <div className="flex flex-wrap gap-2 mb-3">
                 {skills.length > 0 ? (
                   skills.map((skill, index) => (
                     <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 transition-colors"
+                      key={skill.id || index}
+                      className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 transition-colors"
                     >
-                      {skill.nama || skill.name || skill.skill_name}
+                      <span className="font-semibold">
+                        {skill.skill_name || skill.nama}
+                      </span>
+                      <span className="mx-1.5 text-xs text-blue-600">•</span>
+                      <span className="text-xs">
+                        {skill.skill_level || skill.level || 'Beginner'}
+                      </span>
                       <button
                         onClick={() => removeSkill(skill)}
                         className="ml-2 hover:text-blue-600 transition-colors"
@@ -584,7 +637,6 @@ export default function KeterampilanSection() {
                 )}
               </div>
               
-              {/* Add Skill Button */}
               <button
                 onClick={handleAddSkill}
                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
@@ -593,12 +645,11 @@ export default function KeterampilanSection() {
               </button>
             </div>
 
-            {/* Portfolio Section */}
-            <div className="mb-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">Portofolio</h3>
-              <div className="space-y-2">
-                {portfolioLinks.length > 0 ? (
-                  portfolioLinks.map((link, index) => (
+            {portfolioLinks.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-base font-semibold text-gray-900 mb-3">Portofolio</h3>
+                <div className="space-y-2">
+                  {portfolioLinks.map((link, index) => (
                     <a
                       key={index}
                       href={link}
@@ -608,47 +659,73 @@ export default function KeterampilanSection() {
                     >
                       {link}
                     </a>
-                  ))
-                ) : (
-                  <div className="text-gray-500 text-sm italic">
-                    Belum ada link portofolio yang ditambahkan
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* File Upload Display Section */}
             <div>
               <h3 className="text-base font-semibold text-gray-900 mb-4">File Pendukung</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { title: "Project Files", key: "projectFiles" },
-                  { title: "Curriculum Vitae", key: "cv" },
-                  { title: "Paklaring Keahlian", key: "certificate" },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-center hover:bg-gray-100 transition-colors"
-                  >
-                    <h4 className="font-medium text-gray-900 mb-3 text-sm">
-                      {item.title}
-                    </h4>
-                    <div className="flex flex-col items-center justify-center py-6">
-                      <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center mb-3">
-                        <Upload className="w-6 h-6 text-gray-500" />
+                  { 
+                    title: "Portfolio File", 
+                    key: "portfolio_file",
+                    urlKey: "portfolio_file_url"
+                  },
+                  { 
+                    title: "Curriculum Vitae", 
+                    key: "cv_file",
+                    urlKey: "cv_file_url"
+                  },
+                  { 
+                    title: "Cover Letter", 
+                    key: "cover_letter_file",
+                    urlKey: "cover_letter_file_url"
+                  },
+                ].map((item, idx) => {
+                  const fileName = files[item.key as keyof FileData];
+                  const fileUrl = files[item.urlKey as keyof FileData];
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-center hover:bg-gray-100 transition-colors"
+                    >
+                      <h4 className="font-medium text-gray-900 mb-3 text-sm">
+                        {item.title}
+                      </h4>
+                      <div className="flex flex-col items-center justify-center py-6">
+                        <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center mb-3">
+                          <Upload className="w-6 h-6 text-gray-500" />
+                        </div>
+                        {fileName && fileUrl ? (
+                          <div className="text-center">
+                            <p className="text-xs text-green-600 font-medium mb-2">
+                              {fileName}
+                            </p>
+                            <a 
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:underline"
+                            >
+                              Lihat File
+                            </a>
+                          </div>
+                        ) : fileName ? (
+                          <p className="text-xs text-green-600 font-medium">
+                            {fileName}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-500">
+                            Belum ada file yang diunggah
+                          </p>
+                        )}
                       </div>
-                      {files[item.key as keyof FileData] ? (
-                        <p className="text-xs text-green-600 font-medium">
-                          📎 {files[item.key as keyof FileData]?.name || `${item.key}_file.pdf`}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-500">
-                          Belum ada file yang diunggah
-                        </p>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
