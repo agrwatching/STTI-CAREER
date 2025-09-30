@@ -1,26 +1,112 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Home, BriefcaseBusiness, FileText, Settings, Menu, X, type LucideIcon } from "lucide-react";
-import { useState } from "react";
+
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+interface TranslationSet {
+  [key: string]: {
+    [lang: string]: string;
+  };
+}
 
 interface MenuItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  key: string; // Added key for consistent translation
 }
 
+const languages: Language[] = [
+  { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' }
+];
+
+// Complete static translations for all languages
+const translations: TranslationSet = {
+  'Data Pribadi': {
+    'id': 'Data Pribadi',
+    'en': 'Personal Data',
+    'ja': '個人データ'
+  },
+  'Simpan Lowongan': {
+    'id': 'Simpan Lowongan',
+    'en': 'Saved Jobs',
+    'ja': '保存した求人'
+  },
+  'Lamaran saya': {
+    'id': 'Lamaran saya',
+    'en': 'My Applications',
+    'ja': '私の応募'
+  },
+  'Pengaturan': {
+    'id': 'Pengaturan',
+    'en': 'Settings',
+    'ja': '設定'
+  }
+};
+
 const menuItems: MenuItem[] = [
-  { name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
-  { name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness },
-  { name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText },
+  { key: "Data Pribadi", name: "Data Pribadi", href: "/pelamar/profile/{id}", icon: Home },
+  { key: "Simpan Lowongan", name: "Simpan Lowongan", href: "/pelamar/lowongan", icon: BriefcaseBusiness },
+  { key: "Lamaran saya", name: "Lamaran saya", href: "/pelamar/lamaran", icon: FileText },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
+
+  // Get translated text
+  const getTranslation = (key: string, lang: string): string => {
+    return translations[key]?.[lang] || key;
+  };
+
+  // Get translated menu items
+  const getTranslatedMenuItems = (lang: string) => {
+    return menuItems.map(item => ({
+      ...item,
+      name: getTranslation(item.key, lang)
+    }));
+  };
+
+  // Load saved language and listen for language changes
+  useEffect(() => {
+    // Load saved language from localStorage
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      const language = languages.find(lang => lang.code === savedLanguage);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    }
+
+    // Listen for language change events from Header or Navbar
+    const handleLanguageChange = (event: CustomEvent) => {
+      const language = languages.find(lang => lang.code === event.detail.language);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, []);
+
+  const translatedMenuItems = getTranslatedMenuItems(currentLanguage.code);
+  const translatedSettings = getTranslation('Pengaturan', currentLanguage.code);
 
   return (
     <>
@@ -51,12 +137,12 @@ export default function Sidebar() {
 
         {/* Menu Tengah */}
         <nav className="flex flex-col flex-grow justify-center space-y-2">
-          {menuItems.map((item) => {
+          {translatedMenuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
               <Link
-                key={item.href}
+                key={`${item.href}-${index}`}
                 href={item.href}
                 className={`flex items-center gap-3 px-6 py-2 rounded-lg transition-colors
                   ${isActive ? "bg-[#1C2E9E]" : "hover:bg-[#1C2E9E]/50"}`}
@@ -73,13 +159,13 @@ export default function Sidebar() {
           <Link
             href="/pelamar/pengaturan"
             className={`flex items-center gap-3 px-6 py-2 rounded-lg transition-colors
-              ${pathname === "/dashboard/settings"
+              ${pathname === "/pelamar/pengaturan"
                 ? "bg-[#1C2E9E]"
                 : "hover:bg-[#1C2E9E]/50"
               }`}
           >
             <Settings size={20} />
-            <span>Pengaturan</span>
+            <span>{translatedSettings}</span>
           </Link>
         </div>
       </aside>
@@ -114,12 +200,12 @@ export default function Sidebar() {
 
         {isOpen && (
           <nav className="flex flex-col space-y-2 px-4 pb-4">
-            {menuItems.map((item) => {
+            {translatedMenuItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.href}
+                  key={`${item.href}-mobile-${index}`}
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
                     ${isActive ? "bg-[#1C2E9E]" : "hover:bg-[#1C2E9E]/50"}`}
@@ -134,14 +220,14 @@ export default function Sidebar() {
             <Link
               href="/pelamar/pengaturan"
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
-                ${pathname === "/dashboard/settings"
+                ${pathname === "/pelamar/pengaturan"
                   ? "bg-[#1C2E9E]"
                   : "hover:bg-[#1C2E9E]/50"
                 }`}
               onClick={() => setIsOpen(false)}
             >
               <Settings size={18} />
-              <span>Pengaturan</span>
+              <span>{translatedSettings}</span>
             </Link>
           </nav>
         )}
