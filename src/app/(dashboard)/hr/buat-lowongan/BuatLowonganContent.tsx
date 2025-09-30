@@ -7,6 +7,50 @@ import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
 import type { JobApiResponse, JobType, JobFormValues } from "@/components/hr/buat-lowongan/types";
+import toast from "react-hot-toast";
+
+function mapJob(job: JobApiResponse): JobType {
+  let statusLabel = "";
+  let statusColor = "";
+  let icon: React.ReactNode = null;
+
+  switch (job.verification_status) {
+    case "pending":
+      statusLabel = "Tunggu Verifikasi";
+      statusColor = "text-blue-600";
+      icon = <Clock className="w-5 h-5 text-blue-600" />;
+      break;
+    case "verified":
+      statusLabel = "Terverifikasi";
+      statusColor = "text-green-600";
+      icon = <CheckCircle2 className="w-5 h-5 text-green-600" />;
+      break;
+    case "rejected":
+      statusLabel = "Ditolak";
+      statusColor = "text-red-600";
+      icon = <XCircle className="w-5 h-5 text-red-600" />;
+      break;
+    default:
+      statusLabel = "Tunggu Verifikasi";
+      statusColor = "text-blue-600";
+      icon = <Clock className="w-5 h-5 text-blue-600" />;
+  }
+
+  
+  return {
+    ...job,
+    title: job.job_title?.trim() || "Untitled Position",
+    description: job.job_description?.trim() || "No description available",
+    requirements: job.qualifications || "-",
+    salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`,
+    type: job.work_type === "remote" ? "Remote" : job.work_type === "on_site" ? "On-site" : "Hybrid",
+    logo: job.logo || "/logo-stti.png",
+    statusLabel,
+    statusColor,
+    icon,
+  };
+}
+
 
 export default function BuatLowonganContent() {
   const searchParams = useSearchParams();
@@ -43,56 +87,18 @@ export default function BuatLowonganContent() {
         });
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
-
+        
         const data = await res.json();
 
         const mappedJobs: JobType[] = (
-          Array.isArray(data.data) ? data.data : [data.data]
-        ).map((job: JobApiResponse) => {
-          let statusLabel = "";
-          let statusColor = "";
-          let icon: React.ReactNode = null;
+  Array.isArray(data.data) ? data.data : [data.data]
+          ).map(mapJob);
 
-          switch (job.verification_status) {
-            case "pending":
-              statusLabel = "Tunggu Verifikasi";
-              statusColor = "text-blue-600";
-              icon = <Clock className="w-5 h-5 text-blue-600" />;
-              break;
-            case "verified":
-              statusLabel = "Terverifikasi";
-              statusColor = "text-green-600";
-              icon = <CheckCircle2 className="w-5 h-5 text-green-600" />;
-              break;
-            case "rejected":
-              statusLabel = "Ditolak";
-              statusColor = "text-red-600";
-              icon = <XCircle className="w-5 h-5 text-red-600" />;
-              break;
-            default:
-              statusLabel = "Tunggu Verifikasi";
-              statusColor = "text-blue-600";
-              icon = <Clock className="w-5 h-5 text-blue-600" />;
-          }
+          setJobs(mappedJobs);
 
-          return {
-            ...job,
-            title: job.job_title?.trim() || "Untitled Position",
-            description: job.job_description?.trim() || "No description available",
-            requirements: job.qualifications || "-",
-            salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`,
-            type: job.work_type === 'remote' ? 'Remote' : job.work_type === 'on_site' ? 'On-site' : 'Hybrid',
-            logo: job.logo || "/logo-stti.png",
-            statusLabel,
-            statusColor,
-            icon,
-          };
-        });
-
-        setJobs(mappedJobs);
       } catch (err) {
         console.error("Error fetching jobs:", err);
-        alert("Gagal memuat data lowongan");
+        toast.error("Gagal memuat data lowongan");
       } finally {
         setLoading(false);
       }
@@ -111,6 +117,7 @@ export default function BuatLowonganContent() {
   // Add job via API
   const handleAddJob = async (job: JobFormValues) => {
     try {
+      
       const token = localStorage.getItem("token");
       if (!token) {
         router.push("/login");
@@ -129,16 +136,17 @@ export default function BuatLowonganContent() {
       const data = await res.json();
 
       if (res.ok) {
-        setJobs((prev) => [...prev, data.data]);
+        const newJob = mapJob(data.data); // ✅ konsisten format
+        setJobs((prev) => [...prev, newJob]);
         setShowForm(false);
         setEditJob(null);
-        alert("Lowongan berhasil ditambahkan ✅");
+        toast.success("Lowongan berhasil ditambahkan ✅");
       } else {
-        alert(`Gagal tambah job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal tambah job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error adding job:", err);
-      alert("Terjadi kesalahan server ❌");
+      toast.error("Terjadi kesalahan server ❌");
     }
   };
 
@@ -171,18 +179,19 @@ export default function BuatLowonganContent() {
             title: job.job_title,
             description: job.job_description,
             requirements: job.qualifications,
-            salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`
+            salary_range: `Rp ${Number(job.salary_min).toLocaleString()} - Rp ${Number(job.salary_max).toLocaleString()}`,
+
           } : j))
         );
         setShowForm(false);
         setEditJob(null);
-        alert("Lowongan berhasil diperbarui ✏️");
+        toast.success("Lowongan berhasil diperbarui ✏️");
       } else {
-        alert(`Gagal update job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal update job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error updating job:", err);
-      alert("Terjadi kesalahan server ❌");
+      toast.error("Terjadi kesalahan server ❌");
     }
   };
 
@@ -208,53 +217,57 @@ export default function BuatLowonganContent() {
 
       if (res.ok) {
         setJobs((prev) => prev.filter((job) => job.id !== id));
-        alert("Lowongan berhasil dihapus 🗑️");
+        toast.success("Lowongan berhasil dihapus 🗑️");
       } else {
         const data = await res.json();
-        alert(`Gagal hapus job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal hapus job: ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error deleting job:", err);
-      alert("Terjadi kesalahan server ❌");
+      toast.error("Terjadi kesalahan server ❌");
     }
   };
 
-  return (
-    <div className="flex h-screen overflow-hidden">
-      <div className="flex-1 flex flex-col bg-gray-50 p-8">
-        <Header onAddClick={() => setShowForm(true)} />
-        {showForm ? (
-          <JobForm
-            initialValues={editJob || undefined}
-            onCancel={() => {
-              setShowForm(false);
-              setEditJob(null);
-              router.push("/hr/buat-lowongan");
-            }}
-            onSubmit={(values) =>
-              editJob ? handleEditJob(values, editJob.id) : handleAddJob(values)
-            }
-          />
-        ) : (
-          <>
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-500 mt-4">Memuat data lowongan...</p>
-              </div>
-            ) : (
-              <JobList
-                jobs={jobs}
-                onEdit={(job) => {
-                  setEditJob(job);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteJob}
-              />
-            )}
-          </>
-        )}
-      </div>
+return (
+  <div className="flex flex-col bg-gray-50 h-full">
+    {/* Header sticky */}
+    <div className="bg-white border-b shadow-sm sticky top-0 z-10">
+      <Header onAddClick={() => setShowForm(true)} />
     </div>
-  );
+
+    {/* Konten ikut scroll parent */}
+    <div className="p-6">
+      {showForm ? (
+        <JobForm
+          initialValues={editJob || undefined}
+          onCancel={() => {
+            setShowForm(false);
+            setEditJob(null);
+            router.push("/hr/buat-lowongan");
+          }}
+          onSubmit={(values) =>
+            editJob ? handleEditJob(values, editJob.id) : handleAddJob(values)
+          }
+        />
+      ) : loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-500 mt-4">Memuat data lowongan...</p>
+        </div>
+      ) : (
+        <JobList
+          jobs={jobs}
+          onEdit={(job) => {
+            setEditJob(job);
+            setShowForm(true);
+          }}
+          onDelete={handleDeleteJob}
+        />
+      )}
+    </div>
+  </div>
+);
+
+
+
 }

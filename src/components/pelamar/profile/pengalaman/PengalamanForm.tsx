@@ -16,11 +16,236 @@ type Pengalaman = {
 type PengalamanFormProps = {
   mode?: "add" | "edit";
   data?: Pengalaman;
-  onSave: (values: Pengalaman) => void;          // required
-  onCancel: () => void;                          // required
-  onDelete?: (id: string | number) => void;      // optional
+  onSave: (values: Pengalaman) => void;
+  onCancel: () => void;
+  onDelete?: (id: string | number) => void;
 };
 
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+interface TranslationSet {
+  [key: string]: {
+    [lang: string]: string;
+  };
+}
+
+const languages: Language[] = [
+  { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' }
+];
+
+// Translation mappings for the form
+const translations: TranslationSet = {
+  // Form titles
+  'Tambah Pengalaman Kerja': {
+    'id': 'Tambah Pengalaman Kerja',
+    'en': 'Add Work Experience',
+    'ja': '職歴を追加'
+  },
+  'Edit Pengalaman Kerja': {
+    'id': 'Edit Pengalaman Kerja',
+    'en': 'Edit Work Experience',
+    'ja': '職歴を編集'
+  },
+  
+  // Field labels
+  'Posisi': {
+    'id': 'Posisi',
+    'en': 'Position',
+    'ja': 'ポジション'
+  },
+  'Nama Perusahaan': {
+    'id': 'Nama Perusahaan',
+    'en': 'Company Name',
+    'ja': '会社名'
+  },
+  'Tahun Masuk': {
+    'id': 'Tahun Masuk',
+    'en': 'Start Year',
+    'ja': '入社年'
+  },
+  'Tahun Keluar': {
+    'id': 'Tahun Keluar',
+    'en': 'End Year',
+    'ja': '退社年'
+  },
+  'Deskripsi Pekerjaan': {
+    'id': 'Deskripsi Pekerjaan',
+    'en': 'Job Description',
+    'ja': '職務内容'
+  },
+  
+  // Placeholders
+  'Contoh: Senior Software Developer': {
+    'id': 'Contoh: Senior Software Developer',
+    'en': 'Example: Senior Software Developer',
+    'ja': '例: シニアソフトウェア開発者'
+  },
+  'Contoh: PT Tech Innovate Indonesia': {
+    'id': 'Contoh: PT Tech Innovate Indonesia',
+    'en': 'Example: Tech Innovate Inc.',
+    'ja': '例: テックイノベート株式会社'
+  },
+  'Contoh: 2022': {
+    'id': 'Contoh: 2022',
+    'en': 'Example: 2022',
+    'ja': '例: 2022'
+  },
+  'Masih bekerja': {
+    'id': 'Masih bekerja',
+    'en': 'Still working',
+    'ja': '在職中'
+  },
+  'Contoh: 2024': {
+    'id': 'Contoh: 2024',
+    'en': 'Example: 2024',
+    'ja': '例: 2024'
+  },
+  
+  // Checkbox
+  'Saya masih bekerja di posisi ini': {
+    'id': 'Saya masih bekerja di posisi ini',
+    'en': 'I still work in this position',
+    'ja': 'この職に現在も就いています'
+  },
+  
+  // Buttons
+  'Hapus': {
+    'id': 'Hapus',
+    'en': 'Delete',
+    'ja': '削除'
+  },
+  'Batal': {
+    'id': 'Batal',
+    'en': 'Cancel',
+    'ja': 'キャンセル'
+  },
+  'Tambah Pengalaman': {
+    'id': 'Tambah Pengalaman',
+    'en': 'Add Experience',
+    'ja': '経験を追加'
+  },
+  'Perbarui Data': {
+    'id': 'Perbarui Data',
+    'en': 'Update Data',
+    'ja': 'データを更新'
+  },
+  'Menyimpan...': {
+    'id': 'Menyimpan...',
+    'en': 'Saving...',
+    'ja': '保存中...'
+  },
+  
+  // Success messages
+  'Pengalaman kerja berhasil ditambahkan!': {
+    'id': 'Pengalaman kerja berhasil ditambahkan!',
+    'en': 'Work experience added successfully!',
+    'ja': '職歴が正常に追加されました！'
+  },
+  'Pengalaman kerja berhasil diperbarui!': {
+    'id': 'Pengalaman kerja berhasil diperbarui!',
+    'en': 'Work experience updated successfully!',
+    'ja': '職歴が正常に更新されました！'
+  },
+  'Pengalaman kerja berhasil dihapus!': {
+    'id': 'Pengalaman kerja berhasil dihapus!',
+    'en': 'Work experience deleted successfully!',
+    'ja': '職歴が正常に削除されました！'
+  },
+  
+  // Error messages
+  'Posisi harus diisi': {
+    'id': 'Posisi harus diisi',
+    'en': 'Position is required',
+    'ja': 'ポジションは必須です'
+  },
+  'Nama perusahaan harus diisi': {
+    'id': 'Nama perusahaan harus diisi',
+    'en': 'Company name is required',
+    'ja': '会社名は必須です'
+  },
+  'Tahun masuk harus diisi': {
+    'id': 'Tahun masuk harus diisi',
+    'en': 'Start year is required',
+    'ja': '入社年は必須です'
+  },
+  'Tahun keluar harus diisi jika bukan pekerjaan saat ini': {
+    'id': 'Tahun keluar harus diisi jika bukan pekerjaan saat ini',
+    'en': 'End year is required if not current job',
+    'ja': '現職でない場合は退社年が必須です'
+  },
+  'Deskripsi pekerjaan harus diisi': {
+    'id': 'Deskripsi pekerjaan harus diisi',
+    'en': 'Job description is required',
+    'ja': '職務内容は必須です'
+  },
+  'Tahun masuk tidak valid': {
+    'id': 'Tahun masuk tidak valid',
+    'en': 'Invalid start year',
+    'ja': '無効な入社年'
+  },
+  'Tahun keluar tidak valid': {
+    'id': 'Tahun keluar tidak valid',
+    'en': 'Invalid end year',
+    'ja': '無効な退社年'
+  },
+  'Tahun keluar tidak boleh lebih kecil dari tahun masuk': {
+    'id': 'Tahun keluar tidak boleh lebih kecil dari tahun masuk',
+    'en': 'End year cannot be earlier than start year',
+    'ja': '退社年は入社年より前にはできません'
+  },
+  
+  // Delete confirmation
+  'Konfirmasi Hapus': {
+    'id': 'Konfirmasi Hapus',
+    'en': 'Delete Confirmation',
+    'ja': '削除の確認'
+  },
+  'Apakah Anda yakin ingin menghapus pengalaman kerja': {
+    'id': 'Apakah Anda yakin ingin menghapus pengalaman kerja',
+    'en': 'Are you sure you want to delete the work experience',
+    'ja': '職歴を削除してもよろしいですか'
+  },
+  'di': {
+    'id': 'di',
+    'en': 'at',
+    'ja': 'で'
+  },
+  'Tindakan ini tidak dapat dibatalkan.': {
+    'id': 'Tindakan ini tidak dapat dibatalkan.',
+    'en': 'This action cannot be undone.',
+    'ja': 'この操作は元に戻せません。'
+  },
+  'Menghapus...': {
+    'id': 'Menghapus...',
+    'en': 'Deleting...',
+    'ja': '削除中...'
+  },
+  
+  // Character counter
+  'karakter': {
+    'id': 'karakter',
+    'en': 'characters',
+    'ja': '文字'
+  },
+  'Mendekati batas maksimal': {
+    'id': 'Mendekati batas maksimal',
+    'en': 'Approaching maximum limit',
+    'ja': '最大制限に近づいています'
+  },
+  
+  // Job description placeholder
+  'Mengembangkan aplikasi web menggunakan Node.js, React, dan MySQL. Bertanggung jawab atas desain database dan implementasi API RESTful...': {
+    'id': 'Mengembangkan aplikasi web menggunakan Node.js, React, dan MySQL. Bertanggung jawab atas desain database dan implementasi API RESTful...',
+    'en': 'Develop web applications using Node.js, React, and MySQL. Responsible for database design and RESTful API implementation...',
+    'ja': 'Node.js、React、MySQLを使用してWebアプリケーションを開発。データベース設計とRESTful API実装を担当...'
+  }
+};
 
 export default function PengalamanForm({
   mode = "add",
@@ -29,6 +254,7 @@ export default function PengalamanForm({
   onCancel,
   onDelete,
 }: PengalamanFormProps) {
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
   const [values, setValues] = useState<Pengalaman>({
     id: data?.id || undefined,
     posisi: data?.posisi || "",
@@ -44,6 +270,37 @@ export default function PengalamanForm({
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Get translated text
+  const getTranslation = (key: string, lang: string): string => {
+    return translations[key]?.[lang] || key;
+  };
+
+  // Load saved language and listen for language changes
+  useEffect(() => {
+    // Load saved language from localStorage
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      const language = languages.find(lang => lang.code === savedLanguage);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    }
+
+    // Listen for language change events from other components
+    const handleLanguageChange = (event: CustomEvent) => {
+      const language = languages.find(lang => lang.code === event.detail.language);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   // Update form values ketika data prop berubah (untuk mode edit)
   useEffect(() => {
@@ -95,31 +352,33 @@ export default function PengalamanForm({
 
   // Validasi form data
   const validateFormData = (data: Pengalaman): string | null => {
-    if (!data.posisi?.trim()) return "Posisi harus diisi";
-    if (!data.perusahaan?.trim()) return "Nama perusahaan harus diisi";
-    if (!data.tahunMasuk?.trim()) return "Tahun masuk harus diisi";
+    const lang = currentLanguage.code;
+    
+    if (!data.posisi?.trim()) return getTranslation("Posisi harus diisi", lang);
+    if (!data.perusahaan?.trim()) return getTranslation("Nama perusahaan harus diisi", lang);
+    if (!data.tahunMasuk?.trim()) return getTranslation("Tahun masuk harus diisi", lang);
     if (!data.isCurrentJob && !data.tahunKeluar?.trim()) {
-      return "Tahun keluar harus diisi jika bukan pekerjaan saat ini";
+      return getTranslation("Tahun keluar harus diisi jika bukan pekerjaan saat ini", lang);
     }
-    if (!data.deskripsi?.trim()) return "Deskripsi pekerjaan harus diisi";
+    if (!data.deskripsi?.trim()) return getTranslation("Deskripsi pekerjaan harus diisi", lang);
 
     // Validasi tahun
     const tahunMasuk = parseInt(data.tahunMasuk);
     const currentYear = new Date().getFullYear();
     
     if (isNaN(tahunMasuk) || tahunMasuk < 1900 || tahunMasuk > currentYear + 10) {
-      return "Tahun masuk tidak valid";
+      return getTranslation("Tahun masuk tidak valid", lang);
     }
     
     if (!data.isCurrentJob && data.tahunKeluar) {
       const tahunKeluar = parseInt(data.tahunKeluar);
       
       if (isNaN(tahunKeluar) || tahunKeluar < 1900 || tahunKeluar > currentYear + 10) {
-        return "Tahun keluar tidak valid";
+        return getTranslation("Tahun keluar tidak valid", lang);
       }
       
       if (tahunKeluar < tahunMasuk) {
-        return "Tahun keluar tidak boleh lebih kecil dari tahun masuk";
+        return getTranslation("Tahun keluar tidak boleh lebih kecil dari tahun masuk", lang);
       }
     }
 
@@ -225,7 +484,7 @@ export default function PengalamanForm({
     }
 
     const payload = formatPayload(data);
-    const updateUrl = `https://apicareer-production.up.railway.app/api/profile/work-experience/${data.id}`;
+    const updateUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/work-experience/${data.id}`;
     
     console.log("PUT Request - URL:", updateUrl);
     console.log("PUT Request - ID:", data.id);
@@ -395,13 +654,14 @@ export default function PengalamanForm({
 
     try {
       let result;
+      const lang = currentLanguage.code;
       
       if (mode === "add") {
         console.log("=== EXECUTING POST REQUEST ===");
         result = await postWorkExperience(values);
         console.log("POST result:", result);
         
-        setSuccess("Pengalaman kerja berhasil ditambahkan!");
+        setSuccess(getTranslation("Pengalaman kerja berhasil ditambahkan!", lang));
         
         // Reset form setelah berhasil (hanya untuk mode add)
         setValues({
@@ -423,7 +683,7 @@ export default function PengalamanForm({
         result = await updateWorkExperience(values);
         console.log("PUT result:", result);
         
-        setSuccess("Pengalaman kerja berhasil diperbarui!");
+        setSuccess(getTranslation("Pengalaman kerja berhasil diperbarui!", lang));
       }
 
       // Panggil callback onSave jika ada
@@ -468,7 +728,8 @@ export default function PengalamanForm({
       const result = await deleteWorkExperience(values.id);
       console.log("DELETE result:", result);
       
-      setSuccess("Pengalaman kerja berhasil dihapus!");
+      const lang = currentLanguage.code;
+      setSuccess(getTranslation("Pengalaman kerja berhasil dihapus!", lang));
       
       // Panggil callback onDelete jika ada
       if (onDelete) onDelete(values.id);
@@ -489,6 +750,8 @@ export default function PengalamanForm({
     }
   };
 
+  const lang = currentLanguage.code;
+
   return (
     <>
       <form
@@ -498,7 +761,10 @@ export default function PengalamanForm({
         {/* Header */}
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-medium text-gray-800">
-            {mode === "add" ? "Tambah Pengalaman Kerja" : "Edit Pengalaman Kerja"}
+            {mode === "add" 
+              ? getTranslation("Tambah Pengalaman Kerja", lang) 
+              : getTranslation("Edit Pengalaman Kerja", lang)
+            }
           </h3>
           {mode === "edit" && values.id && (
             <button
@@ -508,7 +774,7 @@ export default function PengalamanForm({
               className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 
                 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Hapus
+              {getTranslation("Hapus", lang)}
             </button>
           )}
         </div>
@@ -537,7 +803,7 @@ export default function PengalamanForm({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Posisi <span className="text-red-500">*</span>
+              {getTranslation("Posisi", lang)} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -548,14 +814,14 @@ export default function PengalamanForm({
               className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
                 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              placeholder="Contoh: Senior Software Developer"
+              placeholder={getTranslation("Contoh: Senior Software Developer", lang)}
               maxLength={100}
               required
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Nama Perusahaan <span className="text-red-500">*</span>
+              {getTranslation("Nama Perusahaan", lang)} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -566,7 +832,7 @@ export default function PengalamanForm({
               className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
                 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              placeholder="Contoh: PT Tech Innovate Indonesia"
+              placeholder={getTranslation("Contoh: PT Tech Innovate Indonesia", lang)}
               maxLength={100}
               required
             />
@@ -576,7 +842,7 @@ export default function PengalamanForm({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Tahun Masuk <span className="text-red-500">*</span>
+              {getTranslation("Tahun Masuk", lang)} <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -589,13 +855,13 @@ export default function PengalamanForm({
               className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
                 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              placeholder="Contoh: 2022"
+              placeholder={getTranslation("Contoh: 2022", lang)}
               required
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">
-              Tahun Keluar {!values.isCurrentJob && <span className="text-red-500">*</span>}
+              {getTranslation("Tahun Keluar", lang)} {!values.isCurrentJob && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
@@ -608,7 +874,7 @@ export default function PengalamanForm({
               className="w-full border border-gray-300 rounded px-2 py-1.5 text-xs 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
                 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
-              placeholder={values.isCurrentJob ? "Masih bekerja" : "Contoh: 2024"}
+              placeholder={values.isCurrentJob ? getTranslation("Masih bekerja", lang) : getTranslation("Contoh: 2024", lang)}
             />
           </div>
         </div>
@@ -625,14 +891,14 @@ export default function PengalamanForm({
                 disabled:cursor-not-allowed"
             />
             <span className={values.isCurrentJob ? "text-blue-600 font-medium" : ""}>
-              Saya masih bekerja di posisi ini
+              {getTranslation("Saya masih bekerja di posisi ini", lang)}
             </span>
           </label>
         </div>
 
         <div>
           <label className="block text-xs font-medium text-gray-600 pb-1">
-            Deskripsi Pekerjaan <span className="text-red-500">*</span>
+            {getTranslation("Deskripsi Pekerjaan", lang)} <span className="text-red-500">*</span>
           </label>
           <textarea
             name="deskripsi"
@@ -643,14 +909,14 @@ export default function PengalamanForm({
               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none
               disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
             rows={4}
-            placeholder="Mengembangkan aplikasi web menggunakan Node.js, React, dan MySQL. Bertanggung jawab atas desain database dan implementasi API RESTful..."
+            placeholder={getTranslation("Mengembangkan aplikasi web menggunakan Node.js, React, dan MySQL. Bertanggung jawab atas desain database dan implementasi API RESTful...", lang)}
             maxLength={500}
             required
           />
           <div className="text-xs text-gray-400 mt-1 flex justify-between">
-            <span>{values.deskripsi.length}/500 karakter</span>
+            <span>{values.deskripsi.length}/500 {getTranslation("karakter", lang)}</span>
             {values.deskripsi.length > 450 && (
-              <span className="text-orange-500">Mendekati batas maksimal</span>
+              <span className="text-orange-500">{getTranslation("Mendekati batas maksimal", lang)}</span>
             )}
           </div>
         </div>
@@ -664,7 +930,7 @@ export default function PengalamanForm({
             className="px-4 py-1.5 text-xs bg-gray-400 text-white rounded 
               hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Batal
+            {getTranslation("Batal", lang)}
           </button>
           <button
             type="submit"
@@ -692,10 +958,10 @@ export default function PengalamanForm({
               </svg>
             )}
             {isLoading
-              ? "Menyimpan..."
+              ? getTranslation("Menyimpan...", lang)
               : mode === "add"
-              ? "Tambah Pengalaman"
-              : "Perbarui Data"}
+              ? getTranslation("Tambah Pengalaman", lang)
+              : getTranslation("Perbarui Data", lang)}
           </button>
         </div>
 
@@ -722,14 +988,14 @@ export default function PengalamanForm({
                 </svg>
               </div>
               <h4 className="text-lg font-medium text-gray-800">
-                Konfirmasi Hapus
+                {getTranslation("Konfirmasi Hapus", lang)}
               </h4>
             </div>
             
             <p className="text-sm text-gray-600 mb-6">
-              Apakah Anda yakin ingin menghapus pengalaman kerja <span className="font-semibold">&quot;{values.posisi}&quot;</span> di <span className="font-semibold">&quot;{values.perusahaan}&quot;</span>? 
+              {getTranslation("Apakah Anda yakin ingin menghapus pengalaman kerja", lang)} <span className="font-semibold">&quot;{values.posisi}&quot;</span> {getTranslation("di", lang)} <span className="font-semibold">&quot;{values.perusahaan}&quot;</span>? 
               <br />
-              <span className="font-medium text-red-600 mt-2 block">Tindakan ini tidak dapat dibatalkan.</span>
+              <span className="font-medium text-red-600 mt-2 block">{getTranslation("Tindakan ini tidak dapat dibatalkan.", lang)}</span>
             </p>
             
             {error && (
@@ -762,7 +1028,7 @@ export default function PengalamanForm({
                 className="px-4 py-2 text-sm bg-gray-400 text-white rounded 
                   hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Batal
+                {getTranslation("Batal", lang)}
               </button>
               <button
                 type="button"
@@ -790,7 +1056,7 @@ export default function PengalamanForm({
                     />
                   </svg>
                 )}
-                {isDeleting ? "Menghapus..." : "Hapus"}
+                {isDeleting ? getTranslation("Menghapus...", lang) : getTranslation("Hapus", lang)}
               </button>
             </div>
           </div>

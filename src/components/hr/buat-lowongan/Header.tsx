@@ -1,4 +1,3 @@
-// src/components/hr/buat-lowongan/Header.tsx
 "use client";
 
 interface HeaderProps {
@@ -8,16 +7,15 @@ interface HeaderProps {
 
 export default function Header({ title = "Buat Lowongan", onAddClick }: HeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-4 sticky top-0 bg-gray-50 z-10 pb-2">
-      <h1 className="text-3xl font-bold">{title}</h1>
-      <button
-        type="button"
-        aria-label="Tambah lowongan baru"
-        onClick={onAddClick}
-        className="bg-blue-800 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-900"
-      >
-        + Lowongan
-      </button>
-    </div>
+  <div className="flex items-center justify-between px-6 py-4">
+  <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+  <button
+    onClick={onAddClick}
+    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+  >
+    + Lowongan
+  </button>
+</div>
+
   );
 }

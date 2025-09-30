@@ -22,12 +22,233 @@ type Props = {
   onSaveSuccess: (updated: Partial<User>) => void;
 };
 
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+interface TranslationSet {
+  [key: string]: {
+    [lang: string]: string;
+  };
+}
+
+const languages: Language[] = [
+  { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' }
+];
+
+// Translation mappings untuk form biodata
+const translations: TranslationSet = {
+  // Labels
+  'Nama Lengkap': {
+    'id': 'Nama Lengkap',
+    'en': 'Full Name',
+    'ja': 'フルネーム'
+  },
+  'Email': {
+    'id': 'Email',
+    'en': 'Email',
+    'ja': 'メール'
+  },
+  'Nomor Telepon': {
+    'id': 'Nomor Telepon',
+    'en': 'Phone Number',
+    'ja': '電話番号'
+  },
+  'Tanggal Lahir': {
+    'id': 'Tanggal Lahir',
+    'en': 'Date of Birth',
+    'ja': '生年月日'
+  },
+  'Alamat': {
+    'id': 'Alamat',
+    'en': 'Address',
+    'ja': '住所'
+  },
+  'Kota': {
+    'id': 'Kota',
+    'en': 'City',
+    'ja': '市'
+  },
+  'Negara': {
+    'id': 'Negara',
+    'en': 'Country',
+    'ja': '国'
+  },
+  'Foto Profil': {
+    'id': 'Foto Profil',
+    'en': 'Profile Photo',
+    'ja': 'プロフィール写真'
+  },
+  
+  // Placeholders
+  'Masukkan nama lengkap': {
+    'id': 'Masukkan nama lengkap',
+    'en': 'Enter full name',
+    'ja': 'フルネームを入力してください'
+  },
+  'Email tidak dapat diubah': {
+    'id': 'Email tidak dapat diubah',
+    'en': 'Email cannot be changed',
+    'ja': 'メールは変更できません'
+  },
+  'Contoh: +62 812-3456-7890': {
+    'id': 'Contoh: +62 812-3456-7890',
+    'en': 'Example: +1 234-567-8900',
+    'ja': '例: +81 90-1234-5678'
+  },
+  'Masukkan alamat lengkap': {
+    'id': 'Masukkan alamat lengkap',
+    'en': 'Enter complete address',
+    'ja': '完全な住所を入力してください'
+  },
+  'Masukkan nama kota': {
+    'id': 'Masukkan nama kota',
+    'en': 'Enter city name',
+    'ja': '市名を入力してください'
+  },
+  'Masukkan nama negara': {
+    'id': 'Masukkan nama negara',
+    'en': 'Enter country name',
+    'ja': '国名を入力してください'
+  },
+  'Tanggal lahir belum diatur': {
+    'id': 'Tanggal lahir belum diatur',
+    'en': 'Date of birth not set',
+    'ja': '生年月日が設定されていません'
+  },
+  
+  // Messages
+  'Format: JPG, PNG, GIF. Maksimal 5MB': {
+    'id': 'Format: JPG, PNG, GIF. Maksimal 5MB',
+    'en': 'Format: JPG, PNG, GIF. Maximum 5MB',
+    'ja': 'フォーマット: JPG、PNG、GIF。最大5MB'
+  },
+  'Tanggal lahir tidak dapat diubah': {
+    'id': 'Tanggal lahir tidak dapat diubah',
+    'en': 'Date of birth cannot be changed',
+    'ja': '生年月日は変更できません'
+  },
+  'Format tampilan': {
+    'id': 'Format tampilan',
+    'en': 'Display format',
+    'ja': '表示形式'
+  },
+  'Format lengkap': {
+    'id': 'Format lengkap',
+    'en': 'Full format',
+    'ja': '完全な形式'
+  },
+  'File baru': {
+    'id': 'File baru',
+    'en': 'New file',
+    'ja': '新しいファイル'
+  },
+  'Ukuran': {
+    'id': 'Ukuran',
+    'en': 'Size',
+    'ja': 'サイズ'
+  },
+  'Tipe': {
+    'id': 'Tipe',
+    'en': 'Type',
+    'ja': 'タイプ'
+  },
+  'Foto saat ini': {
+    'id': 'Foto saat ini',
+    'en': 'Current photo',
+    'ja': '現在の写真'
+  },
+  
+  // Buttons
+  'Simpan Perubahan': {
+    'id': '💾 Simpan Perubahan',
+    'en': '💾 Save Changes',
+    'ja': '💾 変更を保存'
+  },
+  'Menyimpan...': {
+    'id': 'Menyimpan...',
+    'en': 'Saving...',
+    'ja': '保存中...'
+  },
+  'Batal': {
+    'id': 'Batal',
+    'en': 'Cancel',
+    'ja': 'キャンセル'
+  },
+  'Hapus foto': {
+    'id': 'Hapus foto',
+    'en': 'Remove photo',
+    'ja': '写真を削除'
+  },
+  
+  // Upload progress
+  'Upload foto': {
+    'id': 'Upload foto',
+    'en': 'Upload photo',
+    'ja': '写真をアップロード'
+  },
+  
+  // Error messages
+  'Nama lengkap tidak boleh kosong': {
+    'id': 'Nama lengkap tidak boleh kosong',
+    'en': 'Full name cannot be empty',
+    'ja': 'フルネームは空にできません'
+  },
+  'Email tidak boleh kosong': {
+    'id': 'Email tidak boleh kosong',
+    'en': 'Email cannot be empty',
+    'ja': 'メールは空にできません'
+  },
+  'Format email tidak valid': {
+    'id': 'Format email tidak valid',
+    'en': 'Invalid email format',
+    'ja': '無効なメール形式'
+  },
+  'Format nomor telepon tidak valid': {
+    'id': 'Format nomor telepon tidak valid',
+    'en': 'Invalid phone number format',
+    'ja': '無効な電話番号形式'
+  },
+  'Tanggal lahir tidak boleh di masa depan': {
+    'id': 'Tanggal lahir tidak boleh di masa depan',
+    'en': 'Date of birth cannot be in the future',
+    'ja': '生年月日は未来にできません'
+  },
+  'Usia minimal 17 tahun': {
+    'id': 'Usia minimal 17 tahun',
+    'en': 'Minimum age 17 years',
+    'ja': '最低年齢17歳'
+  },
+  'File yang dipilih harus berupa gambar': {
+    'id': 'File yang dipilih harus berupa gambar',
+    'en': 'Selected file must be an image',
+    'ja': '選択したファイルは画像である必要があります'
+  },
+  'Ukuran file tidak boleh lebih dari 5MB': {
+    'id': 'Ukuran file tidak boleh lebih dari 5MB',
+    'en': 'File size cannot exceed 5MB',
+    'ja': 'ファイルサイズは5MBを超えることはできません'
+  },
+  
+  // Success messages
+  'Biodata berhasil diperbarui!': {
+    'id': '✅ Biodata berhasil diperbarui!',
+    'en': '✅ Profile data updated successfully!',
+    'ja': '✅ プロフィールデータが正常に更新されました！'
+  }
+};
+
 export default function Biodata({
   user,
   isEditing,
   onCancel,
   onSaveSuccess,
 }: Props) {
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
   const [formData, setFormData] = useState<User>({
     full_name: user.full_name || "",
     email: user.email || "",
@@ -45,6 +266,37 @@ export default function Biodata({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  // Get translated text
+  const getTranslation = (key: string, lang: string): string => {
+    return translations[key]?.[lang] || key;
+  };
+
+  // Listen for language changes from Header
+  useEffect(() => {
+    // Load saved language from localStorage
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      const language = languages.find(lang => lang.code === savedLanguage);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    }
+
+    // Listen for language change events from Header component
+    const handleLanguageChange = (event: CustomEvent) => {
+      const language = languages.find(lang => lang.code === event.detail.language);
+      if (language) {
+        setCurrentLanguage(language);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   // 🔧 Format date dari API (ISO format) ke format tampilan mm/dd/yyyy
   const formatDateForDisplay = (dateString: string | null): string => {
@@ -67,7 +319,7 @@ export default function Biodata({
     }
   };
 
-  // 🔧 Format date untuk tampilan lengkap (Indonesian format)
+  // 🔧 Format date untuk tampilan lengkap (berdasarkan bahasa)
   const formatDateLong = (dateString: string | null): string => {
     if (!dateString) return "";
     
@@ -75,7 +327,12 @@ export default function Biodata({
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "";
       
-      return date.toLocaleDateString('id-ID', {
+      // Format berdasarkan bahasa yang dipilih
+      let locale = 'id-ID';
+      if (currentLanguage.code === 'en') locale = 'en-US';
+      if (currentLanguage.code === 'ja') locale = 'ja-JP';
+      
+      return date.toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -97,7 +354,7 @@ export default function Biodata({
       }
 
       const response = await fetch(
-        "https://apicareer-production.up.railway.app/api/auth/profile",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
         {
           method: "GET",
           headers: {
@@ -171,17 +428,17 @@ export default function Biodata({
     const newErrors: {[key: string]: string} = {};
 
     if (!formData.full_name.trim()) {
-      newErrors.full_name = "Nama lengkap tidak boleh kosong";
+      newErrors.full_name = getTranslation("Nama lengkap tidak boleh kosong", currentLanguage.code);
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email tidak boleh kosong";
+      newErrors.email = getTranslation("Email tidak boleh kosong", currentLanguage.code);
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Format email tidak valid";
+      newErrors.email = getTranslation("Format email tidak valid", currentLanguage.code);
     }
 
     if (formData.phone && !/^[0-9\-\+\(\)\s]+$/.test(formData.phone)) {
-      newErrors.phone = "Format nomor telepon tidak valid";
+      newErrors.phone = getTranslation("Format nomor telepon tidak valid", currentLanguage.code);
     }
 
     // Validasi tanggal lahir (opsional) - hanya jika ada perubahan
@@ -190,7 +447,7 @@ export default function Biodata({
       const today = new Date();
       
       if (birthDate > today) {
-        newErrors.date_of_birth = "Tanggal lahir tidak boleh di masa depan";
+        newErrors.date_of_birth = getTranslation("Tanggal lahir tidak boleh di masa depan", currentLanguage.code);
       }
       
       // Validasi usia minimal (contoh: minimal 17 tahun)
@@ -198,16 +455,16 @@ export default function Biodata({
       minAgeDate.setFullYear(today.getFullYear() - 17);
       
       if (birthDate > minAgeDate) {
-        newErrors.date_of_birth = "Usia minimal 17 tahun";
+        newErrors.date_of_birth = getTranslation("Usia minimal 17 tahun", currentLanguage.code);
       }
     }
 
     if (photoFile && !photoFile.type.startsWith('image/')) {
-      newErrors.photo = "File yang dipilih harus berupa gambar";
+      newErrors.photo = getTranslation("File yang dipilih harus berupa gambar", currentLanguage.code);
     }
 
     if (photoFile && photoFile.size > 5 * 1024 * 1024) {
-      newErrors.photo = "Ukuran file tidak boleh lebih dari 5MB";
+      newErrors.photo = getTranslation("Ukuran file tidak boleh lebih dari 5MB", currentLanguage.code);
     }
 
     setErrors(newErrors);
@@ -246,12 +503,12 @@ export default function Biodata({
     }
 
     if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, photo: "File yang dipilih harus berupa gambar" }));
+      setErrors(prev => ({ ...prev, photo: getTranslation("File yang dipilih harus berupa gambar", currentLanguage.code) }));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, photo: "Ukuran file tidak boleh lebih dari 5MB" }));
+      setErrors(prev => ({ ...prev, photo: getTranslation("Ukuran file tidak boleh lebih dari 5MB", currentLanguage.code) }));
       return;
     }
 
@@ -441,7 +698,7 @@ export default function Biodata({
 
       console.log("✅ Save completed successfully:", finalData);
       
-      alert("✅ Biodata berhasil diperbarui!");
+      alert(getTranslation("Biodata berhasil diperbarui!", currentLanguage.code));
       onSaveSuccess(finalData);
 
     } catch (err) {
@@ -494,7 +751,9 @@ export default function Biodata({
             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${uploadProgress}%` }}
           ></div>
-          <p className="text-sm text-gray-600 mt-1">Upload foto: {uploadProgress}%</p>
+          <p className="text-sm text-gray-600 mt-1">
+            {getTranslation("Upload foto", currentLanguage.code)}: {uploadProgress}%
+          </p>
         </div>
       )}
 
@@ -502,7 +761,7 @@ export default function Biodata({
         {/* Nama Lengkap */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Nama Lengkap <span className="text-red-500">*</span>
+            {getTranslation("Nama Lengkap", currentLanguage.code)} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -513,7 +772,7 @@ export default function Biodata({
             className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${
               errors.full_name ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Masukkan nama lengkap"
+            placeholder={getTranslation("Masukkan nama lengkap", currentLanguage.code)}
           />
           {errors.full_name && (
             <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>
@@ -523,7 +782,7 @@ export default function Biodata({
         {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Email <span className="text-red-500">*</span>
+            {getTranslation("Email", currentLanguage.code)} <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
@@ -531,15 +790,17 @@ export default function Biodata({
             value={formData.email}
             disabled
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 bg-gray-100 cursor-not-allowed"
-            placeholder="Email tidak dapat diubah"
+            placeholder={getTranslation("Email tidak dapat diubah", currentLanguage.code)}
           />
-          <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {getTranslation("Email tidak dapat diubah", currentLanguage.code)}
+          </p>
         </div>
 
         {/* Nomor Telepon */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Nomor Telepon
+            {getTranslation("Nomor Telepon", currentLanguage.code)}
           </label>
           <input
             type="text"
@@ -550,7 +811,7 @@ export default function Biodata({
             className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${
               errors.phone ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="Contoh: +62 812-3456-7890"
+            placeholder={getTranslation("Contoh: +62 812-3456-7890", currentLanguage.code)}
           />
           {errors.phone && (
             <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
@@ -560,7 +821,7 @@ export default function Biodata({
         {/* Tanggal Lahir - TIDAK BISA DIUBAH */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Tanggal Lahir
+            {getTranslation("Tanggal Lahir", currentLanguage.code)}
           </label>
           <div className="relative">
             {/* Input tersembunyi untuk menyimpan value */}
@@ -576,7 +837,9 @@ export default function Biodata({
                   {formatDateForDisplay(formData.date_of_birth)}
                 </span>
               ) : (
-                <span className="text-gray-400">Tanggal lahir belum diatur</span>
+                <span className="text-gray-400">
+                  {getTranslation("Tanggal lahir belum diatur", currentLanguage.code)}
+                </span>
               )}
             </div>
           </div>
@@ -585,12 +848,14 @@ export default function Biodata({
           {formData.date_of_birth && (
             <div className="text-xs text-gray-500 mt-1 space-y-1">
               <p>
-                <strong>Format tampilan:</strong> {formatDateForDisplay(formData.date_of_birth)} (mm/dd/yyyy)
+                <strong>{getTranslation("Format tampilan", currentLanguage.code)}:</strong> {formatDateForDisplay(formData.date_of_birth)} (mm/dd/yyyy)
               </p>
               <p>
-                <strong>Format lengkap:</strong> {formatDateLong(formData.date_of_birth)}
+                <strong>{getTranslation("Format lengkap", currentLanguage.code)}:</strong> {formatDateLong(formData.date_of_birth)}
               </p>
-              <p className="text-blue-600 font-medium">Tanggal lahir tidak dapat diubah</p>
+              <p className="text-blue-600 font-medium">
+                {getTranslation("Tanggal lahir tidak dapat diubah", currentLanguage.code)}
+              </p>
             </div>
           )}
         </div>
@@ -598,7 +863,7 @@ export default function Biodata({
         {/* Alamat */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Alamat
+            {getTranslation("Alamat", currentLanguage.code)}
           </label>
           <input
             type="text"
@@ -607,14 +872,14 @@ export default function Biodata({
             onChange={handleChange}
             disabled={!isEditing}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-            placeholder="Masukkan alamat lengkap"
+            placeholder={getTranslation("Masukkan alamat lengkap", currentLanguage.code)}
           />
         </div>
 
         {/* Kota */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Kota
+            {getTranslation("Kota", currentLanguage.code)}
           </label>
           <input
             type="text"
@@ -623,14 +888,14 @@ export default function Biodata({
             onChange={handleChange}
             disabled={!isEditing}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-            placeholder="Masukkan nama kota"
+            placeholder={getTranslation("Masukkan nama kota", currentLanguage.code)}
           />
         </div>
 
         {/* Negara */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Negara
+            {getTranslation("Negara", currentLanguage.code)}
           </label>
           <input
             type="text"
@@ -639,14 +904,14 @@ export default function Biodata({
             onChange={handleChange}
             disabled={!isEditing}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-            placeholder="Masukkan nama negara"
+            placeholder={getTranslation("Masukkan nama negara", currentLanguage.code)}
           />
         </div>
 
         {/* Upload Foto */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700">
-            Foto Profil
+            {getTranslation("Foto Profil", currentLanguage.code)}
           </label>
           <div className="mt-1">
             <input
@@ -662,7 +927,7 @@ export default function Biodata({
               <p className="text-red-500 text-sm mt-1">{errors.photo}</p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Format: JPG, PNG, GIF. Maksimal 5MB
+              {getTranslation("Format: JPG, PNG, GIF. Maksimal 5MB", currentLanguage.code)}
             </p>
           </div>
 
@@ -689,7 +954,7 @@ export default function Biodata({
                     type="button"
                     onClick={handleRemovePhoto}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    title="Hapus foto"
+                    title={getTranslation("Hapus foto", currentLanguage.code)}
                   >
                     ×
                   </button>
@@ -699,14 +964,14 @@ export default function Biodata({
               <div className="flex-1">
                 {photoFile && (
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>File baru:</strong> {photoFile.name}</p>
-                    <p><strong>Ukuran:</strong> {(photoFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    <p><strong>Tipe:</strong> {photoFile.type}</p>
+                    <p><strong>{getTranslation("File baru", currentLanguage.code)}:</strong> {photoFile.name}</p>
+                    <p><strong>{getTranslation("Ukuran", currentLanguage.code)}:</strong> {(photoFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p><strong>{getTranslation("Tipe", currentLanguage.code)}:</strong> {photoFile.type}</p>
                   </div>
                 )}
                 {!photoFile && (user.profile_photo_url || user.profile_photo) && (
                   <div className="text-sm text-gray-600">
-                    <p><strong>Foto saat ini</strong></p>
+                    <p><strong>{getTranslation("Foto saat ini", currentLanguage.code)}</strong></p>
                     <p className="text-xs break-all">{user.profile_photo_url || user.profile_photo}</p>
                   </div>
                 )}
@@ -727,10 +992,10 @@ export default function Biodata({
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {uploadProgress > 0 && uploadProgress < 100 ? `Upload ${uploadProgress}%` : 'Menyimpan...'}
+                  {uploadProgress > 0 && uploadProgress < 100 ? `${getTranslation("Upload foto", currentLanguage.code)} ${uploadProgress}%` : getTranslation("Menyimpan...", currentLanguage.code)}
                 </div>
               ) : (
-                "💾 Simpan Perubahan"
+                getTranslation("Simpan Perubahan", currentLanguage.code)
               )}
             </button>
             
@@ -740,7 +1005,7 @@ export default function Biodata({
               disabled={loading}
               className="flex-1 md:flex-none bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 font-medium"
             >
-              Batal
+              {getTranslation("Batal", currentLanguage.code)}
             </button>
           </div>
         )}

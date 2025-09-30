@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).hostname : "";
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -15,10 +17,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "dummyimage.com",
       },
-      // ✅ tambahkan domain API kamu di sini
       {
         protocol: "https",
-        hostname: "backendstticareer-123965511401.asia-southeast2.run.app",
+        hostname: apiUrl,
+        pathname: "/uploads/images/**",
       },
     ],
   },
