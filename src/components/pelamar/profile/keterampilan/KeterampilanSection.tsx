@@ -33,6 +33,210 @@ interface FileData {
   cover_letter_file_url?: string | null;
 }
 
+// Translation object for all text in the component
+const translations = {
+  // Section titles
+  skills: {
+    id: 'Keterampilan',
+    en: 'Skills',
+    ja: 'スキル'
+  },
+  portfolio: {
+    id: 'Portofolio',
+    en: 'Portfolio',
+    ja: 'ポートフォリオ'
+  },
+  supportingFiles: {
+    id: 'File Pendukung',
+    en: 'Supporting Files',
+    ja: 'サポートファイル'
+  },
+  
+  // Status messages
+  statusSynced: {
+    id: 'Tersinkron',
+    en: 'Synced',
+    ja: '同期済み'
+  },
+  statusOffline: {
+    id: 'Mode Offline',
+    en: 'Offline Mode',
+    ja: 'オフラインモード'
+  },
+  statusExpired: {
+    id: 'Token Kedaluwarsa',
+    en: 'Token Expired',
+    ja: 'トークン期限切れ'
+  },
+  statusDemo: {
+    id: 'Mode Demo',
+    en: 'Demo Mode',
+    ja: 'デモモード'
+  },
+  statusChecking: {
+    id: 'Memeriksa...',
+    en: 'Checking...',
+    ja: '確認中...'
+  },
+  
+  // Buttons
+  editSkills: {
+    id: 'Edit Keterampilan',
+    en: 'Edit Skills',
+    ja: 'スキルを編集'
+  },
+  addSkill: {
+    id: 'Tambah Keterampilan',
+    en: 'Add Skill',
+    ja: 'スキルを追加'
+  },
+  retry: {
+    id: 'Coba Lagi',
+    en: 'Try Again',
+    ja: '再試行'
+  },
+  viewFile: {
+    id: 'Lihat File',
+    en: 'View File',
+    ja: 'ファイルを見る'
+  },
+  deleteSkill: {
+    id: 'Hapus skill',
+    en: 'Delete skill',
+    ja: 'スキルを削除'
+  },
+  
+  // Messages
+  loadingSkills: {
+    id: 'Memuat data keterampilan...',
+    en: 'Loading skills data...',
+    ja: 'スキルデータを読み込み中...'
+  },
+  noSkills: {
+    id: 'Belum ada keterampilan yang ditambahkan',
+    en: 'No skills added yet',
+    ja: 'まだスキルが追加されていません'
+  },
+  noFileUploaded: {
+    id: 'Belum ada file yang diunggah',
+    en: 'No file uploaded yet',
+    ja: 'まだファイルがアップロードされていません'
+  },
+  
+  // Confirmation messages
+  confirmDelete: {
+    id: 'Yakin mau hapus keterampilan ini?',
+    en: 'Are you sure you want to delete this skill?',
+    ja: 'このスキルを削除してもよろしいですか？'
+  },
+  confirmDeleteShort: {
+    id: 'Yakin ingin menghapus keterampilan ini?',
+    en: 'Are you sure you want to remove this skill?',
+    ja: 'このスキルを削除してもよろしいですか？'
+  },
+  
+  // Error messages
+  tokenExpired: {
+    id: 'Token kedaluwarsa. Silakan login ulang.',
+    en: 'Token expired. Please login again.',
+    ja: 'トークンが期限切れです。再度ログインしてください。'
+  },
+  accessDenied: {
+    id: 'Akses ditolak - periksa permissions',
+    en: 'Access denied - check permissions',
+    ja: 'アクセス拒否 - 権限を確認してください'
+  },
+  connectionError: {
+    id: 'Koneksi bermasalah - menampilkan data demo',
+    en: 'Connection issue - showing demo data',
+    ja: '接続に問題があります - デモデータを表示中'
+  },
+  loadFailed: {
+    id: 'Gagal memuat data',
+    en: 'Failed to load data',
+    ja: 'データの読み込みに失敗しました'
+  },
+  tokenNotFound: {
+    id: 'Token tidak ditemukan',
+    en: 'Token not found',
+    ja: 'トークンが見つかりません'
+  },
+  deleteFailed: {
+    id: 'Gagal menghapus keterampilan. Silakan coba lagi.',
+    en: 'Failed to delete skill. Please try again.',
+    ja: 'スキルの削除に失敗しました。もう一度お試しください。'
+  },
+  deleteSuccess: {
+    id: 'Keterampilan berhasil dihapus',
+    en: 'Skill successfully deleted',
+    ja: 'スキルが正常に削除されました'
+  },
+  skillDeletedLocal: {
+    id: 'Skill dihapus - perubahan disimpan lokal',
+    en: 'Skill deleted - changes saved locally',
+    ja: 'スキルが削除されました - ローカルに保存されました'
+  },
+  changesSavedLocal: {
+    id: 'Perubahan disimpan lokal',
+    en: 'Changes saved locally',
+    ja: 'ローカルに保存されました'
+  },
+  skillAddedLocal: {
+    id: 'Skill ditambahkan - perubahan disimpan lokal',
+    en: 'Skill added - changes saved locally',
+    ja: 'スキルが追加されました - ローカルに保存されました'
+  },
+  changesSavedSuccess: {
+    id: 'Perubahan berhasil disimpan',
+    en: 'Changes saved successfully',
+    ja: '変更が正常に保存されました'
+  },
+  saveFailed: {
+    id: 'Gagal menyimpan keterampilan. Silakan coba lagi.',
+    en: 'Failed to save skill. Please try again.',
+    ja: 'スキルの保存に失敗しました。もう一度お試しください。'
+  },
+  addSkillFailed: {
+    id: 'Gagal menambah keterampilan',
+    en: 'Failed to add skill',
+    ja: 'スキルの追加に失敗しました'
+  },
+  updateSkillFailed: {
+    id: 'Gagal mengupdate keterampilan',
+    en: 'Failed to update skill',
+    ja: 'スキルの更新に失敗しました'
+  },
+  
+  // Help text
+  loginAgain: {
+    id: 'Silakan login ulang untuk sinkronisasi dengan server',
+    en: 'Please login again to sync with server',
+    ja: 'サーバーと同期するには再度ログインしてください'
+  },
+  syncWhenOnline: {
+    id: 'Perubahan akan disinkronkan ketika kembali online',
+    en: 'Changes will be synced when back online',
+    ja: 'オンラインに戻ると変更が同期されます'
+  },
+  
+  // File types
+  portfolioFile: {
+    id: 'Portfolio File',
+    en: 'Portfolio File',
+    ja: 'ポートフォリオファイル'
+  },
+  curriculumVitae: {
+    id: 'Curriculum Vitae',
+    en: 'Curriculum Vitae',
+    ja: '履歴書'
+  },
+  coverLetter: {
+    id: 'Cover Letter',
+    en: 'Cover Letter',
+    ja: 'カバーレター'
+  }
+};
+
 export default function KeterampilanSection() {
   const [showForm, setShowForm] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -51,9 +255,34 @@ export default function KeterampilanSection() {
     cv_file_url: null,
     cover_letter_file_url: null
   });
+  const [currentLanguage, setCurrentLanguage] = useState('id');
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backendstticareer-123965511401.asia-southeast2.run.app';
   
+  // Translation helper function
+  const t = (key: keyof typeof translations): string => {
+    return translations[key]?.[currentLanguage as 'id' | 'en' | 'ja'] || translations[key]?.['id'] || key;
+  };
+
+  // Listen for language changes from Header
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      setCurrentLanguage(event.detail.language);
+    };
+
+    // Load saved language from localStorage
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      setCurrentLanguage(savedLanguage);
+    }
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, []);
+
   const getAuthToken = (): string | null => {
     if (typeof window === 'undefined') return null;
     
@@ -140,13 +369,13 @@ export default function KeterampilanSection() {
         console.warn('Authentication token expired or invalid');
         clearAuthTokens();
         loadDummyData('expired');
-        setError('Token kedaluwarsa. Silakan login ulang.');
+        setError(t('tokenExpired'));
         setLoading(false);
         return;
       }
 
       if (response.status === 403) {
-        setError('Akses ditolak - periksa permissions');
+        setError(t('accessDenied'));
         setAuthStatus('unauthenticated');
         loadDummyData('no-permission');
         setLoading(false);
@@ -170,7 +399,6 @@ export default function KeterampilanSection() {
       setAuthStatus('authenticated');
       setError(null);
 
-      // Extract skills dari response
       if (profileData.skills && Array.isArray(profileData.skills)) {
         const skillsArray = profileData.skills.map((skill: any) => ({
           id: skill.id,
@@ -191,7 +419,6 @@ export default function KeterampilanSection() {
         console.log('No skills found in profile');
       }
       
-      // Extract file URLs dari response
       const fileData: FileData = {
         portfolio_file: profileData.portfolio_file,
         cv_file: profileData.cv_file,
@@ -210,24 +437,24 @@ export default function KeterampilanSection() {
       console.error('Error fetching profile:', err);
       
       if (err.name === 'NetworkError' || err.message.includes('Failed to fetch')) {
-        setError('Koneksi bermasalah - menampilkan data demo');
+        setError(t('connectionError'));
         setIsOnline(false);
       } else {
-        setError(`Gagal memuat data: ${err.message}`);
+        setError(`${t('loadFailed')}: ${err.message}`);
       }
       
       loadDummyData('error');
     } finally {
       setLoading(false);
     }
-  }, [API_BASE_URL]);
+  }, [API_BASE_URL, currentLanguage]);
 
   const addSkill = async (skillData: SkillFormData): Promise<boolean> => {
     try {
       const token = getAuthToken();
       
       if (!token) {
-        throw new Error('Token tidak ditemukan');
+        throw new Error(t('tokenNotFound'));
       }
 
       console.log('Adding skill:', skillData);
@@ -260,7 +487,7 @@ export default function KeterampilanSection() {
       return true;
     } catch (err: any) {
       console.error('Error adding skill:', err);
-      setError(`Gagal menambah keterampilan: ${err.message}`);
+      setError(`${t('addSkillFailed')}: ${err.message}`);
       return false;
     }
   };
@@ -270,7 +497,7 @@ export default function KeterampilanSection() {
       const token = getAuthToken();
       
       if (!token) {
-        throw new Error('Token tidak ditemukan');
+        throw new Error(t('tokenNotFound'));
       }
 
       console.log('Updating skill:', skillId, skillData);
@@ -307,7 +534,7 @@ export default function KeterampilanSection() {
       return true;
     } catch (err: any) {
       console.error('Error updating skill:', err);
-      setError(`Gagal mengupdate keterampilan: ${err.message}`);
+      setError(`${t('updateSkillFailed')}: ${err.message}`);
       return false;
     }
   };
@@ -317,7 +544,7 @@ export default function KeterampilanSection() {
       const token = getAuthToken();
       
       if (!token) {
-        throw new Error('Token tidak ditemukan');
+        throw new Error(t('tokenNotFound'));
       }
 
       console.log('Deleting skill:', skillId);
@@ -346,7 +573,7 @@ export default function KeterampilanSection() {
       return true;
     } catch (err: any) {
       console.error('Error deleting skill:', err);
-      setError(`Gagal menghapus keterampilan: ${err.message}`);
+      setError(`${t('updateSkillFailed')}: ${err.message}`);
       return false;
     }
   };
@@ -388,21 +615,21 @@ export default function KeterampilanSection() {
   };
 
   const handleDelete = async (idx: number): Promise<void> => {
-    if (confirm("Yakin mau hapus keterampilan ini?")) {
+    if (confirm(t('confirmDelete'))) {
       const skill = skills[idx];
       
       if (isOnline && isAuthenticated() && skill.id) {
         const success = await deleteSkill(skill.id);
         if (!success) {
-          alert('Gagal menghapus keterampilan. Silakan coba lagi.');
+          alert(t('deleteFailed'));
         } else {
-          setError('Keterampilan berhasil dihapus');
+          setError(t('deleteSuccess'));
           setTimeout(() => setError(null), 2000);
         }
       } else {
         const newSkills = skills.filter((_, index) => index !== idx);
         setSkills(newSkills);
-        setError('Skill dihapus - perubahan disimpan lokal');
+        setError(t('skillDeletedLocal'));
       }
     }
   };
@@ -438,7 +665,7 @@ export default function KeterampilanSection() {
         };
         setSkills(newSkills);
         success = true;
-        setError('Perubahan disimpan lokal');
+        setError(t('changesSavedLocal'));
       }
     } else {
       if (isOnline && isAuthenticated()) {
@@ -454,7 +681,7 @@ export default function KeterampilanSection() {
         };
         setSkills([...skills, newSkill]);
         success = true;
-        setError('Skill ditambahkan - perubahan disimpan lokal');
+        setError(t('skillAddedLocal'));
       }
     }
 
@@ -465,30 +692,30 @@ export default function KeterampilanSection() {
       
       if (isOnline && isAuthenticated()) {
         const originalError = error;
-        setError('Perubahan berhasil disimpan');
+        setError(t('changesSavedSuccess'));
         setTimeout(() => {
           setError(originalError);
         }, 2000);
       }
     } else {
-      alert("Gagal menyimpan keterampilan. Silakan coba lagi.");
+      alert(t('saveFailed'));
     }
   };
 
   const removeSkill = async (skillToRemove: Skill): Promise<void> => {
-    if (!confirm('Yakin ingin menghapus keterampilan ini?')) {
+    if (!confirm(t('confirmDeleteShort'))) {
       return;
     }
 
     if (isOnline && isAuthenticated() && skillToRemove.id) {
       const success = await deleteSkill(skillToRemove.id);
       if (!success) {
-        alert('Gagal menghapus keterampilan. Silakan coba lagi.');
+        alert(t('deleteFailed'));
       }
     } else {
       const updatedSkills = skills.filter(skill => skill !== skillToRemove);
       setSkills(updatedSkills);
-      setError('Skill dihapus - perubahan disimpan lokal');
+      setError(t('skillDeletedLocal'));
     }
   };
 
@@ -499,18 +726,18 @@ export default function KeterampilanSection() {
 
   const getStatusInfo = () => {
     if (!isOnline) {
-      return { type: 'offline', message: 'Mode Offline', icon: WifiOff, color: 'orange' };
+      return { type: 'offline', message: t('statusOffline'), icon: WifiOff, color: 'orange' };
     }
     
     switch (authStatus) {
       case 'authenticated':
-        return { type: 'success', message: 'Tersinkron', icon: CheckCircle, color: 'green' };
+        return { type: 'success', message: t('statusSynced'), icon: CheckCircle, color: 'green' };
       case 'expired':
-        return { type: 'warning', message: 'Token Kedaluwarsa', icon: AlertCircle, color: 'yellow' };
+        return { type: 'warning', message: t('statusExpired'), icon: AlertCircle, color: 'yellow' };
       case 'unauthenticated':
-        return { type: 'info', message: 'Mode Demo', icon: AlertCircle, color: 'blue' };
+        return { type: 'info', message: t('statusDemo'), icon: AlertCircle, color: 'blue' };
       default:
-        return { type: 'info', message: 'Memeriksa...', icon: Wifi, color: 'gray' };
+        return { type: 'info', message: t('statusChecking'), icon: Wifi, color: 'gray' };
     }
   };
 
@@ -523,7 +750,7 @@ export default function KeterampilanSection() {
           <div className="flex justify-center items-center py-8">
             <div className="text-gray-500 flex items-center">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-              Memuat data keterampilan...
+              {t('loadingSkills')}
             </div>
           </div>
         </div>
@@ -549,7 +776,7 @@ export default function KeterampilanSection() {
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-gray-900">Keterampilan</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t('skills')}</h2>
                 <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                   statusInfo.color === 'green' ? 'bg-green-100 text-green-800' :
                   statusInfo.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
@@ -566,45 +793,45 @@ export default function KeterampilanSection() {
                 className="inline-flex items-center bg-blue-600 text-white px-4 py-2 text-sm rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors"
               >
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Keterampilan
+                {t('editSkills')}
               </button>
             </div>
 
             {error && (
               <div className={`mb-4 p-3 rounded-md flex items-start justify-between ${
-                error.includes('berhasil') ? 'bg-green-100 border border-green-300' :
-                error.includes('offline') || error.includes('Offline') ? 'bg-orange-100 border border-orange-300' :
-                error.includes('kedaluwarsa') || error.includes('expired') ? 'bg-yellow-100 border border-yellow-300' :
-                error.includes('demo') || error.includes('Demo') ? 'bg-blue-100 border border-blue-300' :
+                error.includes('berhasil') || error.includes('successfully') || error.includes('正常') ? 'bg-green-100 border border-green-300' :
+                error.includes('offline') || error.includes('Offline') || error.includes('オフライン') ? 'bg-orange-100 border border-orange-300' :
+                error.includes('kedaluwarsa') || error.includes('expired') || error.includes('期限切れ') ? 'bg-yellow-100 border border-yellow-300' :
+                error.includes('demo') || error.includes('Demo') || error.includes('デモ') ? 'bg-blue-100 border border-blue-300' :
                 'bg-red-100 border border-red-300'
               }`}>
                 <div>
                   <p className={`text-sm font-medium ${
-                    error.includes('berhasil') ? 'text-green-800' :
-                    error.includes('offline') || error.includes('Offline') ? 'text-orange-800' :
-                    error.includes('kedaluwarsa') || error.includes('expired') ? 'text-yellow-800' :
-                    error.includes('demo') || error.includes('Demo') ? 'text-blue-800' :
+                    error.includes('berhasil') || error.includes('successfully') || error.includes('正常') ? 'text-green-800' :
+                    error.includes('offline') || error.includes('Offline') || error.includes('オフライン') ? 'text-orange-800' :
+                    error.includes('kedaluwarsa') || error.includes('expired') || error.includes('期限切れ') ? 'text-yellow-800' :
+                    error.includes('demo') || error.includes('Demo') || error.includes('デモ') ? 'text-blue-800' :
                     'text-red-800'
                   }`}>
                     {error}
                   </p>
-                  {(error.includes('kedaluwarsa') || error.includes('expired')) && (
+                  {(error.includes('kedaluwarsa') || error.includes('expired') || error.includes('期限切れ')) && (
                     <p className="text-xs text-yellow-600 mt-1">
-                      Silakan login ulang untuk sinkronisasi dengan server
+                      {t('loginAgain')}
                     </p>
                   )}
-                  {error.includes('offline') && (
+                  {(error.includes('offline') || error.includes('Offline') || error.includes('オフライン')) && (
                     <p className="text-xs text-orange-600 mt-1">
-                      Perubahan akan disinkronkan ketika kembali online
+                      {t('syncWhenOnline')}
                     </p>
                   )}
                 </div>
-                {(error.includes('Gagal') || error.includes('bermasalah')) && (
+                {(error.includes('Gagal') || error.includes('Failed') || error.includes('失敗') || error.includes('bermasalah') || error.includes('issue') || error.includes('問題')) && (
                   <button
                     onClick={handleRetry}
                     className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    Coba Lagi
+                    {t('retry')}
                   </button>
                 )}
               </div>
@@ -628,7 +855,7 @@ export default function KeterampilanSection() {
                       <button
                         onClick={() => removeSkill(skill)}
                         className="ml-2 hover:text-blue-600 transition-colors"
-                        title="Hapus skill"
+                        title={t('deleteSkill')}
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -636,7 +863,7 @@ export default function KeterampilanSection() {
                   ))
                 ) : (
                   <div className="text-gray-500 text-sm italic">
-                    Belum ada keterampilan yang ditambahkan
+                    {t('noSkills')}
                   </div>
                 )}
               </div>
@@ -645,13 +872,13 @@ export default function KeterampilanSection() {
                 onClick={handleAddSkill}
                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium transition-colors"
               >
-                + Tambah Keterampilan
+                + {t('addSkill')}
               </button>
             </div>
 
             {portfolioLinks.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-base font-semibold text-gray-900 mb-3">Portofolio</h3>
+                <h3 className="text-base font-semibold text-gray-900 mb-3">{t('portfolio')}</h3>
                 <div className="space-y-2">
                   {portfolioLinks.map((link, index) => (
                     <a
@@ -669,21 +896,21 @@ export default function KeterampilanSection() {
             )}
 
             <div>
-              <h3 className="text-base font-semibold text-gray-900 mb-4">File Pendukung</h3>
+              <h3 className="text-base font-semibold text-gray-900 mb-4">{t('supportingFiles')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { 
-                    title: "Portfolio File", 
+                    title: t('portfolioFile'), 
                     key: "portfolio_file",
                     urlKey: "portfolio_file_url"
                   },
                   { 
-                    title: "Curriculum Vitae", 
+                    title: t('curriculumVitae'), 
                     key: "cv_file",
                     urlKey: "cv_file_url"
                   },
                   { 
-                    title: "Cover Letter", 
+                    title: t('coverLetter'), 
                     key: "cover_letter_file",
                     urlKey: "cover_letter_file_url"
                   },
@@ -714,7 +941,7 @@ export default function KeterampilanSection() {
                               rel="noopener noreferrer"
                               className="text-xs text-blue-600 hover:underline"
                             >
-                              Lihat File
+                              {t('viewFile')}
                             </a>
                           </div>
                         ) : fileName ? (
@@ -723,7 +950,7 @@ export default function KeterampilanSection() {
                           </p>
                         ) : (
                           <p className="text-xs text-gray-500">
-                            Belum ada file yang diunggah
+                            {t('noFileUploaded')}
                           </p>
                         )}
                       </div>

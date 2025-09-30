@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, Upload } from "lucide-react";
 
 type Props = {
@@ -8,6 +8,332 @@ type Props = {
   initialData?: { nama: string };
   onCancel: () => void;
   onSave: (data: { nama: string }) => void;
+};
+
+// Translation object
+const translations = {
+  // Form labels
+  skills: {
+    id: 'Keterampilan',
+    en: 'Skills',
+    ja: 'スキル'
+  },
+  required: {
+    id: '*',
+    en: '*',
+    ja: '*'
+  },
+  portfolioOnline: {
+    id: 'Portofolio Online & Tautan Terkait',
+    en: 'Online Portfolio & Related Links',
+    ja: 'オンラインポートフォリオ＆関連リンク'
+  },
+  uploadSupportingFiles: {
+    id: 'Unggah File Pendukung',
+    en: 'Upload Supporting Files',
+    ja: 'サポートファイルをアップロード'
+  },
+  
+  // Placeholders
+  skillPlaceholder: {
+    id: 'Contoh: HTML, CSS, Data Science',
+    en: 'Example: HTML, CSS, Data Science',
+    ja: '例：HTML、CSS、データサイエンス'
+  },
+  linkPlaceholder: {
+    id: 'https://example.com/portfolio',
+    en: 'https://example.com/portfolio',
+    ja: 'https://example.com/portfolio'
+  },
+  
+  // Buttons
+  add: {
+    id: 'Tambah',
+    en: 'Add',
+    ja: '追加'
+  },
+  addAnotherLink: {
+    id: 'Tambah Tautan Lain',
+    en: 'Add Another Link',
+    ja: '別のリンクを追加'
+  },
+  cancel: {
+    id: 'Batal',
+    en: 'Cancel',
+    ja: 'キャンセル'
+  },
+  saveChanges: {
+    id: 'Simpan Perubahan',
+    en: 'Save Changes',
+    ja: '変更を保存'
+  },
+  saving: {
+    id: 'Menyimpan...',
+    en: 'Saving...',
+    ja: '保存中...'
+  },
+  uploadFile: {
+    id: 'Unggah File',
+    en: 'Upload File',
+    ja: 'ファイルをアップロード'
+  },
+  deleteSkill: {
+    id: 'Hapus skill',
+    en: 'Delete skill',
+    ja: 'スキルを削除'
+  },
+  deleteLink: {
+    id: 'Hapus link',
+    en: 'Delete link',
+    ja: 'リンクを削除'
+  },
+  deleteFile: {
+    id: 'Hapus file',
+    en: 'Delete file',
+    ja: 'ファイルを削除'
+  },
+  
+  // Skill levels
+  beginner: {
+    id: 'Beginner',
+    en: 'Beginner',
+    ja: '初級'
+  },
+  intermediate: {
+    id: 'Intermediate',
+    en: 'Intermediate',
+    ja: '中級'
+  },
+  advanced: {
+    id: 'Advanced',
+    en: 'Advanced',
+    ja: '上級'
+  },
+  expert: {
+    id: 'Expert',
+    en: 'Expert',
+    ja: 'エキスパート'
+  },
+  
+  // Messages
+  noSkillsAdded: {
+    id: 'Belum ada keterampilan yang ditambahkan',
+    en: 'No skills added yet',
+    ja: 'まだスキルが追加されていません'
+  },
+  selectLevelHint: {
+    id: 'Pilih level untuk setiap keterampilan sebelum menyimpan',
+    en: 'Select level for each skill before saving',
+    ja: '保存する前に各スキルのレベルを選択してください'
+  },
+  addLinks: {
+    id: 'Tambahkan Tautan',
+    en: 'Add Links',
+    ja: 'リンクを追加'
+  },
+  dragAndDrop: {
+    id: 'atau tarik & seret',
+    en: 'or drag & drop',
+    ja: 'またはドラッグ＆ドロップ'
+  },
+  maxSize: {
+    id: 'Maksimal',
+    en: 'Maximum',
+    ja: '最大'
+  },
+  format: {
+    id: 'Format',
+    en: 'Format',
+    ja: 'フォーマット'
+  },
+  filesOptional: {
+    id: 'File bersifat opsional, tetapi sangat direkomendasikan untuk melengkapi profil Anda',
+    en: 'Files are optional, but highly recommended to complete your profile',
+    ja: 'ファイルはオプションですが、プロフィールを完成させるために強く推奨されます'
+  },
+  
+  // File types
+  portfolioFile: {
+    id: 'Portfolio File',
+    en: 'Portfolio File',
+    ja: 'ポートフォリオファイル'
+  },
+  curriculumVitae: {
+    id: 'Curriculum Vitae',
+    en: 'Curriculum Vitae',
+    ja: '履歴書'
+  },
+  coverLetter: {
+    id: 'Cover Letter',
+    en: 'Cover Letter',
+    ja: 'カバーレター'
+  },
+  
+  // File descriptions
+  portfolioDesc: {
+    id: 'Unggah portfolio Anda dalam format PDF atau DOC/DOCX (maks 100MB)',
+    en: 'Upload your portfolio in PDF or DOC/DOCX format (max 100MB)',
+    ja: 'ポートフォリオをPDFまたはDOC/DOCX形式でアップロード（最大100MB）'
+  },
+  cvDesc: {
+    id: 'Unggah CV Anda dalam format PDF atau DOC/DOCX (maks 100MB)',
+    en: 'Upload your CV in PDF or DOC/DOCX format (max 100MB)',
+    ja: '履歴書をPDFまたはDOC/DOCX形式でアップロード（最大100MB）'
+  },
+  coverLetterDesc: {
+    id: 'Unggah surat lamaran dalam format PDF atau DOC/DOCX (maks 100MB)',
+    en: 'Upload cover letter in PDF or DOC/DOCX format (max 100MB)',
+    ja: 'カバーレターをPDFまたはDOC/DOCX形式でアップロード（最大100MB）'
+  },
+  
+  // Error messages
+  fileTypeNotAllowed: {
+    id: 'Tipe file tidak diizinkan!',
+    en: 'File type not allowed!',
+    ja: 'ファイルタイプが許可されていません！'
+  },
+  onlyAllowed: {
+    id: 'Hanya diperbolehkan: PDF, DOC, DOCX',
+    en: 'Only allowed: PDF, DOC, DOCX',
+    ja: '許可されているのは：PDF、DOC、DOCX'
+  },
+  fileTooLarge: {
+    id: 'Ukuran file terlalu besar!',
+    en: 'File size too large!',
+    ja: 'ファイルサイズが大きすぎます！'
+  },
+  maxFileSize: {
+    id: 'Maksimal: 100 MB',
+    en: 'Maximum: 100 MB',
+    ja: '最大：100 MB'
+  },
+  addMinimumSkill: {
+    id: 'Mohon tambahkan minimal satu keterampilan',
+    en: 'Please add at least one skill',
+    ja: '少なくとも1つのスキルを追加してください'
+  },
+  notLoggedIn: {
+    id: 'Anda belum login. Silakan login terlebih dahulu.',
+    en: 'You are not logged in. Please login first.',
+    ja: 'ログインしていません。最初にログインしてください。'
+  },
+  uploadingFiles: {
+    id: 'Uploading files...',
+    en: 'Uploading files...',
+    ja: 'ファイルをアップロード中...'
+  },
+  postingSkills: {
+    id: 'Posting skills...',
+    en: 'Posting skills...',
+    ja: 'スキルを投稿中...'
+  },
+  failedToSaveAll: {
+    id: 'Gagal menyimpan semua keterampilan',
+    en: 'Failed to save all skills',
+    ja: 'すべてのスキルの保存に失敗しました'
+  },
+  partiallySaved: {
+    id: 'Sebagian data berhasil disimpan',
+    en: 'Some data saved successfully',
+    ja: '一部のデータが正常に保存されました'
+  },
+  successful: {
+    id: 'Berhasil',
+    en: 'Successful',
+    ja: '成功'
+  },
+  failed: {
+    id: 'Gagal',
+    en: 'Failed',
+    ja: '失敗'
+  },
+  allSavedSuccess: {
+    id: 'Semua keterampilan dan file berhasil disimpan!',
+    en: 'All skills and files saved successfully!',
+    ja: 'すべてのスキルとファイルが正常に保存されました！'
+  },
+  errorSaving: {
+    id: 'Terjadi kesalahan saat menyimpan data.',
+    en: 'An error occurred while saving data.',
+    ja: 'データの保存中にエラーが発生しました。'
+  },
+  tokenExpiredLogin: {
+    id: 'Token Anda mungkin sudah kadaluarsa. Silakan login ulang.',
+    en: 'Your token may have expired. Please login again.',
+    ja: 'トークンが期限切れの可能性があります。再度ログインしてください。'
+  },
+  endpointNotFound: {
+    id: 'Endpoint API tidak ditemukan. Mungkin ada masalah dengan server atau URL API.',
+    en: 'API endpoint not found. There may be an issue with the server or API URL.',
+    ja: 'APIエンドポイントが見つかりません。サーバーまたはAPI URLに問題がある可能性があります。'
+  },
+  serverError: {
+    id: 'Terjadi kesalahan di server. Silakan coba lagi nanti.',
+    en: 'A server error occurred. Please try again later.',
+    ja: 'サーバーエラーが発生しました。後でもう一度お試しください。'
+  },
+  checkConnection: {
+    id: 'Periksa koneksi internet Anda dan coba lagi.',
+    en: 'Check your internet connection and try again.',
+    ja: 'インターネット接続を確認してもう一度お試しください。'
+  },
+  failedToSave: {
+    id: 'Gagal menyimpan data',
+    en: 'Failed to save data',
+    ja: 'データの保存に失敗しました'
+  },
+  
+  // Debug
+  debugInfo: {
+    id: 'Debug Info:',
+    en: 'Debug Info:',
+    ja: 'デバッグ情報：'
+  },
+  tokenAvailable: {
+    id: 'Token tersedia',
+    en: 'Token available',
+    ja: 'トークン利用可能'
+  },
+  yes: {
+    id: 'Ya',
+    en: 'Yes',
+    ja: 'はい'
+  },
+  no: {
+    id: 'Tidak',
+    en: 'No',
+    ja: 'いいえ'
+  },
+  skillCount: {
+    id: 'Jumlah skills',
+    en: 'Skill count',
+    ja: 'スキル数'
+  },
+  filesUploaded: {
+    id: 'Files terupload',
+    en: 'Files uploaded',
+    ja: 'アップロードされたファイル'
+  },
+  skillsAndLevels: {
+    id: 'Skills & Levels:',
+    en: 'Skills & Levels:',
+    ja: 'スキル＆レベル：'
+  },
+  file: {
+    id: 'File',
+    en: 'File',
+    ja: 'ファイル'
+  },
+  type: {
+    id: 'Tipe',
+    en: 'Type',
+    ja: 'タイプ'
+  },
+  size: {
+    id: 'Ukuran',
+    en: 'Size',
+    ja: 'サイズ'
+  }
 };
 
 export default function KeterampilanForm({
@@ -24,9 +350,32 @@ export default function KeterampilanForm({
   const [links, setLinks] = useState([""]);
   const [files, setFiles] = useState<(File | null)[]>([null, null, null]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('id');
 
-  // API Base URL - FIXED
   const API_BASE_URL = 'https://backendstticareer-123965511401.asia-southeast2.run.app';
+
+  // Translation helper function
+  const t = (key: keyof typeof translations): string => {
+    return translations[key]?.[currentLanguage as 'id' | 'en' | 'ja'] || translations[key]?.['id'] || key;
+  };
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      setCurrentLanguage(event.detail.language);
+    };
+
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      setCurrentLanguage(savedLanguage);
+    }
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   const getAuthToken = () => {
     if (typeof window === 'undefined') return null;
@@ -94,13 +443,13 @@ export default function KeterampilanForm({
       const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
       
       if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-        alert(`Tipe file tidak diizinkan!\n\nFile: ${file.name}\nTipe: ${file.type}\n\nHanya diperbolehkan: PDF, DOC, DOCX`);
+        alert(`${t('fileTypeNotAllowed')}\n\n${t('file')}: ${file.name}\n${t('type')}: ${file.type}\n\n${t('onlyAllowed')}`);
         return;
       }
       
       const maxSize = 100 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert(`Ukuran file terlalu besar!\n\nFile: ${file.name}\nUkuran: ${(file.size / 1024 / 1024).toFixed(2)} MB\n\nMaksimal: 100 MB`);
+        alert(`${t('fileTooLarge')}\n\n${t('file')}: ${file.name}\n${t('size')}: ${(file.size / 1024 / 1024).toFixed(2)} MB\n\n${t('maxFileSize')}`);
         return;
       }
     }
@@ -110,12 +459,11 @@ export default function KeterampilanForm({
     setFiles(newFiles);
   };
 
-  // POST single skill to API - FIXED sesuai endpoint yang benar
   const postSkillToAPI = async (skillName: string, skillLevel: string) => {
     const token = getAuthToken();
     
     if (!token) {
-      throw new Error('Token autentikasi tidak ditemukan. Silakan login kembali.');
+      throw new Error(t('notLoggedIn'));
     }
 
     try {
@@ -159,27 +507,22 @@ export default function KeterampilanForm({
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
         console.error('Network error - possible CORS or connection issue');
-        throw new Error(`Network error saat posting skill ${skillName}. Periksa koneksi internet Anda.`);
+        throw new Error(`Network error saat posting skill ${skillName}. ${t('checkConnection')}`);
       }
       
       throw error;
     }
   };
 
-  // Upload files - FIXED sesuai endpoint yang benar
   const uploadFiles = async () => {
     const token = getAuthToken();
     
     if (!token) {
-      throw new Error('Token autentikasi tidak ditemukan');
+      throw new Error(t('notLoggedIn'));
     }
 
     const formData = new FormData();
     
-    // Mapping files berdasarkan dokumentasi API
-    // Index 0: Portfolio File
-    // Index 1: CV File
-    // Index 2: Cover Letter
     if (files[0]) {
       console.log('Adding portfolio_file:', files[0].name, files[0].type);
       formData.append('portfolio_file', files[0]);
@@ -239,7 +582,7 @@ export default function KeterampilanForm({
       console.error('Error uploading files:', error);
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Network error saat upload files. Periksa koneksi internet Anda.');
+        throw new Error(`Network error saat upload files. ${t('checkConnection')}`);
       }
       
       throw error;
@@ -248,29 +591,27 @@ export default function KeterampilanForm({
 
   const handleSubmit = async () => {
     if (skills.length === 0) {
-      alert("Mohon tambahkan minimal satu keterampilan");
+      alert(t('addMinimumSkill'));
       return;
     }
 
     const token = getAuthToken();
     if (!token) {
-      alert("Anda belum login. Silakan login terlebih dahulu.");
+      alert(t('notLoggedIn'));
       return;
     }
 
     setIsLoading(true);
     
     try {
-      // 1. Upload files terlebih dahulu jika ada
       let uploadResult = null;
       if (files.some(f => f !== null)) {
-        console.log("Uploading files...");
+        console.log(t('uploadingFiles'));
         uploadResult = await uploadFiles();
         console.log("Files uploaded successfully:", uploadResult);
       }
 
-      // 2. Post setiap skill ke API
-      console.log("Posting skills...");
+      console.log(t('postingSkills'));
       const skillErrors: string[] = [];
       const successfulSkills: string[] = [];
       
@@ -287,44 +628,41 @@ export default function KeterampilanForm({
         }
       }
 
-      // 3. Evaluasi hasil
       if (skillErrors.length > 0 && successfulSkills.length === 0) {
-        throw new Error(`Gagal menyimpan semua keterampilan:\n\n${skillErrors.join('\n')}`);
+        throw new Error(`${t('failedToSaveAll')}:\n\n${skillErrors.join('\n')}`);
       } else if (skillErrors.length > 0) {
         console.warn('Some skills failed to post:', skillErrors);
-        alert(`Sebagian data berhasil disimpan:\n\nBerhasil: ${successfulSkills.join(', ')}\n\nGagal: ${skillErrors.join('\n')}`);
+        alert(`${t('partiallySaved')}:\n\n${t('successful')}: ${successfulSkills.join(', ')}\n\n${t('failed')}: ${skillErrors.join('\n')}`);
       } else {
         console.log("Successfully posted all skills:", successfulSkills);
       }
       
-      // 4. Call onSave callback untuk update UI
       onSave({ nama: skills.join(", ") });
       
-      // 5. Success message
       if (skillErrors.length === 0) {
-        alert("Semua keterampilan dan file berhasil disimpan!");
+        alert(t('allSavedSuccess'));
       }
       
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       
-      let errorMessage = "Terjadi kesalahan saat menyimpan data.";
+      let errorMessage = t('errorSaving');
       
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       
       if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
-        errorMessage += "\n\nToken Anda mungkin sudah kadaluarsa. Silakan login ulang.";
+        errorMessage += `\n\n${t('tokenExpiredLogin')}`;
       } else if (errorMessage.includes("404") || errorMessage.includes("Not Found")) {
-        errorMessage += "\n\nEndpoint API tidak ditemukan. Mungkin ada masalah dengan server atau URL API.";
+        errorMessage += `\n\n${t('endpointNotFound')}`;
       } else if (errorMessage.includes("500")) {
-        errorMessage += "\n\nTerjadi kesalahan di server. Silakan coba lagi nanti.";
+        errorMessage += `\n\n${t('serverError')}`;
       } else if (errorMessage.includes("Network error") || errorMessage.includes("fetch")) {
-        errorMessage += "\n\nPeriksa koneksi internet Anda dan coba lagi.";
+        errorMessage += `\n\n${t('checkConnection')}`;
       }
       
-      alert(`Gagal menyimpan data:\n\n${errorMessage}`);
+      alert(`${t('failedToSave')}:\n\n${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -334,7 +672,7 @@ export default function KeterampilanForm({
     <div className="max-w-4xl mx-auto bg-white rounded-lg border border-gray-200 p-6 space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Keterampilan <span className="text-red-500">*</span>
+          {t('skills')} <span className="text-red-500">{t('required')}</span>
         </label>
         
         <div className="flex gap-2 mb-3">
@@ -343,7 +681,7 @@ export default function KeterampilanForm({
             value={skillInput}
             onChange={(e) => setSkillInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Contoh: HTML, CSS, Data Science"
+            placeholder={t('skillPlaceholder')}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <button
@@ -351,7 +689,7 @@ export default function KeterampilanForm({
             type="button"
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm transition-colors"
           >
-            Tambah
+            {t('add')}
           </button>
         </div>
 
@@ -367,15 +705,15 @@ export default function KeterampilanForm({
                 onChange={(e) => updateSkillLevel(skill, e.target.value)}
                 className="text-xs bg-white border border-green-300 rounded px-2 py-0.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 cursor-pointer"
               >
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-                <option value="Expert">Expert</option>
+                <option value="Beginner">{t('beginner')}</option>
+                <option value="Intermediate">{t('intermediate')}</option>
+                <option value="Advanced">{t('advanced')}</option>
+                <option value="Expert">{t('expert')}</option>
               </select>
               <button
                 onClick={() => removeSkill(skill)}
                 className="ml-1 hover:text-green-600 transition-colors"
-                title="Hapus skill"
+                title={t('deleteSkill')}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -383,32 +721,32 @@ export default function KeterampilanForm({
           ))}
           {skills.length === 0 && (
             <p className="text-sm text-gray-500 italic">
-              Belum ada keterampilan yang ditambahkan
+              {t('noSkillsAdded')}
             </p>
           )}
         </div>
         
         {skills.length > 0 && (
           <p className="text-xs text-gray-500 mt-2">
-            Pilih level untuk setiap keterampilan sebelum menyimpan
+            {t('selectLevelHint')}
           </p>
         )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Portofolio Online & Tautan Terkait
+          {t('portfolioOnline')}
         </label>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs text-gray-600 mb-1">Tambahkan Tautan</label>
+            <label className="block text-xs text-gray-600 mb-1">{t('addLinks')}</label>
             {links.map((link, idx) => (
               <div key={idx} className="flex gap-2 mb-2">
                 <input
                   type="url"
                   value={link}
                   onChange={(e) => updateLink(idx, e.target.value)}
-                  placeholder="https://example.com/portfolio"
+                  placeholder={t('linkPlaceholder')}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {links.length > 1 && (
@@ -416,7 +754,7 @@ export default function KeterampilanForm({
                     type="button"
                     onClick={() => removeLink(idx)}
                     className="px-3 py-2 text-red-500 hover:text-red-700 transition-colors"
-                    title="Hapus link"
+                    title={t('deleteLink')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -429,7 +767,7 @@ export default function KeterampilanForm({
               className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
             >
               <Plus className="w-4 h-4 mr-1" /> 
-              Tambah Tautan Lain
+              {t('addAnotherLink')}
             </button>
           </div>
         </div>
@@ -437,27 +775,27 @@ export default function KeterampilanForm({
 
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-4">
-          Unggah File Pendukung
+          {t('uploadSupportingFiles')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
-              title: "Portfolio File",
-              desc: "Unggah portfolio Anda dalam format PDF atau DOC/DOCX (maks 100MB)",
+              title: t('portfolioFile'),
+              desc: t('portfolioDesc'),
               maxSize: "100MB",
               accept: ".pdf,.doc,.docx",
               formats: "PDF, DOC, DOCX"
             },
             {
-              title: "Curriculum Vitae", 
-              desc: "Unggah CV Anda dalam format PDF atau DOC/DOCX (maks 100MB)",
+              title: t('curriculumVitae'), 
+              desc: t('cvDesc'),
               maxSize: "100MB",
               accept: ".pdf,.doc,.docx",
               formats: "PDF, DOC, DOCX"
             },
             {
-              title: "Cover Letter",
-              desc: "Unggah surat lamaran dalam format PDF atau DOC/DOCX (maks 100MB)", 
+              title: t('coverLetter'),
+              desc: t('coverLetterDesc'), 
               maxSize: "100MB",
               accept: ".pdf,.doc,.docx",
               formats: "PDF, DOC, DOCX"
@@ -489,15 +827,15 @@ export default function KeterampilanForm({
                   </div>
                   <p className="text-xs text-center">
                     <span className="text-blue-600 hover:underline font-medium">
-                      Unggah File
+                      {t('uploadFile')}
                     </span>{" "}
-                    atau tarik & seret
+                    {t('dragAndDrop')}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Maksimal {item.maxSize}
+                    {t('maxSize')} {item.maxSize}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Format: {item.formats}
+                    {t('format')}: {item.formats}
                   </p>
                 </div>
               </label>
@@ -515,7 +853,7 @@ export default function KeterampilanForm({
                   <button
                     onClick={() => handleFileChange(idx, null)}
                     className="absolute top-2 right-2 text-blue-600 hover:text-blue-800"
-                    title="Hapus file"
+                    title={t('deleteFile')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -525,7 +863,7 @@ export default function KeterampilanForm({
           ))}
         </div>
         <p className="text-xs text-gray-500 mt-3">
-          File bersifat opsional, tetapi sangat direkomendasikan untuk melengkapi profil Anda
+          {t('filesOptional')}
         </p>
       </div>
 
@@ -536,7 +874,7 @@ export default function KeterampilanForm({
           className="px-6 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
-          Batal
+          {t('cancel')}
         </button>
         <button
           onClick={handleSubmit}
@@ -546,25 +884,25 @@ export default function KeterampilanForm({
           {isLoading ? (
             <span className="flex items-center gap-2">
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              Menyimpan...
+              {t('saving')}
             </span>
           ) : (
-            "Simpan Perubahan"
+            t('saveChanges')
           )}
         </button>
       </div>
 
       {process.env.NODE_ENV === 'development' && (
         <div className="mt-4 p-4 bg-gray-100 rounded text-xs space-y-2">
-          <p className="font-bold mb-2">Debug Info:</p>
+          <p className="font-bold mb-2">{t('debugInfo')}</p>
           <div className="grid grid-cols-2 gap-2">
-            <p>Token tersedia: {getAuthToken() ? 'Ya' : 'Tidak'}</p>
-            <p>Jumlah skills: {skills.length}</p>
-            <p>Files terupload: {files.filter(f => f !== null).length}/3</p>
+            <p>{t('tokenAvailable')}: {getAuthToken() ? t('yes') : t('no')}</p>
+            <p>{t('skillCount')}: {skills.length}</p>
+            <p>{t('filesUploaded')}: {files.filter(f => f !== null).length}/3</p>
             <p>API Base URL: {API_BASE_URL}</p>
           </div>
           <div className="mt-2 p-2 bg-white rounded">
-            <p className="font-semibold">Skills & Levels:</p>
+            <p className="font-semibold">{t('skillsAndLevels')}</p>
             {skills.map(skill => (
               <p key={skill} className="text-xs">
                 {skill}: {skillLevels[skill] || 'Beginner'}
