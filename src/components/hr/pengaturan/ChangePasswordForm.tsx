@@ -1,9 +1,66 @@
 "use client";
 
+import { useState } from "react";
+import toast from "react-hot-toast";
+
 export default function ChangePasswordForm() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const token = localStorage.getItem("token") || "";
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Password diubah");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Semua kolom wajib diisi!");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Kata sandi baru dan konfirmasi tidak sama!");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/change-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            currentPassword,
+            newPassword,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Gagal mengubah kata sandi");
+      }
+
+      toast.success("Kata sandi berhasil diubah!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: unknown) {
+  console.error("Gagal ubah password:", err);
+
+  if (err instanceof Error) {
+    toast.error(err.message);
+  } else {
+    toast.error("Terjadi kesalahan saat mengubah kata sandi");
+  }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,6 +78,8 @@ export default function ChangePasswordForm() {
           <input
             type="password"
             className="border rounded px-2 py-1.5 w-full text-xs"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
           />
         </div>
         <div>
@@ -30,6 +89,8 @@ export default function ChangePasswordForm() {
           <input
             type="password"
             className="border rounded px-2 py-1.5 w-full text-xs"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
         <div>
@@ -39,14 +100,17 @@ export default function ChangePasswordForm() {
           <input
             type="password"
             className="border rounded px-2 py-1.5 w-full text-xs"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
           />
         </div>
         <div className="flex justify-end items-end">
           <button
             type="submit"
-            className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs w-32"
+            disabled={loading}
+            className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 text-xs w-32 disabled:opacity-50"
           >
-            Ubah Kata Sandi
+            {loading ? "Menyimpan..." : "Ubah Kata Sandi"}
           </button>
         </div>
       </div>
