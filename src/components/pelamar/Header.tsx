@@ -6,9 +6,6 @@ import { ChevronDown } from "lucide-react";
 
 type HeaderProps = {
   title: string;
-  name: string;
-  role: string;
-  avatarUrl?: string | null;
 };
 
 interface Language {
@@ -23,15 +20,19 @@ interface TranslationSet {
   };
 }
 
+interface UserData {
+  name: string;
+  role: string;
+  avatarUrl: string | null;
+}
+
 const languages: Language[] = [
   { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' }
 ];
 
-// Translation mappings for common titles and roles
 const translations: TranslationSet = {
-  // Common titles that might be passed as props
   'Data Pribadi': {
     'id': 'Data Pribadi',
     'en': 'Personal Data',
@@ -62,48 +63,134 @@ const translations: TranslationSet = {
     'en': 'My Applications',
     'ja': '私の応募'
   },
-  // Common roles
   'pelamar': {
-    'id': 'pelamar',
-    'en': 'applicant',
+    'id': 'Pelamar',
+    'en': 'Applicant',
     'ja': '応募者'
   },
   'admin': {
-    'id': 'admin',
-    'en': 'admin',
+    'id': 'Admin',
+    'en': 'Admin',
     'ja': '管理者'
   },
   'hr': {
-    'id': 'hr',
-    'en': 'hr',
+    'id': 'HR',
+    'en': 'HR',
     'ja': '人事'
   },
   'user': {
-    'id': 'pengguna',
-    'en': 'user',
+    'id': 'Pengguna',
+    'en': 'User',
     'ja': 'ユーザー'
+  },
+  'perusahaan': {
+    'id': 'Perusahaan',
+    'en': 'Company',
+    'ja': '企業'
   }
 };
 
-export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
+export default function Header({ title }: HeaderProps) {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
+    name: 'Loading...',
+    role: 'user',
+    avatarUrl: null
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
-  const initial = name?.charAt(0).toUpperCase() ?? "?";
 
-  // Get translated text
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Ambil token dari localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found, redirecting to login...');
+          // Optional: redirect ke login jika tidak ada token
+          // window.location.href = '/login';
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch('https://backendstticareer-123965511401.asia-southeast2.run.app/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.error('Unauthorized - token might be expired');
+            // Optional: redirect ke login
+            // localStorage.removeItem('token');
+            // window.location.href = '/login';
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          const user = result.data;
+          setUserData({
+            name: user.full_name || 'User',
+            role: user.role || 'pelamar',
+            avatarUrl: user.profile_photo_url || null
+          });
+
+          // Optional: Simpan ke localStorage untuk caching
+          localStorage.setItem('userData', JSON.stringify({
+            name: user.full_name,
+            role: user.role,
+            avatarUrl: user.profile_photo_url
+          }));
+        }
+
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        
+        // Fallback: coba ambil dari localStorage cache
+        const cachedUser = localStorage.getItem('userData');
+        if (cachedUser) {
+          try {
+            const parsedUser = JSON.parse(cachedUser);
+            setUserData({
+              name: parsedUser.name || 'User',
+              role: parsedUser.role || 'pelamar',
+              avatarUrl: parsedUser.avatarUrl || null
+            });
+          } catch (e) {
+            console.error('Error parsing cached user data:', e);
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const initial = userData.name?.charAt(0).toUpperCase() ?? "?";
+
   const getTranslation = (key: string, lang: string): string => {
     return translations[key]?.[lang] || key;
   };
 
-  // Handle language change
   const handleLanguageChange = (language: Language) => {
     const previousLanguage = currentLanguage.code;
     setCurrentLanguage(language);
     localStorage.setItem('selectedLanguage', language.code);
     setIsLanguageDropdownOpen(false);
     
-    // Dispatch custom event to notify other components
     const event = new CustomEvent('languageChanged', {
       detail: {
         language: language.code,
@@ -111,11 +198,8 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
       }
     });
     window.dispatchEvent(event);
-    
-    console.log('Language changed to:', language.code);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
@@ -129,9 +213,7 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
     };
   }, []);
 
-  // Load saved language and listen for language changes
   useEffect(() => {
-    // Load saved language from localStorage
     const savedLanguage = localStorage.getItem('selectedLanguage');
     if (savedLanguage) {
       const language = languages.find(lang => lang.code === savedLanguage);
@@ -140,7 +222,6 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
       }
     }
 
-    // Listen for language change events from other components
     const handleLanguageChange = (event: CustomEvent) => {
       const language = languages.find(lang => lang.code === event.detail.language);
       if (language) {
@@ -156,14 +237,12 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
   }, []);
 
   const translatedTitle = getTranslation(title, currentLanguage.code);
-  const translatedRole = getTranslation(role, currentLanguage.code);
+  const translatedRole = getTranslation(userData.role, currentLanguage.code);
 
   return (
     <header className="flex justify-between items-center">
-      {/* Kiri */}
       <h1 className="text-2xl font-bold">{translatedTitle}</h1>
 
-      {/* Kanan */}
       <div className="flex items-center gap-4">
         {/* Language Dropdown */}
         <div className="relative" ref={languageDropdownRef}>
@@ -196,16 +275,25 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
 
         {/* User Info */}
         <div className="flex items-center gap-3">
-          {avatarUrl ? (
+          {isLoading ? (
+            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+          ) : userData.avatarUrl ? (
             <Image
-              src={avatarUrl}
-              alt={name}
+              src={userData.avatarUrl}
+              alt={userData.name}
               width={40}
               height={40}
               className="w-10 h-10 rounded-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  const fallbackDiv = document.createElement('div');
+                  fallbackDiv.className = 'w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold';
+                  fallbackDiv.textContent = initial;
+                  parent.appendChild(fallbackDiv);
+                }
               }}
             />
           ) : (
@@ -215,7 +303,7 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
           )}
 
           <div className="text-left">
-            <p className="font-semibold">{name}</p>
+            <p className="font-semibold">{isLoading ? 'Loading...' : userData.name}</p>
             <p className="text-sm text-gray-500 capitalize">{translatedRole}</p>
           </div>
         </div>
