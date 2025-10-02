@@ -3,16 +3,10 @@ import LamaranSaya from "@/components/pelamar/lamaran/LamaranSaya";
 
 export default function HalamanLamaranSaya() {
   return (
-    <div>
-      <Header
-        title="Lamaran Saya"
-        name="Muhammad Rizal"
-        role="Pelamar"
-      />
-
-      <div className="mt-4">
-        <LamaranSaya />
-      </div>
-    </div>
+    <>
+      {/* Header sekarang hanya perlu prop title */}
+      <Header title="Lamaran Saya" />
+      <LamaranSaya />
+    </>
   );
 }
