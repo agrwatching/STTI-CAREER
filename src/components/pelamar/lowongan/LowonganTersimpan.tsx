@@ -1,44 +1,141 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import CardLowongan from "./CardLowongan";
 
-const dataLowongan = [
-  {
-    judul: "UI/UX Designer",
-    perusahaan: "PT Palugada Code",
-    lokasi: "Karawang",
-    kategori: "IT",
-    warnaKategori: "bg-green-500",
-  },
-  {
-    judul: "Frontend Dev",
-    perusahaan: "PT Palugada Code",
-    lokasi: "Karawang",
-    kategori: "IT",
-    warnaKategori: "bg-green-500",
-  },
-  {
-    judul: "Digital Marketing",
-    perusahaan: "PT Palugada Code",
-    lokasi: "Karawang",
-    kategori: "Marketing",
-    warnaKategori: "bg-pink-500",
-  },
-  ...Array(10).fill({
-    judul: "Software Engineer",
-    perusahaan: "PT Contoh Data",
-    lokasi: "Bandung",
-    kategori: "IT",
-    warnaKategori: "bg-green-500",
-  }),
-];
+interface HRInfo {
+  name: string;
+  company_name: string;
+}
+
+interface JobPost {
+  id: number;
+  title: string;
+  description: string;
+  requirements: string | null;
+  salary_range: string;
+  location: string;
+  is_active: number;
+  created_at: string;
+  updated_at: string;
+  hr_info: HRInfo;
+}
+
+interface Bookmark {
+  bookmark_id: number;
+  user_id: number;
+  job_id: number;
+  bookmarked_at: string;
+  job_post: JobPost;
+}
+
+interface BookmarkResponse {
+  success: boolean;
+  message: string;
+  data: {
+    bookmarks: Bookmark[];
+  };
+}
+
+type BookmarkJob = {
+  judul: string;
+  perusahaan: string;
+  lokasi: string;
+  kategori: string;
+  warnaKategori?: string;
+  userId: number;
+};
 
 export default function LowonganTersimpan() {
+  const [dataLowongan, setDataLowongan] = useState<BookmarkJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      try {
+        // ✅ Ambil token dari localStorage (hasil login user)
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          throw new Error("Token tidak ditemukan, silakan login dulu.");
+        }
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/bookmarks`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Fetch gagal:", errorText);
+          throw new Error("Gagal fetch data");
+        }
+
+        const result: BookmarkResponse = await response.json();
+        console.log("Response API:", result);
+
+        const bookmarks = result?.data?.bookmarks || [];
+
+        if (bookmarks.length > 0) {
+          // ✅ Ambil user_id dari token / dari bookmark
+          const currentUserId = bookmarks[0].user_id;
+
+          // Filter hanya bookmark milik user ini
+          const filteredBookmarks = bookmarks.filter(
+            (item) => item.user_id === currentUserId
+          );
+
+          const mappedData: BookmarkJob[] = filteredBookmarks.map((item) => ({
+            judul: item.job_post.title,
+            perusahaan: item.job_post.hr_info?.company_name || "Unknown",
+            lokasi: item.job_post.location,
+            kategori: "IT",
+            warnaKategori: "bg-green-500",
+            userId: item.user_id,
+          }));
+
+          setDataLowongan(mappedData);
+        } else {
+          console.log("Tidak ada bookmark ditemukan");
+        }
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+        setError(error instanceof Error ? error.message : "Terjadi kesalahan");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookmarks();
+  }, []);
+
+  if (loading) {
+    return <p className="text-gray-500">Loading data...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">Error: {error}</p>;
+  }
+
   return (
     <div className="bg-gray-50 p-4 rounded-xl max-h-[calc(100vh-110px)] overflow-y-auto">
-      {dataLowongan.map((job, index) => (
-        <CardLowongan key={index} {...job} />
-      ))}
+      {dataLowongan.length > 0 ? (
+        dataLowongan.map((job, index) => (
+          <CardLowongan
+            key={`${job.judul}-${job.perusahaan}-${index}`}
+            {...job}
+          />
+        ))
+      ) : (
+        <p className="text-gray-500">Belum ada lowongan tersimpan.</p>
+      )}
     </div>
   );
 }
