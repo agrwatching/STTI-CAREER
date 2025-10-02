@@ -35,219 +35,214 @@ interface TranslationSet {
 }
 
 const languages: Language[] = [
-  { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' }
+  { code: "id", name: "Indonesia", flag: "🇮🇩" },
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "ja", name: "日本語", flag: "🇯🇵" },
 ];
 
 // Translation mappings untuk form biodata
 const translations: TranslationSet = {
   // Labels
-  'Nama Lengkap': {
-    'id': 'Nama Lengkap',
-    'en': 'Full Name',
-    'ja': 'フルネーム'
+  "Nama Lengkap": {
+    id: "Nama Lengkap",
+    en: "Full Name",
+    ja: "フルネーム",
   },
-  'Email': {
-    'id': 'Email',
-    'en': 'Email',
-    'ja': 'メール'
+  Email: {
+    id: "Email",
+    en: "Email",
+    ja: "メール",
   },
-  'Nomor Telepon': {
-    'id': 'Nomor Telepon',
-    'en': 'Phone Number',
-    'ja': '電話番号'
+  "Nomor Telepon": {
+    id: "Nomor Telepon",
+    en: "Phone Number",
+    ja: "電話番号",
   },
-  'Tanggal Lahir': {
-    'id': 'Tanggal Lahir',
-    'en': 'Date of Birth',
-    'ja': '生年月日'
+  "Tanggal Lahir": {
+    id: "Tanggal Lahir",
+    en: "Date of Birth",
+    ja: "生年月日",
   },
-  'Alamat': {
-    'id': 'Alamat',
-    'en': 'Address',
-    'ja': '住所'
+  Alamat: {
+    id: "Alamat",
+    en: "Address",
+    ja: "住所",
   },
-  'Kota': {
-    'id': 'Kota',
-    'en': 'City',
-    'ja': '市'
+  Kota: {
+    id: "Kota",
+    en: "City",
+    ja: "市",
   },
-  'Negara': {
-    'id': 'Negara',
-    'en': 'Country',
-    'ja': '国'
+  Negara: {
+    id: "Negara",
+    en: "Country",
+    ja: "国",
   },
-  'Foto Profil': {
-    'id': 'Foto Profil',
-    'en': 'Profile Photo',
-    'ja': 'プロフィール写真'
+  "Foto Profil": {
+    id: "Foto Profil",
+    en: "Profile Photo",
+    ja: "プロフィール写真",
   },
-  
+
   // Placeholders
-  'Masukkan nama lengkap': {
-    'id': 'Masukkan nama lengkap',
-    'en': 'Enter full name',
-    'ja': 'フルネームを入力してください'
+  "Masukkan nama lengkap": {
+    id: "Masukkan nama lengkap",
+    en: "Enter full name",
+    ja: "フルネームを入力してください",
   },
-  'Email tidak dapat diubah': {
-    'id': 'Email tidak dapat diubah',
-    'en': 'Email cannot be changed',
-    'ja': 'メールは変更できません'
+  "Email tidak dapat diubah": {
+    id: "Email tidak dapat diubah",
+    en: "Email cannot be changed",
+    ja: "メールは変更できません",
   },
-  'Contoh: +62 812-3456-7890': {
-    'id': 'Contoh: +62 812-3456-7890',
-    'en': 'Example: +1 234-567-8900',
-    'ja': '例: +81 90-1234-5678'
+  "Contoh: +62 812-3456-7890": {
+    id: "Contoh: +62 812-3456-7890",
+    en: "Example: +1 234-567-8900",
+    ja: "例: +81 90-1234-5678",
   },
-  'Masukkan alamat lengkap': {
-    'id': 'Masukkan alamat lengkap',
-    'en': 'Enter complete address',
-    'ja': '完全な住所を入力してください'
+  "Masukkan alamat lengkap": {
+    id: "Masukkan alamat lengkap",
+    en: "Enter complete address",
+    ja: "完全な住所を入力してください",
   },
-  'Masukkan nama kota': {
-    'id': 'Masukkan nama kota',
-    'en': 'Enter city name',
-    'ja': '市名を入力してください'
+  "Masukkan nama kota": {
+    id: "Masukkan nama kota",
+    en: "Enter city name",
+    ja: "市名を入力してください",
   },
-  'Masukkan nama negara': {
-    'id': 'Masukkan nama negara',
-    'en': 'Enter country name',
-    'ja': '国名を入力してください'
+  "Masukkan nama negara": {
+    id: "Masukkan nama negara",
+    en: "Enter country name",
+    ja: "国名を入力してください",
   },
-  'Tanggal lahir belum diatur': {
-    'id': 'Tanggal lahir belum diatur',
-    'en': 'Date of birth not set',
-    'ja': '生年月日が設定されていません'
+  "Tanggal lahir belum diatur": {
+    id: "Tanggal lahir belum diatur",
+    en: "Date of birth not set",
+    ja: "生年月日が設定されていません",
   },
-  
+
   // Messages
-  'Format: JPG, PNG, GIF. Maksimal 5MB': {
-    'id': 'Format: JPG, PNG, GIF. Maksimal 5MB',
-    'en': 'Format: JPG, PNG, GIF. Maximum 5MB',
-    'ja': 'フォーマット: JPG、PNG、GIF。最大5MB'
+  "Format: JPG, PNG, GIF. Maksimal 5MB": {
+    id: "Format: JPG, PNG, GIF. Maksimal 5MB",
+    en: "Format: JPG, PNG, GIF. Maximum 5MB",
+    ja: "フォーマット: JPG、PNG、GIF。最大5MB",
   },
-  'Tanggal lahir tidak dapat diubah': {
-    'id': 'Tanggal lahir tidak dapat diubah',
-    'en': 'Date of birth cannot be changed',
-    'ja': '生年月日は変更できません'
+  "Tanggal lahir tidak dapat diubah": {
+    id: "Tanggal lahir tidak dapat diubah",
+    en: "Date of birth cannot be changed",
+    ja: "生年月日は変更できません",
   },
-  'Format tampilan': {
-    'id': 'Format tampilan',
-    'en': 'Display format',
-    'ja': '表示形式'
+  "Format tampilan": {
+    id: "Format tampilan",
+    en: "Display format",
+    ja: "表示形式",
   },
-  'Format lengkap': {
-    'id': 'Format lengkap',
-    'en': 'Full format',
-    'ja': '完全な形式'
+  "Format lengkap": {
+    id: "Format lengkap",
+    en: "Full format",
+    ja: "完全な形式",
   },
-  'File baru': {
-    'id': 'File baru',
-    'en': 'New file',
-    'ja': '新しいファイル'
+  "File baru": {
+    id: "File baru",
+    en: "New file",
+    ja: "新しいファイル",
   },
-  'Ukuran': {
-    'id': 'Ukuran',
-    'en': 'Size',
-    'ja': 'サイズ'
+  Ukuran: {
+    id: "Ukuran",
+    en: "Size",
+    ja: "サイズ",
   },
-  'Tipe': {
-    'id': 'Tipe',
-    'en': 'Type',
-    'ja': 'タイプ'
+  Tipe: {
+    id: "Tipe",
+    en: "Type",
+    ja: "タイプ",
   },
-  'Foto saat ini': {
-    'id': 'Foto saat ini',
-    'en': 'Current photo',
-    'ja': '現在の写真'
+  "Foto saat ini": {
+    id: "Foto saat ini",
+    en: "Current photo",
+    ja: "現在の写真",
   },
-  
+
   // Buttons
-  'Simpan Perubahan': {
-    'id': '💾 Simpan Perubahan',
-    'en': '💾 Save Changes',
-    'ja': '💾 変更を保存'
+  "Simpan Perubahan": {
+    id: "💾 Simpan Perubahan",
+    en: "💾 Save Changes",
+    ja: "💾 変更を保存",
   },
-  'Menyimpan...': {
-    'id': 'Menyimpan...',
-    'en': 'Saving...',
-    'ja': '保存中...'
+  "Menyimpan...": {
+    id: "Menyimpan...",
+    en: "Saving...",
+    ja: "保存中...",
   },
-  'Batal': {
-    'id': 'Batal',
-    'en': 'Cancel',
-    'ja': 'キャンセル'
+  Batal: {
+    id: "Batal",
+    en: "Cancel",
+    ja: "キャンセル",
   },
-  'Hapus foto': {
-    'id': 'Hapus foto',
-    'en': 'Remove photo',
-    'ja': '写真を削除'
+  "Hapus foto": {
+    id: "Hapus foto",
+    en: "Remove photo",
+    ja: "写真を削除",
   },
-  
+
   // Upload progress
-  'Upload foto': {
-    'id': 'Upload foto',
-    'en': 'Upload photo',
-    'ja': '写真をアップロード'
+  "Upload foto": {
+    id: "Upload foto",
+    en: "Upload photo",
+    ja: "写真をアップロード",
   },
-  
+
   // Error messages
-  'Nama lengkap tidak boleh kosong': {
-    'id': 'Nama lengkap tidak boleh kosong',
-    'en': 'Full name cannot be empty',
-    'ja': 'フルネームは空にできません'
+  "Nama lengkap tidak boleh kosong": {
+    id: "Nama lengkap tidak boleh kosong",
+    en: "Full name cannot be empty",
+    ja: "フルネームは空にできません",
   },
-  'Email tidak boleh kosong': {
-    'id': 'Email tidak boleh kosong',
-    'en': 'Email cannot be empty',
-    'ja': 'メールは空にできません'
+  "Email tidak boleh kosong": {
+    id: "Email tidak boleh kosong",
+    en: "Email cannot be empty",
+    ja: "メールは空にできません",
   },
-  'Format email tidak valid': {
-    'id': 'Format email tidak valid',
-    'en': 'Invalid email format',
-    'ja': '無効なメール形式'
+  "Format email tidak valid": {
+    id: "Format email tidak valid",
+    en: "Invalid email format",
+    ja: "無効なメール形式",
   },
-  'Format nomor telepon tidak valid': {
-    'id': 'Format nomor telepon tidak valid',
-    'en': 'Invalid phone number format',
-    'ja': '無効な電話番号形式'
+  "Format nomor telepon tidak valid": {
+    id: "Format nomor telepon tidak valid",
+    en: "Invalid phone number format",
+    ja: "無効な電話番号形式",
   },
-  'Tanggal lahir tidak boleh di masa depan': {
-    'id': 'Tanggal lahir tidak boleh di masa depan',
-    'en': 'Date of birth cannot be in the future',
-    'ja': '生年月日は未来にできません'
+  "Tanggal lahir tidak boleh di masa depan": {
+    id: "Tanggal lahir tidak boleh di masa depan",
+    en: "Date of birth cannot be in the future",
+    ja: "生年月日は未来にできません",
   },
-  'Usia minimal 17 tahun': {
-    'id': 'Usia minimal 17 tahun',
-    'en': 'Minimum age 17 years',
-    'ja': '最低年齢17歳'
+  "Usia minimal 17 tahun": {
+    id: "Usia minimal 17 tahun",
+    en: "Minimum age 17 years",
+    ja: "最低年齢17歳",
   },
-  'File yang dipilih harus berupa gambar': {
-    'id': 'File yang dipilih harus berupa gambar',
-    'en': 'Selected file must be an image',
-    'ja': '選択したファイルは画像である必要があります'
+  "File yang dipilih harus berupa gambar": {
+    id: "File yang dipilih harus berupa gambar",
+    en: "Selected file must be an image",
+    ja: "選択したファイルは画像である必要があります",
   },
-  'Ukuran file tidak boleh lebih dari 5MB': {
-    'id': 'Ukuran file tidak boleh lebih dari 5MB',
-    'en': 'File size cannot exceed 5MB',
-    'ja': 'ファイルサイズは5MBを超えることはできません'
+  "Ukuran file tidak boleh lebih dari 5MB": {
+    id: "Ukuran file tidak boleh lebih dari 5MB",
+    en: "File size cannot exceed 5MB",
+    ja: "ファイルサイズは5MBを超えることはできません",
   },
-  
+
   // Success messages
-  'Biodata berhasil diperbarui!': {
-    'id': '✅ Biodata berhasil diperbarui!',
-    'en': '✅ Profile data updated successfully!',
-    'ja': '✅ プロフィールデータが正常に更新されました！'
-  }
+  "Biodata berhasil diperbarui!": {
+    id: "✅ Biodata berhasil diperbarui!",
+    en: "✅ Profile data updated successfully!",
+    ja: "✅ プロフィールデータが正常に更新されました！",
+  },
 };
 
-export default function Biodata({
-  user,
-  isEditing,
-  onCancel,
-  onSaveSuccess,
-}: Props) {
+export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Props) {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
   const [formData, setFormData] = useState<User>({
     full_name: user.full_name || "",
@@ -260,12 +255,12 @@ export default function Biodata({
     profile_photo: user.profile_photo || "",
     profile_photo_url: user.profile_photo_url || "",
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Get translated text
   const getTranslation = (key: string, lang: string): string => {
@@ -275,9 +270,9 @@ export default function Biodata({
   // Listen for language changes from Header
   useEffect(() => {
     // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem('selectedLanguage');
+    const savedLanguage = localStorage.getItem("selectedLanguage");
     if (savedLanguage) {
-      const language = languages.find(lang => lang.code === savedLanguage);
+      const language = languages.find((lang) => lang.code === savedLanguage);
       if (language) {
         setCurrentLanguage(language);
       }
@@ -285,33 +280,33 @@ export default function Biodata({
 
     // Listen for language change events from Header component
     const handleLanguageChange = (event: CustomEvent) => {
-      const language = languages.find(lang => lang.code === event.detail.language);
+      const language = languages.find((lang) => lang.code === event.detail.language);
       if (language) {
         setCurrentLanguage(language);
       }
     };
 
-    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
-    
+    window.addEventListener("languageChanged", handleLanguageChange as EventListener);
+
     return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+      window.removeEventListener("languageChanged", handleLanguageChange as EventListener);
     };
   }, []);
 
   // 🔧 Format date dari API (ISO format) ke format tampilan mm/dd/yyyy
   const formatDateForDisplay = (dateString: string | null): string => {
     if (!dateString) return "";
-    
+
     try {
       // Handle ISO date format from API (2003-01-31T17:00:00.000Z)
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "";
-      
+
       // Format to mm/dd/yyyy for display
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
       const year = date.getFullYear();
-      
+
       return `${month}/${day}/${year}`;
     } catch (error) {
       console.error("Error formatting date for display:", error);
@@ -322,21 +317,21 @@ export default function Biodata({
   // 🔧 Format date untuk tampilan lengkap (berdasarkan bahasa)
   const formatDateLong = (dateString: string | null): string => {
     if (!dateString) return "";
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return "";
-      
+
       // Format berdasarkan bahasa yang dipilih
-      let locale = 'id-ID';
-      if (currentLanguage.code === 'en') locale = 'en-US';
-      if (currentLanguage.code === 'ja') locale = 'ja-JP';
-      
+      let locale = "id-ID";
+      if (currentLanguage.code === "en") locale = "en-US";
+      if (currentLanguage.code === "ja") locale = "ja-JP";
+
       return date.toLocaleDateString(locale, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch (error) {
       console.error("Error formatting long date:", error);
@@ -353,16 +348,13 @@ export default function Biodata({
         return null;
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -389,7 +381,7 @@ export default function Biodata({
       // Gunakan profile_photo_url jika ada, jika tidak gunakan profile_photo
       const initialPhotoUrl = user.profile_photo_url || user.profile_photo || null;
       setPhotoPreview(initialPhotoUrl);
-      
+
       // Jika date_of_birth kosong di props user, ambil dari API
       let dateOfBirth = user.date_of_birth;
       if (!dateOfBirth) {
@@ -397,7 +389,7 @@ export default function Biodata({
         dateOfBirth = await fetchDateOfBirthFromAPI();
         console.log("📅 Date of birth dari API:", dateOfBirth);
       }
-      
+
       // Reset form ketika user berubah
       setFormData({
         full_name: user.full_name || "",
@@ -425,7 +417,7 @@ export default function Biodata({
 
   /** ✅ Validasi form data */
   const validateForm = (): boolean => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.full_name.trim()) {
       newErrors.full_name = getTranslation("Nama lengkap tidak boleh kosong", currentLanguage.code);
@@ -445,21 +437,21 @@ export default function Biodata({
     if (formData.date_of_birth && formData.date_of_birth !== user.date_of_birth) {
       const birthDate = new Date(formData.date_of_birth);
       const today = new Date();
-      
+
       if (birthDate > today) {
         newErrors.date_of_birth = getTranslation("Tanggal lahir tidak boleh di masa depan", currentLanguage.code);
       }
-      
+
       // Validasi usia minimal (contoh: minimal 17 tahun)
       const minAgeDate = new Date();
       minAgeDate.setFullYear(today.getFullYear() - 17);
-      
+
       if (birthDate > minAgeDate) {
         newErrors.date_of_birth = getTranslation("Usia minimal 17 tahun", currentLanguage.code);
       }
     }
 
-    if (photoFile && !photoFile.type.startsWith('image/')) {
+    if (photoFile && !photoFile.type.startsWith("image/")) {
       newErrors.photo = getTranslation("File yang dipilih harus berupa gambar", currentLanguage.code);
     }
 
@@ -474,17 +466,17 @@ export default function Biodata({
   /** ✅ Update input text */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     // Jangan izinkan perubahan untuk date_of_birth
     if (name === "date_of_birth") {
       return;
     }
-    
+
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Clear specific error ketika user mulai mengetik
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -495,50 +487,50 @@ export default function Biodata({
   /** ✅ Handle photo selection */
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    
+
     if (!file) {
       setPhotoFile(null);
       setPhotoPreview(user.profile_photo_url || user.profile_photo || null);
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      setErrors(prev => ({ ...prev, photo: getTranslation("File yang dipilih harus berupa gambar", currentLanguage.code) }));
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({ ...prev, photo: getTranslation("File yang dipilih harus berupa gambar", currentLanguage.code) }));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrors(prev => ({ ...prev, photo: getTranslation("Ukuran file tidak boleh lebih dari 5MB", currentLanguage.code) }));
+      setErrors((prev) => ({ ...prev, photo: getTranslation("Ukuran file tidak boleh lebih dari 5MB", currentLanguage.code) }));
       return;
     }
 
-    setErrors(prev => {
+    setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors.photo;
       return newErrors;
     });
 
     setPhotoFile(file);
-    
+
     const tempUrl = URL.createObjectURL(file);
     setPhotoPreview(tempUrl);
   };
 
   /** ✅ Remove photo selection */
   const handleRemovePhoto = () => {
-    if (photoFile && photoPreview && photoPreview.startsWith('blob:')) {
+    if (photoFile && photoPreview && photoPreview.startsWith("blob:")) {
       URL.revokeObjectURL(photoPreview);
     }
-    
+
     setPhotoFile(null);
     setPhotoPreview(user.profile_photo_url || user.profile_photo || null);
-    
+
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
 
-    setErrors(prev => {
+    setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors.photo;
       return newErrors;
@@ -551,14 +543,14 @@ export default function Biodata({
 
     try {
       setUploadProgress(0);
-      
+
       const formDataImg = new FormData();
       formDataImg.append("profile_photo", photoFile);
 
       const xhr = new XMLHttpRequest();
-      
+
       return new Promise((resolve, reject) => {
-        xhr.upload.addEventListener('progress', (e) => {
+        xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
             const progress = Math.round((e.loaded / e.total) * 100);
             setUploadProgress(progress);
@@ -567,15 +559,11 @@ export default function Biodata({
 
         xhr.onload = () => {
           setUploadProgress(100);
-          
+
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
-              const photoUrl = response.url || 
-                              response.profile_photo_url ||
-                              response.data?.url ||
-                              response.data?.profile_photo_url ||
-                              (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null);
+              const photoUrl = response.url || response.profile_photo_url || response.data?.url || response.data?.profile_photo_url || (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null);
 
               if (photoUrl) {
                 resolve(photoUrl);
@@ -599,11 +587,10 @@ export default function Biodata({
           reject(new Error("Koneksi gagal saat upload foto"));
         };
 
-        xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL}/api/profile/upload-photo`);
-        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL}/api/profile/upload-photo`);
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         xhr.send(formDataImg);
       });
-
     } catch (error) {
       throw new Error("Gagal upload foto: " + (error as Error).message);
     }
@@ -619,7 +606,7 @@ export default function Biodata({
     try {
       setLoading(true);
       setUploadProgress(0);
-      
+
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("Token tidak ditemukan. Silakan login ulang.");
@@ -637,7 +624,7 @@ export default function Biodata({
       };
 
       // Hapus property yang undefined
-      Object.keys(cleanFormData).forEach(key => {
+      Object.keys(cleanFormData).forEach((key) => {
         if (cleanFormData[key as keyof User] === undefined) {
           delete cleanFormData[key as keyof User];
         }
@@ -646,17 +633,14 @@ export default function Biodata({
       console.log("📝 Updating biodata (date_of_birth tidak diubah):", cleanFormData);
 
       // 2️⃣ Update biodata ke endpoint PUT
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/profile/biodata`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(cleanFormData),
-        }
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/biodata`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cleanFormData),
+      });
 
       const biodataResponse = await res.json();
       console.log("📝 Biodata update response:", biodataResponse);
@@ -681,26 +665,25 @@ export default function Biodata({
       const finalData: Partial<User> = { ...cleanFormData };
       if (photoUrl) {
         finalData.profile_photo_url = photoUrl;
-        
-        setFormData(prev => ({
+
+        setFormData((prev) => ({
           ...prev,
-          profile_photo_url: photoUrl
+          profile_photo_url: photoUrl,
         }));
-        
+
         setPhotoPreview(photoUrl);
         setPhotoFile(null);
-        
+
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         if (fileInput) {
-          fileInput.value = '';
+          fileInput.value = "";
         }
       }
 
       console.log("✅ Save completed successfully:", finalData);
-      
+
       alert(getTranslation("Biodata berhasil diperbarui!", currentLanguage.code));
       onSaveSuccess(finalData);
-
     } catch (err) {
       console.error("❌ Save error:", err);
       const errorMessage = (err as Error).message || "Terjadi kesalahan server";
@@ -725,15 +708,15 @@ export default function Biodata({
       profile_photo_url: user.profile_photo_url || "",
     });
 
-    if (photoFile && photoPreview && photoPreview.startsWith('blob:')) {
+    if (photoFile && photoPreview && photoPreview.startsWith("blob:")) {
       URL.revokeObjectURL(photoPreview);
     }
     setPhotoFile(null);
     setPhotoPreview(user.profile_photo_url || user.profile_photo || null);
-    
+
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
 
     setErrors({});
@@ -747,10 +730,7 @@ export default function Biodata({
       {/* Progress bar untuk photo upload */}
       {loading && uploadProgress > 0 && uploadProgress < 100 && (
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${uploadProgress}%` }}
-          ></div>
+          <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
           <p className="text-sm text-gray-600 mt-1">
             {getTranslation("Upload foto", currentLanguage.code)}: {uploadProgress}%
           </p>
@@ -769,14 +749,10 @@ export default function Biodata({
             value={formData.full_name}
             onChange={handleChange}
             disabled={!isEditing}
-            className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${
-              errors.full_name ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${errors.full_name ? "border-red-500" : "border-gray-300"}`}
             placeholder={getTranslation("Masukkan nama lengkap", currentLanguage.code)}
           />
-          {errors.full_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>
-          )}
+          {errors.full_name && <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>}
         </div>
 
         {/* Email */}
@@ -792,58 +768,36 @@ export default function Biodata({
             className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 bg-gray-100 cursor-not-allowed"
             placeholder={getTranslation("Email tidak dapat diubah", currentLanguage.code)}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            {getTranslation("Email tidak dapat diubah", currentLanguage.code)}
-          </p>
+          <p className="text-xs text-gray-500 mt-1">{getTranslation("Email tidak dapat diubah", currentLanguage.code)}</p>
         </div>
 
         {/* Nomor Telepon */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Nomor Telepon", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Nomor Telepon", currentLanguage.code)}</label>
           <input
             type="text"
             name="phone"
             value={formData.phone ?? ""}
             onChange={handleChange}
             disabled={!isEditing}
-            className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${
-              errors.phone ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${errors.phone ? "border-red-500" : "border-gray-300"}`}
             placeholder={getTranslation("Contoh: +62 812-3456-7890", currentLanguage.code)}
           />
-          {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-          )}
+          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
         </div>
 
         {/* Tanggal Lahir - TIDAK BISA DIUBAH */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Tanggal Lahir", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Tanggal Lahir", currentLanguage.code)}</label>
           <div className="relative">
             {/* Input tersembunyi untuk menyimpan value */}
-            <input
-              type="hidden"
-              name="date_of_birth"
-              value={formData.date_of_birth || ""}
-            />
+            <input type="hidden" name="date_of_birth" value={formData.date_of_birth || ""} />
             {/* Display-only field */}
             <div className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 bg-gray-100 cursor-not-allowed min-h-[42px] flex items-center">
-              {formData.date_of_birth ? (
-                <span className="text-gray-700">
-                  {formatDateForDisplay(formData.date_of_birth)}
-                </span>
-              ) : (
-                <span className="text-gray-400">
-                  {getTranslation("Tanggal lahir belum diatur", currentLanguage.code)}
-                </span>
-              )}
+              {formData.date_of_birth ? <span className="text-gray-700">{formatDateForDisplay(formData.date_of_birth)}</span> : <span className="text-gray-400">{getTranslation("Tanggal lahir belum diatur", currentLanguage.code)}</span>}
             </div>
           </div>
-          
+
           {/* Informasi tambahan tentang tanggal lahir */}
           {formData.date_of_birth && (
             <div className="text-xs text-gray-500 mt-1 space-y-1">
@@ -853,18 +807,14 @@ export default function Biodata({
               <p>
                 <strong>{getTranslation("Format lengkap", currentLanguage.code)}:</strong> {formatDateLong(formData.date_of_birth)}
               </p>
-              <p className="text-blue-600 font-medium">
-                {getTranslation("Tanggal lahir tidak dapat diubah", currentLanguage.code)}
-              </p>
+              <p className="text-blue-600 font-medium">{getTranslation("Tanggal lahir tidak dapat diubah", currentLanguage.code)}</p>
             </div>
           )}
         </div>
 
         {/* Alamat */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Alamat", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Alamat", currentLanguage.code)}</label>
           <input
             type="text"
             name="address"
@@ -878,9 +828,7 @@ export default function Biodata({
 
         {/* Kota */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Kota", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Kota", currentLanguage.code)}</label>
           <input
             type="text"
             name="city"
@@ -894,9 +842,7 @@ export default function Biodata({
 
         {/* Negara */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Negara", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Negara", currentLanguage.code)}</label>
           <input
             type="text"
             name="country"
@@ -910,25 +856,17 @@ export default function Biodata({
 
         {/* Upload Foto */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">
-            {getTranslation("Foto Profil", currentLanguage.code)}
-          </label>
+          <label className="block text-sm font-medium text-gray-700">{getTranslation("Foto Profil", currentLanguage.code)}</label>
           <div className="mt-1">
             <input
               type="file"
               accept="image/*"
               onChange={handlePhotoChange}
               disabled={!isEditing}
-              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${
-                errors.photo ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 ${errors.photo ? "border-red-500" : "border-gray-300"}`}
             />
-            {errors.photo && (
-              <p className="text-red-500 text-sm mt-1">{errors.photo}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              {getTranslation("Format: JPG, PNG, GIF. Maksimal 5MB", currentLanguage.code)}
-            </p>
+            {errors.photo && <p className="text-red-500 text-sm mt-1">{errors.photo}</p>}
+            <p className="text-xs text-gray-500 mt-1">{getTranslation("Format: JPG, PNG, GIF. Maksimal 5MB", currentLanguage.code)}</p>
           </div>
 
           {/* Photo Preview */}
@@ -945,7 +883,8 @@ export default function Biodata({
                       console.error("❌ Error loading image:", photoPreview);
                       // Fallback ke placeholder jika gambar error
                       const target = e.target as HTMLImageElement;
-                      target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04NCA2NEw3MCA3OEw1OCA3MEw0NCA4NEg4NFY2NFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNTgiIGN5PSI1MiIgcj0iOCIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
+                      target.src =
+                        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04NCA2NEw3MCA3OEw1OCA3MEw0NCA4NEg4NFY2NFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNTgiIGN5PSI1MiIgcj0iOCIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
                     }}
                   />
                 </div>
@@ -960,18 +899,26 @@ export default function Biodata({
                   </button>
                 )}
               </div>
-              
+
               <div className="flex-1">
                 {photoFile && (
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>{getTranslation("File baru", currentLanguage.code)}:</strong> {photoFile.name}</p>
-                    <p><strong>{getTranslation("Ukuran", currentLanguage.code)}:</strong> {(photoFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                    <p><strong>{getTranslation("Tipe", currentLanguage.code)}:</strong> {photoFile.type}</p>
+                    <p>
+                      <strong>{getTranslation("File baru", currentLanguage.code)}:</strong> {photoFile.name}
+                    </p>
+                    <p>
+                      <strong>{getTranslation("Ukuran", currentLanguage.code)}:</strong> {(photoFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                    <p>
+                      <strong>{getTranslation("Tipe", currentLanguage.code)}:</strong> {photoFile.type}
+                    </p>
                   </div>
                 )}
                 {!photoFile && (user.profile_photo_url || user.profile_photo) && (
                   <div className="text-sm text-gray-600">
-                    <p><strong>{getTranslation("Foto saat ini", currentLanguage.code)}</strong></p>
+                    <p>
+                      <strong>{getTranslation("Foto saat ini", currentLanguage.code)}</strong>
+                    </p>
                     <p className="text-xs break-all">{user.profile_photo_url || user.profile_photo}</p>
                   </div>
                 )}
@@ -998,7 +945,7 @@ export default function Biodata({
                 getTranslation("Simpan Perubahan", currentLanguage.code)
               )}
             </button>
-            
+
             <button
               type="button"
               onClick={handleCancel}
