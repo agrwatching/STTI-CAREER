@@ -439,6 +439,7 @@ export default function KeterampilanForm({
 
   const handleFileChange = (idx: number, file: File | null) => {
     if (file) {
+      // Validasi untuk files (dokumen)
       const allowedTypes = [
         'application/pdf',
         'application/msword',
@@ -555,7 +556,7 @@ export default function KeterampilanForm({
     });
 
     try {
-      console.log('Sending file upload request...');
+      console.log('Sending file upload request to /api/profile/upload-files...');
       const response = await fetch(`${API_BASE_URL}/api/profile/upload-files`, {
         method: 'POST',
         headers: {
@@ -565,24 +566,24 @@ export default function KeterampilanForm({
         body: formData
       });
 
-      console.log('Upload response status:', response.status);
+      console.log('Upload files response status:', response.status);
 
       if (!response.ok) {
         let errorMessage = 'Failed to upload files';
         try {
           const errorData = await response.json();
-          console.error('Upload error response:', errorData);
+          console.error('Upload files error response:', errorData);
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (e) {
           const responseText = await response.text();
-          console.error('Non-JSON upload error:', responseText);
+          console.error('Non-JSON upload files error:', responseText);
           errorMessage = responseText || `${response.status} ${response.statusText}`;
         }
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      console.log('Upload success:', result);
+      console.log('Upload files success:', result);
       return result;
     } catch (error) {
       console.error('Error uploading files:', error);
@@ -610,13 +611,15 @@ export default function KeterampilanForm({
     setIsLoading(true);
     
     try {
-      let uploadResult = null;
+      // Upload files (dokumen) ke /api/profile/upload-files
+      let filesUploadResult = null;
       if (files.some(f => f !== null)) {
         console.log(t('uploadingFiles'));
-        uploadResult = await uploadFiles();
-        console.log("Files uploaded successfully:", uploadResult);
+        filesUploadResult = await uploadFiles();
+        console.log("Files uploaded successfully:", filesUploadResult);
       }
 
+      // Post skills ke /api/profile/skill
       console.log(t('postingSkills'));
       const skillErrors: string[] = [];
       const successfulSkills: string[] = [];
@@ -779,6 +782,7 @@ export default function KeterampilanForm({
         </div>
       </div>
 
+      {/* File Upload Section */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-4">
           {t('uploadSupportingFiles')}
