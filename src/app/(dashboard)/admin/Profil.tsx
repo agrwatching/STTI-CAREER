@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -7,17 +7,57 @@ interface HeaderProps {
   title: string;
 }
 
+interface UserProfile {
+  id: number;
+  full_name: string;
+  email: string;
+  role: string;
+  profile_photo_url?: string | null;
+}
+
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const router = useRouter();
 
+  // ✅ Ambil data profile dari API
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.replace("/login");
+          return;
+        }
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Gagal ambil profil");
+        }
+
+        const json = await res.json();
+        setProfile(json.data); // ✅ ambil yang di dalam `data`
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        handleLogout();
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const handleLogout = () => {
-    // ✅ Hapus semua item auth
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
-
-    // ✅ Redirect via router
     router.replace("/login");
   };
 
@@ -32,8 +72,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           className="w-10 h-10 bg-orange-500 rounded-full overflow-hidden focus:outline-none"
         >
           <Image
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-            alt="Admin"
+            src={
+              profile?.profile_photo_url ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+            }
+            alt={profile?.full_name || "Admin"}
             width={40}
             height={40}
             className="w-full h-full object-cover"
@@ -42,8 +85,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
         {/* Nama + Email */}
         <div>
-          <div className="text-sm font-medium">Admin</div>
-          <div className="text-xs text-gray-400">AdminCareer@gmail.com</div>
+          <div className="text-sm font-medium">
+            {profile?.full_name || "Loading..."}
+          </div>
+          <div className="text-xs text-gray-400">{profile?.email || ""}</div>
         </div>
 
         {/* Dropdown */}
