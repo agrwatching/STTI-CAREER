@@ -8,7 +8,7 @@ type CardLowonganProps = {
   perusahaan: string;
   lokasi: string;
   kategori: string;
-  warnaKategori?: string; // default hijau
+  warnaKategori?: string;
   logoUrl?: string;
 };
 
@@ -26,9 +26,7 @@ export default function CardLowongan({
 
   return (
     <div className="flex items-center justify-between py-3 border-b-2 last:border-none">
-      {/* Kiri */}
       <div className="flex items-center gap-3">
-        {/* Logo / Avatar */}
         <Image
           src={avatarSrc}
           alt={perusahaan}
@@ -37,7 +35,6 @@ export default function CardLowongan({
           className="w-12 h-12 rounded-md object-cover"
         />
 
-        {/* Info Lowongan */}
         <div>
           <h3 className="font-semibold">{judul}</h3>
           <p className="text-sm text-gray-600">{perusahaan}</p>
@@ -52,7 +49,6 @@ export default function CardLowongan({
         </div>
       </div>
 
-      {/* Kanan: Tombol Simpan */}
       <button className="text-gray-600 hover:text-black">
         <Bookmark size={28} />
       </button>

@@ -240,6 +240,23 @@ const translations: TranslationSet = {
     en: "✅ Profile data updated successfully!",
     ja: "✅ プロフィールデータが正常に更新されました！",
   },
+
+  // Token & Auth errors
+  "Token tidak ditemukan": {
+    id: "⚠️ Sesi tidak ditemukan, silakan login ulang",
+    en: "⚠️ Session not found, please login again",
+    ja: "⚠️ セッションが見つかりません。再度ログインしてください",
+  },
+  "Token expired": {
+    id: "⚠️ Sesi telah berakhir, silakan login ulang",
+    en: "⚠️ Session expired, please login again",
+    ja: "⚠️ セッションの有効期限が切れました。再度ログインしてください",
+  },
+  "Gagal memuat data": {
+    id: "❌ Gagal memuat tanggal lahir dari server",
+    en: "❌ Failed to load date of birth from server",
+    ja: "❌ サーバーから生年月日を読み込めませんでした",
+  },
 };
 
 export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Props) {
@@ -261,6 +278,7 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [tokenValid, setTokenValid] = useState<boolean>(true);
 
   // Get translated text
   const getTranslation = (key: string, lang: string): string => {
@@ -292,6 +310,28 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
       window.removeEventListener("languageChanged", handleLanguageChange as EventListener);
     };
   }, []);
+
+  // 🔧 Validasi token sebelum melakukan request
+  const validateToken = (): string | null => {
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      console.error("❌ Token tidak ditemukan di localStorage");
+      setTokenValid(false);
+      return null;
+    }
+
+    // Basic token format validation
+    if (token.length < 20) {
+      console.error("❌ Token format tidak valid (terlalu pendek)");
+      setTokenValid(false);
+      return null;
+    }
+
+    console.log("✅ Token ditemukan:", token.substring(0, 30) + "...");
+    setTokenValid(true);
+    return token;
+  };
 
   // 🔧 Format date dari API (ISO format) ke format tampilan mm/dd/yyyy
   const formatDateForDisplay = (dateString: string | null): string => {
@@ -339,38 +379,103 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
     }
   };
 
-  // 🔧 Fetch date_of_birth dari API profile
+  // 🔧 Fetch date_of_birth dari API profile dengan error handling lengkap
   const fetchDateOfBirthFromAPI = async (): Promise<string | null> => {
     try {
-      const token = localStorage.getItem("token");
+      console.log("🔍 Memulai fetch date_of_birth dari API...");
+      
+      // Validasi token terlebih dahulu
+      const token = validateToken();
       if (!token) {
-        console.error("❌ Token tidak ditemukan");
+        console.warn("⚠️ Tidak dapat fetch DOB: Token tidak valid");
         return null;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`, {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/profile`;
+      console.log("📡 Fetching dari:", apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
+        credentials: "include", // Include cookies if needed
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log("📊 Response status:", response.status);
+      console.log("📊 Response headers:", Object.fromEntries(response.headers.entries()));
+
+      // Handle 401 Unauthorized secara spesifik
+      if (response.status === 401) {
+        console.error("❌ 401 Unauthorized - Token expired atau invalid");
+        setTokenValid(false);
+        
+        // Optional: Tampilkan peringatan ke user
+        const warningMessage = getTranslation("Token expired", currentLanguage.code);
+        console.warn(warningMessage);
+        
+        // Jangan throw error, biarkan komponen tetap berfungsi
+        return null;
       }
 
+      // Handle error status lainnya
+      if (!response.ok) {
+        console.error(`❌ HTTP Error ${response.status}: ${response.statusText}`);
+        
+        // Coba parse error message dari response
+        try {
+          const errorData = await response.json();
+          console.error("❌ Error detail:", errorData);
+        } catch (parseError) {
+          console.error("❌ Tidak dapat parse error response");
+        }
+        
+        return null;
+      }
+
+      // Parse response
       const data = await response.json();
-      console.log("📅 API Profile Response:", data);
+      console.log("✅ API Response berhasil:", JSON.stringify(data, null, 2));
+
+      // Validasi struktur response
+      if (!data) {
+        console.warn("⚠️ Response kosong dari API");
+        return null;
+      }
+
+      // Check berbagai kemungkinan struktur response
+      let dateOfBirth: string | null = null;
 
       if (data.success && data.data && data.data.date_of_birth) {
-        console.log("📅 Date of birth dari API:", data.data.date_of_birth);
-        return data.data.date_of_birth;
+        dateOfBirth = data.data.date_of_birth;
+      } else if (data.date_of_birth) {
+        dateOfBirth = data.date_of_birth;
+      } else if (data.user && data.user.date_of_birth) {
+        dateOfBirth = data.user.date_of_birth;
       }
 
-      return null;
+      if (dateOfBirth) {
+        console.log("✅ Date of birth ditemukan:", dateOfBirth);
+        return dateOfBirth;
+      } else {
+        console.warn("⚠️ Date of birth tidak ditemukan dalam response API");
+        console.warn("⚠️ Response structure:", Object.keys(data));
+        return null;
+      }
+
     } catch (error) {
-      console.error("❌ Error fetching date of birth from API:", error);
+      // Network error atau parsing error
+      console.error("❌ Error saat fetch date of birth:", error);
+      
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        console.error("❌ Network error - Tidak dapat terhubung ke server");
+      } else {
+        console.error("❌ Unexpected error:", error);
+      }
+      
+      // Jangan throw error, biarkan komponen tetap berfungsi
       return null;
     }
   };
@@ -378,19 +483,39 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
   // 🔧 Initialize form data ketika user data berubah
   useEffect(() => {
     const initializeFormData = async () => {
+      console.log("🔄 Initializing form data...");
+      console.log("👤 User props:", user);
+
       // Gunakan profile_photo_url jika ada, jika tidak gunakan profile_photo
       const initialPhotoUrl = user.profile_photo_url || user.profile_photo || null;
       setPhotoPreview(initialPhotoUrl);
 
-      // Jika date_of_birth kosong di props user, ambil dari API
+      // Prioritas pengambilan date_of_birth:
+      // 1. Dari props user (jika sudah ada)
+      // 2. Dari API (jika props kosong DAN token valid)
       let dateOfBirth = user.date_of_birth;
+      
       if (!dateOfBirth) {
-        console.log("📅 Date of birth kosong, mengambil dari API...");
-        dateOfBirth = await fetchDateOfBirthFromAPI();
-        console.log("📅 Date of birth dari API:", dateOfBirth);
+        console.log("📅 Date of birth kosong di props, mencoba fetch dari API...");
+        
+        // Validasi token dulu sebelum fetch
+        const token = validateToken();
+        if (token) {
+          dateOfBirth = await fetchDateOfBirthFromAPI();
+          
+          if (dateOfBirth) {
+            console.log("✅ Berhasil fetch DOB dari API:", dateOfBirth);
+          } else {
+            console.warn("⚠️ Gagal fetch DOB dari API atau DOB tidak tersedia");
+          }
+        } else {
+          console.warn("⚠️ Skip fetch DOB: Token tidak valid");
+        }
+      } else {
+        console.log("✅ Date of birth sudah ada di props:", dateOfBirth);
       }
 
-      // Reset form ketika user berubah
+      // Set form data
       setFormData({
         full_name: user.full_name || "",
         email: user.email || "",
@@ -402,6 +527,8 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
         profile_photo: user.profile_photo || "",
         profile_photo_url: user.profile_photo_url || "",
       });
+
+      console.log("✅ Form data initialized");
     };
 
     initializeFormData();
@@ -537,11 +664,12 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
     });
   };
 
-  /** ✅ Upload photo ke server */
+  /** ✅ Upload photo ke server dengan validasi token */
   const uploadPhoto = async (token: string): Promise<string | null> => {
     if (!photoFile) return null;
 
     try {
+      console.log("📤 Memulai upload foto...");
       setUploadProgress(0);
 
       const formDataImg = new FormData();
@@ -554,29 +682,45 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
           if (e.lengthComputable) {
             const progress = Math.round((e.loaded / e.total) * 100);
             setUploadProgress(progress);
+            console.log(`📊 Upload progress: ${progress}%`);
           }
         });
 
         xhr.onload = () => {
           setUploadProgress(100);
+          console.log("📥 Upload response status:", xhr.status);
 
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
-              const photoUrl = response.url || response.profile_photo_url || response.data?.url || response.data?.profile_photo_url || (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null);
+              console.log("✅ Upload response:", response);
+
+              const photoUrl = response.url || 
+                               response.profile_photo_url || 
+                               response.data?.url || 
+                               response.data?.profile_photo_url || 
+                               (response.filename ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/images/${response.filename}` : null);
 
               if (photoUrl) {
+                console.log("✅ Photo URL ditemukan:", photoUrl);
                 resolve(photoUrl);
               } else {
+                console.error("❌ URL foto tidak ditemukan dalam response:", response);
                 reject(new Error("URL foto tidak ditemukan dalam response server"));
               }
-            } catch {
+            } catch (parseError) {
+              console.error("❌ Error parsing upload response:", parseError);
               reject(new Error("Response server tidak valid"));
             }
+          } else if (xhr.status === 401) {
+            console.error("❌ 401 Unauthorized saat upload foto");
+            setTokenValid(false);
+            reject(new Error("Sesi telah berakhir. Silakan login ulang."));
           } else {
             try {
               const errorResponse = JSON.parse(xhr.responseText);
-              reject(new Error(errorResponse.message || "Gagal upload foto"));
+              console.error("❌ Upload error response:", errorResponse);
+              reject(new Error(errorResponse.message || `Upload gagal dengan status: ${xhr.status}`));
             } catch {
               reject(new Error(`Upload failed with status: ${xhr.status}`));
             }
@@ -584,33 +728,42 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
         };
 
         xhr.onerror = () => {
+          console.error("❌ Network error saat upload foto");
           reject(new Error("Koneksi gagal saat upload foto"));
         };
 
-        xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL}/api/profile/upload-photo`);
+        const uploadUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/upload-photo`;
+        console.log("📤 Upload URL:", uploadUrl);
+
+        xhr.open("POST", uploadUrl);
         xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         xhr.send(formDataImg);
       });
     } catch (error) {
+      console.error("❌ Error dalam uploadPhoto:", error);
       throw new Error("Gagal upload foto: " + (error as Error).message);
     }
   };
 
-  /** ✅ Save biodata dan photo */
+  /** ✅ Save biodata dan photo dengan validasi token */
   const handleSave = async () => {
+    console.log("💾 Memulai proses save...");
+
     if (!validateForm()) {
-      console.log("❌ Form validation failed:", errors);
+      console.log("❌ Form validation gagal:", errors);
+      return;
+    }
+
+    // Validasi token sebelum save
+    const token = validateToken();
+    if (!token) {
+      alert(getTranslation("Token tidak ditemukan", currentLanguage.code));
       return;
     }
 
     try {
       setLoading(true);
       setUploadProgress(0);
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token tidak ditemukan. Silakan login ulang.");
-      }
 
       // 1️⃣ Format data untuk dikirim ke server - date_of_birth TIDAK diubah
       const cleanFormData: Partial<User> = {
@@ -630,20 +783,32 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
         }
       });
 
-      console.log("📝 Updating biodata (date_of_birth tidak diubah):", cleanFormData);
+      console.log("📝 Data yang akan disimpan:", cleanFormData);
 
       // 2️⃣ Update biodata ke endpoint PUT
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile/biodata`, {
+      const biodataUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/profile/biodata`;
+      console.log("📡 PUT request ke:", biodataUrl);
+
+      const res = await fetch(biodataUrl, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify(cleanFormData),
       });
 
+      console.log("📊 Biodata update status:", res.status);
+
+      if (res.status === 401) {
+        console.error("❌ 401 Unauthorized saat update biodata");
+        setTokenValid(false);
+        throw new Error(getTranslation("Token expired", currentLanguage.code));
+      }
+
       const biodataResponse = await res.json();
-      console.log("📝 Biodata update response:", biodataResponse);
+      console.log("📝 Biodata response:", biodataResponse);
 
       if (!res.ok) {
         throw new Error(biodataResponse.message || "Gagal update biodata");
@@ -654,7 +819,7 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
       if (photoFile) {
         try {
           photoUrl = await uploadPhoto(token);
-          console.log("📷 Photo uploaded successfully:", photoUrl);
+          console.log("✅ Photo uploaded successfully:", photoUrl);
         } catch (photoError) {
           console.error("❌ Photo upload failed:", photoError);
           throw new Error("Biodata berhasil disimpan, tetapi gagal upload foto: " + (photoError as Error).message);
@@ -696,6 +861,8 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
 
   /** ✅ Cancel editing */
   const handleCancel = () => {
+    console.log("🔄 Cancel editing...");
+
     setFormData({
       full_name: user.full_name || "",
       email: user.email || "",
@@ -727,6 +894,24 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
 
   return (
     <div className="space-y-4">
+      {/* Token Warning - Tampilkan jika token tidak valid */}
+      {!tokenValid && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                {getTranslation("Token expired", currentLanguage.code)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Progress bar untuk photo upload */}
       {loading && uploadProgress > 0 && uploadProgress < 100 && (
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -881,7 +1066,6 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
                     className="object-cover rounded-lg border border-gray-300 shadow-sm"
                     onError={(e) => {
                       console.error("❌ Error loading image:", photoPreview);
-                      // Fallback ke placeholder jika gambar error
                       const target = e.target as HTMLImageElement;
                       target.src =
                         "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmlld0JveD0iMCAwIDEyOCAxMjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik04NCA2NEw3MCA3OEw1OCA3MEw0NCA4NEg4NFY2NFoiIGZpbGw9IiM5Q0EzQUYiLz4KPGNpcmNsZSBjeD0iNTgiIGN5PSI1MiIgcj0iOCIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K";
@@ -933,7 +1117,7 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
             <button
               type="button"
               onClick={handleSave}
-              disabled={loading}
+              disabled={loading || !tokenValid}
               className="flex-1 md:flex-none bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {loading ? (
