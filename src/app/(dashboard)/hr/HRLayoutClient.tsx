@@ -1,3 +1,4 @@
+//src/app/(dashboard)/hr/HRLayoutClient.tsx
 "use client";
 
 import { useRouter } from "next/navigation";

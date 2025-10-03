@@ -10,5 +10,13 @@ export const metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return (
+    <html lang="en">
+      <body>
+        <AdminLayoutClient>
+          {children}
+        </AdminLayoutClient>
+      </body>
+    </html>
+  );
 }
