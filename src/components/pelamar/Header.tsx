@@ -6,9 +6,9 @@ import { ChevronDown } from "lucide-react";
 
 type HeaderProps = {
   title: string;
-  name: string;
-  role: string;
-  avatarUrl?: string | null;
+  name?: string;              // 🔹 opsional
+  role?: string;              // 🔹 opsional
+  avatarUrl?: string | null;  // 🔹 opsional
 };
 
 interface Language {
@@ -48,7 +48,7 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
 
-  const initial = name.charAt(0).toUpperCase();
+  const initial = name ? name.charAt(0).toUpperCase() : "?";
 
   const getTranslation = (key: string, lang: string): string => {
     return translations[key]?.[lang] || key;
@@ -99,7 +99,7 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
   }, []);
 
   const translatedTitle = getTranslation(title, currentLanguage.code);
-  const translatedRole = getTranslation(role, currentLanguage.code);
+  const translatedRole = role ? getTranslation(role, currentLanguage.code) : "";
 
   return (
     <header className="flex justify-between items-center">
@@ -145,30 +145,32 @@ export default function Header({ title, name, role, avatarUrl }: HeaderProps) {
         </div>
 
         {/* User Info */}
-        <div className="flex items-center gap-3">
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={name}
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = "none";
-              }}
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
-              {initial}
-            </div>
-          )}
+        {name && role && (
+          <div className="flex items-center gap-3">
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt={name}
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
+                {initial}
+              </div>
+            )}
 
-          <div className="text-left">
-            <p className="font-semibold">{name}</p>
-            <p className="text-sm text-gray-500 capitalize">{translatedRole}</p>
+            <div className="text-left">
+              <p className="font-semibold">{name}</p>
+              <p className="text-sm text-gray-500 capitalize">{translatedRole}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
