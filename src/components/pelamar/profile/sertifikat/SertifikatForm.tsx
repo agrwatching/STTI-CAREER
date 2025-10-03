@@ -17,12 +17,7 @@ type SertifikatFormProps = {
   onCancel?: () => void;
 };
 
-export default function SertifikatForm({
-  mode = "add",
-  data,
-  onSave,
-  onCancel,
-}: SertifikatFormProps) {
+export default function SertifikatForm({ mode = "add", data, onSave, onCancel }: SertifikatFormProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,10 +41,7 @@ export default function SertifikatForm({
   });
 
   const getAuthToken = () => {
-    const token =
-      localStorage.getItem("jwt_token") ||
-      localStorage.getItem("token") ||
-      localStorage.getItem("auth_token");
+    const token = localStorage.getItem("jwt_token") || localStorage.getItem("token") || localStorage.getItem("auth_token");
     console.log("Token retrieved:", token ? "Token exists" : "No token found");
     return token;
   };
@@ -95,8 +87,7 @@ export default function SertifikatForm({
       }
 
       if (expiryDate <= issueDate) {
-        newErrors.expiry_date =
-          "Tanggal berakhir harus lebih besar dari tanggal terbit";
+        newErrors.expiry_date = "Tanggal berakhir harus lebih besar dari tanggal terbit";
         isValid = false;
       }
     }
@@ -140,12 +131,7 @@ export default function SertifikatForm({
       }
 
       // Validasi tipe file
-      const allowedTypes = [
-        "application/pdf",
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-      ];
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
       if (!allowedTypes.includes(file.type)) {
         setErrors((prev) => ({
           ...prev,
@@ -177,11 +163,7 @@ export default function SertifikatForm({
     const isPDF = fileType === "application/pdf";
 
     // Tentukan endpoint berdasarkan tipe file
-    const uploadEndpoint = isImage
-      ? `${API_BASE_URL}/upload-photo`
-      : isPDF
-      ? `${API_BASE_URL}/upload-files`
-      : `${API_BASE_URL}/upload-files`;
+    const uploadEndpoint = isImage ? `${API_BASE_URL}/upload-photo` : isPDF ? `${API_BASE_URL}/upload-files` : `${API_BASE_URL}/upload-files`;
 
     const formData = new FormData();
     // Sesuaikan field name dengan yang diharapkan backend
@@ -210,8 +192,7 @@ export default function SertifikatForm({
           console.error("Upload Error Response:", errorData);
           try {
             const parsedError = JSON.parse(errorData);
-            errorMessage =
-              parsedError.message || parsedError.error || errorMessage;
+            errorMessage = parsedError.message || parsedError.error || errorMessage;
           } catch {
             if (errorData) errorMessage = errorData;
           }
@@ -234,199 +215,83 @@ export default function SertifikatForm({
 
   const createCertificate = async () => {
     const token = getAuthToken();
-
     if (!token) {
-      throw new Error(
-        "Token autentikasi tidak ditemukan. Silakan login ulang."
-      );
+      throw new Error("Token autentikasi tidak ditemukan. Silakan login ulang.");
     }
 
-    let fileUrl = null;
-
-    // Upload file terlebih dahulu jika ada
-    if (selectedFile) {
-      try {
-        console.log("Uploading file first...");
-        fileUrl = await uploadFile(selectedFile);
-        console.log("File uploaded successfully:", fileUrl);
-      } catch (uploadError) {
-        console.error("File upload failed:", uploadError);
-        throw new Error(
-          `Gagal upload file: ${
-            uploadError instanceof Error
-              ? uploadError.message
-              : "Unknown error"
-          }`
-        );
-      }
-    }
-
-    // Kirim data sertifikat ke endpoint certificate
-    const payload = {
-      certificate_name: formData.certificate_name.trim(),
-      issuer: formData.issuer.trim(),
-      ...(formData.issue_date && { issue_date: formData.issue_date }),
-      ...(formData.expiry_date && { expiry_date: formData.expiry_date }),
-      ...(fileUrl && { certificate_file: fileUrl }),
-    };
+    const form = new FormData();
+    form.append("certificate_name", formData.certificate_name.trim());
+    form.append("issuer", formData.issuer.trim());
+    if (formData.issue_date) form.append("issue_date", formData.issue_date);
+    if (formData.expiry_date) form.append("expiry_date", formData.expiry_date);
+    if (selectedFile) form.append("certificate_file", selectedFile); // 👈 penting, harus sama dengan backend
 
     console.log("=== SENDING DATA TO API ===");
     console.log("Endpoint:", `${API_BASE_URL}/certificate`);
-    console.log("Method: POST");
-    console.log("Payload:", payload);
+    console.log("FormData:", [...form.entries()]);
 
     try {
       const response = await fetch(`${API_BASE_URL}/certificate`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: form, // 👈 langsung kirim FormData, jangan JSON
       });
 
-      console.log("=== API RESPONSE ===");
-      console.log("Status:", response.status);
-
       if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-        try {
-          const errorData = await response.text();
-          console.error("Error Response Body:", errorData);
-
-          try {
-            const parsedError = JSON.parse(errorData);
-            errorMessage =
-              parsedError.message || parsedError.error || errorMessage;
-          } catch {
-            if (errorData) {
-              errorMessage = errorData;
-            }
-          }
-        } catch (parseError) {
-          console.error("Failed to parse error response:", parseError);
-        }
-
-        throw new Error(errorMessage);
+        const errorData = await response.text();
+        throw new Error(errorData || `HTTP ${response.status}`);
       }
 
       const result = await response.json();
       console.log("Success Response:", result);
       return result;
-    } catch (networkError) {
-      console.error("Network Error:", networkError);
-
-      if (
-        networkError instanceof TypeError &&
-        networkError.message.includes("fetch")
-      ) {
-        throw new Error(
-          "Gagal terhubung ke server. Periksa koneksi internet Anda."
-        );
-      }
-
-      throw networkError;
+    } catch (error) {
+      console.error("Upload Error:", error);
+      throw error;
     }
   };
 
   const updateCertificate = async () => {
-    if (!data?.id)
-      throw new Error("ID sertifikat tidak ditemukan untuk update");
+    if (!data?.id) throw new Error("ID sertifikat tidak ditemukan untuk update");
 
     const token = getAuthToken();
-
     if (!token) {
-      throw new Error(
-        "Token autentikasi tidak ditemukan. Silakan login ulang."
-      );
+      throw new Error("Token autentikasi tidak ditemukan. Silakan login ulang.");
     }
 
-    let fileUrl = null;
-
-    // Upload file baru jika ada
-    if (selectedFile) {
-      try {
-        console.log("Uploading new file...");
-        fileUrl = await uploadFile(selectedFile);
-        console.log("File uploaded successfully:", fileUrl);
-      } catch (uploadError) {
-        console.error("File upload failed:", uploadError);
-        throw new Error(
-          `Gagal upload file: ${
-            uploadError instanceof Error
-              ? uploadError.message
-              : "Unknown error"
-          }`
-        );
-      }
-    }
-
-    // Update data sertifikat
-    const payload = {
-      certificate_name: formData.certificate_name.trim(),
-      issuer: formData.issuer.trim(),
-      ...(formData.issue_date && { issue_date: formData.issue_date }),
-      ...(formData.expiry_date && { expiry_date: formData.expiry_date }),
-      ...(fileUrl && { certificate_file: fileUrl }),
-    };
+    const form = new FormData();
+    form.append("certificate_name", formData.certificate_name.trim());
+    form.append("issuer", formData.issuer.trim());
+    if (formData.issue_date) form.append("issue_date", formData.issue_date);
+    if (formData.expiry_date) form.append("expiry_date", formData.expiry_date);
+    if (selectedFile) form.append("certificate_file", selectedFile);
 
     console.log("=== UPDATING CERTIFICATE ===");
-    console.log("Certificate ID:", data.id);
     console.log("Endpoint:", `${API_BASE_URL}/certificate/${data.id}`);
-    console.log("Payload:", payload);
+    console.log("FormData:", [...form.entries()]);
 
     try {
       const response = await fetch(`${API_BASE_URL}/certificate/${data.id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: form,
       });
 
-      console.log("Update Response Status:", response.status);
-
       if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-        try {
-          const errorData = await response.text();
-          console.error("Update Error Response:", errorData);
-
-          try {
-            const parsedError = JSON.parse(errorData);
-            errorMessage =
-              parsedError.message || parsedError.error || errorMessage;
-          } catch {
-            if (errorData) {
-              errorMessage = errorData;
-            }
-          }
-        } catch (parseError) {
-          console.error("Failed to parse update error:", parseError);
-        }
-
-        throw new Error(errorMessage);
+        const errorData = await response.text();
+        throw new Error(errorData || `HTTP ${response.status}`);
       }
 
       const result = await response.json();
       console.log("Update Success Response:", result);
       return result;
-    } catch (networkError) {
-      console.error("Update Network Error:", networkError);
-
-      if (
-        networkError instanceof TypeError &&
-        networkError.message.includes("fetch")
-      ) {
-        throw new Error(
-          "Gagal terhubung ke server. Periksa koneksi internet Anda."
-        );
-      }
-
-      throw networkError;
+    } catch (error) {
+      console.error("Update Error:", error);
+      throw error;
     }
   };
 
@@ -434,11 +299,8 @@ export default function SertifikatForm({
     if (!data?.id) throw new Error("ID sertifikat tidak ditemukan untuk hapus");
 
     const token = getAuthToken();
-
     if (!token) {
-      throw new Error(
-        "Token autentikasi tidak ditemukan. Silakan login ulang."
-      );
+      throw new Error("Token autentikasi tidak ditemukan. Silakan login ulang.");
     }
 
     console.log("=== DELETING CERTIFICATE ===");
@@ -448,61 +310,29 @@ export default function SertifikatForm({
       const response = await fetch(`${API_BASE_URL}/certificate/${data.id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 👈 cukup ini
         },
       });
 
       console.log("Delete Response Status:", response.status);
 
       if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-        try {
-          const errorData = await response.text();
-          console.error("Delete Error Response:", errorData);
-
-          try {
-            const parsedError = JSON.parse(errorData);
-            errorMessage =
-              parsedError.message || parsedError.error || errorMessage;
-          } catch {
-            if (errorData) {
-              errorMessage = errorData;
-            }
-          }
-        } catch (parseError) {
-          console.error("Failed to parse delete error:", parseError);
-        }
-
-        throw new Error(errorMessage);
+        const errorData = await response.text();
+        throw new Error(errorData || `HTTP ${response.status}`);
       }
 
       let result = null;
       try {
-        const responseText = await response.text();
-        if (responseText) {
-          result = JSON.parse(responseText);
-        }
+        result = await response.json();
       } catch {
         result = { success: true };
       }
 
       console.log("Delete Success Response:", result);
       return result;
-    } catch (networkError) {
-      console.error("Delete Network Error:", networkError);
-
-      if (
-        networkError instanceof TypeError &&
-        networkError.message.includes("fetch")
-      ) {
-        throw new Error(
-          "Gagal terhubung ke server. Periksa koneksi internet Anda."
-        );
-      }
-
-      throw networkError;
+    } catch (error) {
+      console.error("Delete Error:", error);
+      throw error;
     }
   };
 
@@ -538,11 +368,7 @@ export default function SertifikatForm({
         result = await createCertificate();
         console.log("Certificate created successfully:", result);
 
-        if (
-          window.confirm(
-            "Sertifikat berhasil ditambahkan! Apakah Anda ingin menambah sertifikat lagi?"
-          )
-        ) {
+        if (window.confirm("Sertifikat berhasil ditambahkan! Apakah Anda ingin menambah sertifikat lagi?")) {
           // Reset form
           setFormData({
             certificate_name: "",
@@ -576,10 +402,7 @@ export default function SertifikatForm({
       console.error("=== ERROR OCCURRED ===");
       console.error("Error details:", error);
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui";
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan yang tidak diketahui";
 
       let userMessage = errorMessage;
 
@@ -594,17 +417,12 @@ export default function SertifikatForm({
       } else if (errorMessage.includes("415")) {
         userMessage = "Format file tidak didukung.";
       } else if (errorMessage.includes("422")) {
-        userMessage =
-          "Data yang dikirim tidak valid. Periksa kembali form Anda.";
+        userMessage = "Data yang dikirim tidak valid. Periksa kembali form Anda.";
       } else if (errorMessage.includes("500")) {
         userMessage = "Terjadi kesalahan di server. Silakan coba lagi nanti.";
       }
 
-      alert(
-        `Gagal ${
-          mode === "add" ? "menambah" : "memperbarui"
-        } sertifikat:\n\n${userMessage}`
-      );
+      alert(`Gagal ${mode === "add" ? "menambah" : "memperbarui"} sertifikat:\n\n${userMessage}`);
     } finally {
       setIsLoading(false);
       setUploadProgress(0);
@@ -630,17 +448,13 @@ export default function SertifikatForm({
     } catch (error) {
       console.error("Delete Error:", error);
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan yang tidak diketahui";
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan yang tidak diketahui";
 
       let userMessage = errorMessage;
       if (errorMessage.includes("401")) {
         userMessage = "Sesi Anda telah berakhir. Silakan login ulang.";
       } else if (errorMessage.includes("403")) {
-        userMessage =
-          "Anda tidak memiliki izin untuk menghapus sertifikat ini.";
+        userMessage = "Anda tidak memiliki izin untuk menghapus sertifikat ini.";
       } else if (errorMessage.includes("404")) {
         userMessage = "Sertifikat tidak ditemukan atau sudah dihapus.";
       }
@@ -675,14 +489,8 @@ export default function SertifikatForm({
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {mode === "add" ? "Tambah Sertifikat Baru" : "Edit Sertifikat"}
-        </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          {mode === "add"
-            ? "Lengkapi informasi sertifikat yang ingin ditambahkan"
-            : "Ubah informasi sertifikat sesuai kebutuhan"}
-        </p>
+        <h3 className="text-lg font-semibold text-gray-900">{mode === "add" ? "Tambah Sertifikat Baru" : "Edit Sertifikat"}</h3>
+        <p className="text-sm text-gray-600 mt-1">{mode === "add" ? "Lengkapi informasi sertifikat yang ingin ditambahkan" : "Ubah informasi sertifikat sesuai kebutuhan"}</p>
       </div>
 
       {/* Form Content */}
@@ -696,13 +504,9 @@ export default function SertifikatForm({
             <input
               type="text"
               value={formData.certificate_name}
-              onChange={(e) =>
-                handleInputChange("certificate_name", e.target.value)
-              }
+              onChange={(e) => handleInputChange("certificate_name", e.target.value)}
               className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.certificate_name
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-300"
+                errors.certificate_name ? "border-red-500 bg-red-50" : "border-gray-300"
               }`}
               placeholder="Contoh: AWS Certified Solutions Architect - Associate"
               required
@@ -726,9 +530,7 @@ export default function SertifikatForm({
               type="text"
               value={formData.issuer}
               onChange={(e) => handleInputChange("issuer", e.target.value)}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.issuer ? "border-red-500 bg-red-50" : "border-gray-300"
-              }`}
+              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.issuer ? "border-red-500 bg-red-50" : "border-gray-300"}`}
               placeholder="Contoh: Amazon Web Services (AWS)"
               required
               disabled={isLoading}
@@ -744,18 +546,12 @@ export default function SertifikatForm({
 
           {/* Tanggal Terbit */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tanggal Terbit
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Terbit</label>
             <input
               type="date"
               value={formData.issue_date}
               onChange={(e) => handleInputChange("issue_date", e.target.value)}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.issue_date
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-300"
-              }`}
+              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.issue_date ? "border-red-500 bg-red-50" : "border-gray-300"}`}
               disabled={isLoading}
               max={new Date().toISOString().split("T")[0]}
             />
@@ -777,11 +573,7 @@ export default function SertifikatForm({
               type="date"
               value={formData.expiry_date}
               onChange={(e) => handleInputChange("expiry_date", e.target.value)}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.expiry_date
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-300"
-              }`}
+              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.expiry_date ? "border-red-500 bg-red-50" : "border-gray-300"}`}
               disabled={isLoading}
               min={formData.issue_date || undefined}
             />
@@ -797,49 +589,28 @@ export default function SertifikatForm({
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Unggah Sertifikat
-              <span className="text-gray-500 text-xs ml-1">
-                (Opsional - PDF, JPG, PNG, max 10MB)
-              </span>
+              <span className="text-gray-500 text-xs ml-1">(Opsional - PDF, JPG, PNG, max 10MB)</span>
             </label>
 
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              disabled={isLoading}
-            />
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isLoading} />
 
             <div
               onClick={handleClickUpload}
               className={`w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-gray-500 transition-all ${
-                errors.file
-                  ? "border-red-500 bg-red-50"
-                  : !isLoading
-                  ? "cursor-pointer hover:border-blue-400 hover:bg-blue-50"
-                  : "cursor-not-allowed opacity-50"
+                errors.file ? "border-red-500 bg-red-50" : !isLoading ? "cursor-pointer hover:border-blue-400 hover:bg-blue-50" : "cursor-not-allowed opacity-50"
               }`}
             >
               {selectedFile ? (
                 <>
                   <span className="text-4xl mb-2">📄</span>
-                  <p className="text-sm text-blue-600 font-medium text-center px-4">
-                    {selectedFile.name}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
+                  <p className="text-sm text-blue-600 font-medium text-center px-4">{selectedFile.name}</p>
+                  <p className="text-xs text-gray-400 mt-1">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                 </>
               ) : (
                 <>
                   <span className="text-4xl mb-2">📁</span>
-                  <p className="text-sm text-blue-600 font-medium">
-                    Klik untuk pilih file
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    atau seret dan lepas file di sini
-                  </p>
+                  <p className="text-sm text-blue-600 font-medium">Klik untuk pilih file</p>
+                  <p className="text-xs text-gray-400 mt-1">atau seret dan lepas file di sini</p>
                 </>
               )}
             </div>
@@ -861,10 +632,7 @@ export default function SertifikatForm({
               <span>{uploadProgress}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
+              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
             </div>
           </div>
         )}
@@ -903,12 +671,7 @@ export default function SertifikatForm({
               </button>
             )}
 
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isLoading}
-              className="bg-gray-500 text-white px-6 py-2.5 rounded-lg hover:bg-gray-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
+            <button type="button" onClick={onCancel} disabled={isLoading} className="bg-gray-500 text-white px-6 py-2.5 rounded-lg hover:bg-gray-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               ❌ Batal
             </button>
 
@@ -924,11 +687,7 @@ export default function SertifikatForm({
                   {mode === "add" ? "Menambah..." : "Menyimpan..."}
                 </>
               ) : (
-                <>
-                  {mode === "add"
-                    ? "➕ Tambah Sertifikat"
-                    : "💾 Simpan Perubahan"}
-                </>
+                <>{mode === "add" ? "➕ Tambah Sertifikat" : "💾 Simpan Perubahan"}</>
               )}
             </button>
           </div>

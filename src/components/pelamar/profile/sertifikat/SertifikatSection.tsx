@@ -18,21 +18,21 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 // Helper untuk mendapatkan URL gambar yang benar
 function getCertificateImageUrl(certificateFile: string): string {
   if (!certificateFile) return "";
-  
+
   // Jika sudah URL lengkap
   if (certificateFile.startsWith("http://") || certificateFile.startsWith("https://")) {
     return certificateFile;
   }
-  
+
   // Jika sudah ada /uploads/ di path, return dengan BASE_URL
   if (certificateFile.includes("/uploads/")) {
     return `${BASE_URL}${certificateFile}`;
   }
-  
+
   // Tentukan folder berdasarkan ekstensi file
-  const ext = certificateFile.toLowerCase().substring(certificateFile.lastIndexOf('.'));
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
-  
+  const ext = certificateFile.toLowerCase().substring(certificateFile.lastIndexOf("."));
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"];
+
   // Jika gambar -> uploads/images/, jika bukan -> uploads/files/
   if (imageExtensions.includes(ext)) {
     return `${BASE_URL}/uploads/images/${certificateFile}`;
@@ -44,8 +44,8 @@ function getCertificateImageUrl(certificateFile: string): string {
 // Helper untuk cek apakah file adalah gambar
 function isImageFile(filename: string): boolean {
   if (!filename) return false;
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
-  const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp"];
+  const ext = filename.toLowerCase().substring(filename.lastIndexOf("."));
   return imageExtensions.includes(ext);
 }
 
@@ -103,15 +103,13 @@ export default function SertifikatSection() {
         }
 
         const json = await res.json();
-        
+
         if (json.data?.certificates) {
           setSertifikatList(json.data.certificates);
           console.log("✅ Certificates loaded:", json.data.certificates);
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Terjadi kesalahan saat fetch"
-        );
+        setError(err instanceof Error ? err.message : "Terjadi kesalahan saat fetch");
         console.error("❌ Error fetching certificates:", err);
       } finally {
         setIsLoading(false);
@@ -130,36 +128,44 @@ export default function SertifikatSection() {
     setEditIndex(idx);
     setShowForm(true);
   };
+const handleDelete = async (idx: number) => {
+  const cert = sertifikatList[idx];
+  if (!confirm(`Yakin mau hapus sertifikat "${cert.certificate_name}"?`)) {
+    return;
+  }
 
-  const handleDelete = async (idx: number) => {
-    const cert = sertifikatList[idx];
-    if (!confirm(`Yakin mau hapus sertifikat "${cert.certificate_name}"?`)) {
+  try {
+    const token = getToken();
+    if (!token) {
+      alert("Token tidak ditemukan. Silakan login kembali.");
       return;
     }
 
-    try {
-      const token = getToken();
-      if (!token) {
-        alert("Token tidak ditemukan. Silakan login kembali.");
-        return;
-      }
+    const res = await fetch(`${BASE_URL}/api/profile/certificate/${cert.id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      // Panggil API delete jika ada endpoint nya
-      const res = await fetch(`${BASE_URL}/api/certificates/${cert.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Untuk sementara, hapus dari state
-      setSertifikatList((prev) => prev.filter((_, i) => i !== idx));
-      console.log("✅ Certificate deleted:", cert.certificate_name);
-    } catch (err) {
-      console.error("❌ Error deleting certificate:", err);
-      alert("Gagal menghapus sertifikat");
+    // ambil isi response buat debug
+    const text = await res.text();
+    if (!res.ok) {
+      console.error("❌ Delete failed:", res.status, text);
+      alert(`Gagal menghapus sertifikat (${res.status}): ${text}`);
+      return;
     }
-  };
+
+    console.log("✅ Delete success:", text);
+
+    // baru hapus dari state kalau backend benar-benar sukses
+    setSertifikatList((prev) => prev.filter((_, i) => i !== idx));
+  } catch (err) {
+    console.error("❌ Error deleting certificate:", err);
+    alert("Gagal menghapus sertifikat");
+  }
+};
+
 
   const handleCancel = () => {
     setShowForm(false);
@@ -188,10 +194,7 @@ export default function SertifikatSection() {
       <div className="flex justify-between items-center">
         <h2 className="text-base font-semibold text-gray-800">Sertifikat</h2>
         {!showForm && (
-          <button
-            onClick={handleAdd}
-            className="inline-flex items-center bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 transition-colors"
-          >
+          <button onClick={handleAdd} className="inline-flex items-center bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700 transition-colors">
             <Plus className="w-4 h-4 mr-1" />
             Tambah
           </button>
@@ -203,7 +206,7 @@ export default function SertifikatSection() {
           <div className="text-sm text-gray-500">Memuat data sertifikat...</div>
         </div>
       )}
-      
+
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded">
           <p className="text-sm text-red-600">{error}</p>
@@ -211,18 +214,10 @@ export default function SertifikatSection() {
       )}
 
       {showForm ? (
-        <SertifikatForm
-          mode={editIndex === null ? "add" : "edit"}
-          data={
-            editIndex !== null
-              ? mapCertToForm(sertifikatList[editIndex])
-              : undefined
-          }
-          onCancel={handleCancel}
-          onSave={handleSave}
-        />
+        <SertifikatForm mode={editIndex === null ? "add" : "edit"} data={editIndex !== null ? mapCertToForm(sertifikatList[editIndex]) : undefined} onCancel={handleCancel} onSave={handleSave} />
       ) : (
-        !isLoading && !error && (
+        !isLoading &&
+        !error && (
           <div className="space-y-3">
             {sertifikatList.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[50vh] overflow-y-auto pr-1">
@@ -230,7 +225,7 @@ export default function SertifikatSection() {
                   const imageUrl = getCertificateImageUrl(cert.certificate_file);
                   const hasImageError = imageErrors[cert.id];
                   const isImage = isImageFile(cert.certificate_file);
-                  
+
                   console.log(`🖼️ Certificate #${idx + 1}:`, {
                     name: cert.certificate_name,
                     file: cert.certificate_file,
@@ -239,26 +234,16 @@ export default function SertifikatSection() {
                   });
 
                   return (
-                    <div
-                      key={cert.id}
-                      className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
-                    >
+                    <div key={cert.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                       {/* Gambar / Preview */}
                       <div className="relative w-full h-40 bg-gradient-to-br from-gray-50 to-gray-100">
                         {hasImageError || !isImage ? (
                           // Fallback: Icon file (untuk PDF atau gambar error)
                           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-400 p-4">
                             <FileText className="w-16 h-16 stroke-1" />
-                            <span className="text-xs text-center break-all line-clamp-2 px-2">
-                              {cert.certificate_file.split('/').pop()}
-                            </span>
+                            <span className="text-xs text-center break-all line-clamp-2 px-2">{cert.certificate_file.split("/").pop()}</span>
                             {!isImage && (
-                              <a
-                                href={imageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 text-xs text-blue-500 hover:text-blue-700 hover:underline"
-                              >
+                              <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="mt-2 text-xs text-blue-500 hover:text-blue-700 hover:underline">
                                 📄 Buka PDF
                               </a>
                             )}
@@ -266,13 +251,7 @@ export default function SertifikatSection() {
                         ) : (
                           // Tampilkan gambar (JPG, PNG, JPEG, dll)
                           <div className="relative w-full h-full overflow-hidden">
-                            <img
-                              src={imageUrl}
-                              alt={cert.certificate_name}
-                              className="w-full h-full object-cover"
-                              onError={() => handleImageError(cert.id)}
-                              onLoad={() => handleImageLoad(cert.id, cert.certificate_name)}
-                            />
+                            <img src={imageUrl} alt={cert.certificate_name} className="w-full h-full object-cover" onError={() => handleImageError(cert.id)} onLoad={() => handleImageLoad(cert.id, cert.certificate_name)} />
                             {/* Overlay untuk loading */}
                             <div className="absolute inset-0 bg-gray-200 animate-pulse -z-10" />
                           </div>
@@ -290,21 +269,13 @@ export default function SertifikatSection() {
                               {cert.issuer}
                             </p>
                           </div>
-                          
+
                           {/* Action Buttons */}
                           <div className="flex gap-1 flex-shrink-0">
-                            <button
-                              onClick={() => handleEdit(idx)}
-                              className="p-1.5 hover:bg-blue-50 rounded transition-colors"
-                              title="Edit"
-                            >
+                            <button onClick={() => handleEdit(idx)} className="p-1.5 hover:bg-blue-50 rounded transition-colors" title="Edit">
                               <Pencil className="w-4 h-4 text-blue-600" />
                             </button>
-                            <button
-                              onClick={() => handleDelete(idx)}
-                              className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                              title="Hapus"
-                            >
+                            <button onClick={() => handleDelete(idx)} className="p-1.5 hover:bg-red-50 rounded transition-colors" title="Hapus">
                               <Trash2 className="w-4 h-4 text-red-600" />
                             </button>
                           </div>
@@ -325,11 +296,24 @@ export default function SertifikatSection() {
                         <details className="text-xs text-gray-400">
                           <summary className="cursor-pointer hover:text-gray-600">Debug Info</summary>
                           <div className="mt-1 space-y-1 p-2 bg-gray-50 rounded text-xs font-mono">
-                            <div><strong>File:</strong> {cert.certificate_file}</div>
-                            <div><strong>Extension:</strong> {cert.certificate_file.substring(cert.certificate_file.lastIndexOf('.'))}</div>
-                            <div><strong>URL:</strong> <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline break-all">{imageUrl}</a></div>
-                            <div><strong>Is Image:</strong> {isImage ? '✅ Yes (uploads/images/)' : '❌ No (uploads/files/)'}</div>
-                            <div><strong>Error:</strong> {hasImageError ? '❌ Yes' : '✅ No'}</div>
+                            <div>
+                              <strong>File:</strong> {cert.certificate_file}
+                            </div>
+                            <div>
+                              <strong>Extension:</strong> {cert.certificate_file.substring(cert.certificate_file.lastIndexOf("."))}
+                            </div>
+                            <div>
+                              <strong>URL:</strong>{" "}
+                              <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline break-all">
+                                {imageUrl}
+                              </a>
+                            </div>
+                            <div>
+                              <strong>Is Image:</strong> {isImage ? "✅ Yes (uploads/images/)" : "❌ No (uploads/files/)"}
+                            </div>
+                            <div>
+                              <strong>Error:</strong> {hasImageError ? "❌ Yes" : "✅ No"}
+                            </div>
                           </div>
                         </details>
                       </div>
@@ -341,7 +325,7 @@ export default function SertifikatSection() {
               <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                 <ImageIcon className="w-16 h-16 mb-3 stroke-1" />
                 <p className="text-sm">Belum ada sertifikat yang tersimpan</p>
-                <p className="text-xs mt-1">Klik tombol "Tambah" untuk menambahkan sertifikat</p>
+                <p className="text-xs mt-1">Klik tombol Tambah untuk menambahkan sertifikat</p>
               </div>
             )}
           </div>
