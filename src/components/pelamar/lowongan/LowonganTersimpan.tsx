@@ -6,6 +6,7 @@ import CardLowongan from "./CardLowongan";
 interface HRInfo {
   name: string;
   company_name: string;
+  company_logo_url: string | null;
 }
 
 interface JobPost {
@@ -44,6 +45,8 @@ type BookmarkJob = {
   kategori: string;
   warnaKategori?: string;
   userId: number;
+  logoUrl?: string;
+  gaji: string;
 };
 
 export default function LowonganTersimpan() {
@@ -54,7 +57,6 @@ export default function LowonganTersimpan() {
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
-        // ✅ Ambil token dari localStorage (hasil login user)
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -84,10 +86,8 @@ export default function LowonganTersimpan() {
         const bookmarks = result?.data?.bookmarks || [];
 
         if (bookmarks.length > 0) {
-          // ✅ Ambil user_id dari token / dari bookmark
           const currentUserId = bookmarks[0].user_id;
 
-          // Filter hanya bookmark milik user ini
           const filteredBookmarks = bookmarks.filter(
             (item) => item.user_id === currentUserId
           );
@@ -99,6 +99,8 @@ export default function LowonganTersimpan() {
             kategori: "IT",
             warnaKategori: "bg-green-500",
             userId: item.user_id,
+            logoUrl: item.job_post.hr_info?.company_logo_url ?? undefined,
+            gaji: item.job_post.salary_range,
           }));
 
           setDataLowongan(mappedData);
