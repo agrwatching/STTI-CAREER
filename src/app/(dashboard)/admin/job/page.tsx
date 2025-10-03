@@ -1,7 +1,15 @@
 // src/app/(dashboard)/admin/job/page.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+interface ApiJob {
+  id: number;
+  job_title: string;
+  company_name?: string;
+  created_at: string;
+  verification_status: "pending" | "verified" | "rejected";
+}
 
 interface JobPost {
   id: number;
@@ -12,53 +20,57 @@ interface JobPost {
 }
 
 const JobPostsVerification: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "Pending" | "Verified" | "Rejected"
-  >("Pending");
+  const [activeTab, setActiveTab] = useState<"Pending" | "Verified" | "Rejected">("Pending");
 
-  // Sample data - ini bisa diganti dari API
-  const [jobPosts, setJobPosts] = useState<JobPost[]>([
-    {
-      id: 1,
-      title: "Software Engineer",
-      company: "PT Pelayanan Code",
-      postedDate: "2025-06-17",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      title: "Frontend Developer",
-      company: "PT Tech Solution",
-      postedDate: "2025-06-16",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      title: "Backend Developer",
-      company: "PT Digital Innovation",
-      postedDate: "2025-06-15",
-      status: "Verified",
-    },
-    {
-      id: 4,
-      title: "UI/UX Designer",
-      company: "PT Creative Studio",
-      postedDate: "2025-06-14",
-      status: "Rejected",
-    },
-  ]);
+  const [jobPosts, setJobPosts] = useState<JobPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data dari API
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`); // sesuaikan endpoint backend kamu
+        const result = await res.json();
+
+        if (result.success && Array.isArray(result.data)) {
+          const mappedJobs: JobPost[] = (result.data as ApiJob[]).map((job) => ({
+            id: job.id,
+            title: job.job_title,
+            company: job.company_name || "Unknown",
+            postedDate: new Date(job.created_at).toLocaleDateString("id-ID"),
+            status: job.verification_status === "pending" ? "Pending" : job.verification_status === "verified" ? "Verified" : "Rejected",
+          }));
+          setJobPosts(mappedJobs);
+        }
+      } catch (error) {
+        console.error("Failed to fetch jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   const filteredJobs = jobPosts.filter((job) => job.status === activeTab);
 
-  const handleAction = (id: number, action: "verify" | "reject") => {
-    setJobPosts((prevJobs) =>
-      prevJobs.map((job) =>
-        job.id === id
-          ? { ...job, status: action === "verify" ? "Verified" : "Rejected" }
-          : job
-      )
-    );
-    console.log(`${action} job with id: ${id}`);
+  // Ubah status job (local + panggil API)
+  const handleAction = async (id: number, action: "verify" | "reject") => {
+    try {
+      // update ke backend (sesuaikan endpoint dan method)
+      await fetch(`/api/jobs/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          verification_status: action === "verify" ? "verified" : "rejected",
+        }),
+      });
+
+      // update state local biar langsung pindah tab
+      setJobPosts((prevJobs) => prevJobs.map((job) => (job.id === id ? { ...job, status: action === "verify" ? "Verified" : "Rejected" } : job)));
+    } catch (error) {
+      console.error("Failed to update job status:", error);
+    }
   };
 
   return (
@@ -75,16 +87,10 @@ const JobPostsVerification: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                activeTab === tab
-                  ? "text-orange-400 bg-slate-700"
-                  : "text-slate-400 hover:text-slate-300 hover:bg-slate-750"
-              }`}
+              className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === tab ? "text-orange-400 bg-slate-700" : "text-slate-400 hover:text-slate-300 hover:bg-slate-750"}`}
             >
               {tab}
-              {activeTab === tab && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></div>
-              )}
+              {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400"></div>}
             </button>
           ))}
         </div>
@@ -96,91 +102,54 @@ const JobPostsVerification: React.FC = () => {
           {/* Table Header */}
           <div className="bg-slate-700 px-6 py-3">
             <div className="grid grid-cols-5 gap-4">
-              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">
-                Job Title
-              </div>
-              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">
-                Company
-              </div>
-              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">
-                Posted Date
-              </div>
-              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">
-                Status
-              </div>
-              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">
-                Actions
-              </div>
+              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">Job Title</div>
+              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">Company</div>
+              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">Posted Date</div>
+              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">Status</div>
+              <div className="text-slate-300 text-xs font-medium uppercase tracking-wider">Actions</div>
             </div>
           </div>
 
           {/* Table Body */}
           <div className="divide-y divide-slate-700">
-            {filteredJobs.map((job) => (
-              <div
-                key={job.id}
-                className="px-6 py-4 hover:bg-slate-750 transition-colors"
-              >
-                <div className="grid grid-cols-5 gap-4 items-center">
-                  <div className="text-white text-sm font-medium">
-                    {job.title}
-                  </div>
-                  <div className="text-slate-300 text-sm">{job.company}</div>
-                  <div className="text-slate-300 text-sm">{job.postedDate}</div>
-                  <div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        job.status === "Pending"
-                          ? "bg-yellow-500 text-black"
-                          : job.status === "Verified"
-                          ? "bg-green-500 text-white"
-                          : "bg-red-500 text-white"
-                      }`}
-                    >
-                      {job.status}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    {job.status === "Pending" && (
-                      <>
-                        <button
-                          onClick={() => handleAction(job.id, "verify")}
-                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors font-medium"
-                        >
-                          Verified
-                        </button>
-                        <button
-                          onClick={() => handleAction(job.id, "reject")}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors font-medium"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    {job.status === "Verified" && (
-                      <span className="text-green-400 text-xs font-medium">
-                        Verified
+            {loading ? (
+              <div className="text-center py-6 text-slate-400">Loading...</div>
+            ) : (
+              filteredJobs.map((job) => (
+                <div key={job.id} className="px-6 py-4 hover:bg-slate-750 transition-colors">
+                  <div className="grid grid-cols-5 gap-4 items-center">
+                    <div className="text-white text-sm font-medium">{job.title}</div>
+                    <div className="text-slate-300 text-sm">{job.company}</div>
+                    <div className="text-slate-300 text-sm">{job.postedDate}</div>
+                    <div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${job.status === "Pending" ? "bg-yellow-500 text-black" : job.status === "Verified" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>
+                        {job.status}
                       </span>
-                    )}
-                    {job.status === "Rejected" && (
-                      <span className="text-red-400 text-xs font-medium">
-                        Rejected
-                      </span>
-                    )}
+                    </div>
+                    <div className="flex gap-2">
+                      {job.status === "Pending" && (
+                        <>
+                          <button onClick={() => handleAction(job.id, "verify")} className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors font-medium">
+                            Verified
+                          </button>
+                          <button onClick={() => handleAction(job.id, "reject")} className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors font-medium">
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {job.status === "Verified" && <span className="text-green-400 text-xs font-medium">Verified</span>}
+                      {job.status === "Rejected" && <span className="text-red-400 text-xs font-medium">Rejected</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
 
       {/* Empty State */}
-      {filteredJobs.length === 0 && (
-        <div className="text-center py-12 text-slate-400">
-          No {activeTab.toLowerCase()} job posts found.
-        </div>
-      )}
+      {!loading && filteredJobs.length === 0 && <div className="text-center py-12 text-slate-400">No {activeTab.toLowerCase()} job posts found.</div>}
     </>
   );
 };
