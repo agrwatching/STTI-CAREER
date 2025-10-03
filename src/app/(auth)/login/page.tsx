@@ -55,7 +55,7 @@ export default function Login() {
     <section className="flex flex-col md:flex-row h-screen relative">
       {/* Tombol Back */}
       <button
-        onClick={() => window.history.back()}
+        onClick={() => router.push("/")}
         className="absolute top-4 left-4 z-20"
       >
         <Image src="/back.png" alt="Back" width={32} height={32} />

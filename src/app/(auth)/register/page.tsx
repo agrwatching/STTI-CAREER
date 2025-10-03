@@ -77,13 +77,24 @@ export default function RegisterPelamar() {
       <div className="relative z-10 bg-white/90 rounded-lg shadow-lg w-11/12 md:w-4/5 lg:w-3/4 flex flex-col md:flex-row p-8 md:p-12 gap-8 my-4">
         {/* Logo di atas (hanya mobile) */}
         <div className="flex flex-col items-center justify-center mb-6 md:hidden">
-          <Image src="/logo-stti.png" alt="Logo STTIS" width={120} height={120} />
+          <Image
+            src="/logo-stti.png"
+            alt="Logo STTIS"
+            width={120}
+            height={120}
+          />
           <h1 className="mt-2 text-xl font-bold text-[#0A1FB5]">STTICAREER</h1>
         </div>
 
         {/* Form */}
         <div className="flex-1 overflow-y-auto">
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <button
+              onClick={() => router.push("/role")}
+              className="absolute top-2 left-2 z-20"
+            >
+              <Image src="/back.png" alt="Back" width={28} height={28} />
+            </button>
             <label className="block text-sm font-medium">
               Full Name:
               <input
@@ -191,7 +202,12 @@ export default function RegisterPelamar() {
 
         {/* Logo Section (hanya desktop) */}
         <div className="hidden md:flex flex-col items-center justify-center flex-1">
-          <Image src="/logo-stti.png" alt="Logo STTIS" width={200} height={200} />
+          <Image
+            src="/logo-stti.png"
+            alt="Logo STTIS"
+            width={200}
+            height={200}
+          />
           <h1 className="mt-4 text-2xl md:text-3xl font-bold text-[#0A1FB5]">
             STTICAREER
           </h1>

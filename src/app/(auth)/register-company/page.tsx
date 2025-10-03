@@ -77,14 +77,15 @@ export default function RegisterPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
+      <button
+        onClick={() => router.push("/role")}
+        className="absolute top-2 left-2 z-20"
+      >
+        <Image src="/back.png" alt="Back" width={28} height={28} />
+      </button>
       {/* Gambar di atas (mobile) / kanan (desktop) */}
       <div className="order-1 md:order-2 relative basis-2/5 md:basis-2/5 h-40 md:h-full">
-        <Image
-          src="/company.jpg"
-          alt="STTIS"
-          fill
-          className="object-cover"
-        />
+        <Image src="/company.jpg" alt="STTIS" fill className="object-cover" />
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
@@ -95,20 +96,6 @@ export default function RegisterPage() {
             className="w-24 h-24 md:w-60 md:h-60 object-contain"
           />
         </div>
-
-        {/* Tombol Back */}
-        <button
-          onClick={() => router.back()}
-          className="absolute top-4 left-4"
-        >
-          <Image
-            src="/back.png"
-            alt="Back"
-            width={40}
-            height={40}
-            className="w-8 h-8"
-          />
-        </button>
       </div>
 
       {/* Form di bawah (mobile) / kiri (desktop) */}

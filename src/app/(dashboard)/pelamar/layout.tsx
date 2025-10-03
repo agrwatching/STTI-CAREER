@@ -1,3 +1,4 @@
+// src/app/(dashboard)/pelamar/layout.tsx
 import "@/app/globals.css";
 import PelamarLayoutClient from "./PelamarLayoutClient";
 
@@ -10,5 +11,11 @@ export const metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <PelamarLayoutClient>{children}</PelamarLayoutClient>;
+  return (
+    <html lang="en">
+      <body>
+        <PelamarLayoutClient>{children}</PelamarLayoutClient>
+      </body>
+    </html>
+  );
 }
