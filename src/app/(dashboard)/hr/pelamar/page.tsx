@@ -11,6 +11,14 @@ type JobApplicant = {
   posisi: string;
 };
 
+type RawApplicant = {
+  id: number;
+  nama: string;
+  tanggal: string;
+  cv: string;
+  posisi: string;
+};
+
 export default function PelamarPage() {
   const [pelamars, setPelamars] = useState<JobApplicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,30 +29,37 @@ export default function PelamarPage() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applicant`, {
-        headers: {
-        Authorization: `Bearer ${token}`,
-        },
-        cache: "no-store",
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Terjadi kesalahan saat memuat data");
         }
 
-        const rawData = await res.json();
-        
-        const transformedData = rawData.map((item: any) => ({
+        const rawData: RawApplicant[] = await res.json();
+
+        const transformedData: JobApplicant[] = rawData.map((item) => ({
           id: item.id,
-          nama: item.nama,       
+          nama: item.nama,
           tanggal: new Date(item.tanggal).toLocaleDateString("id-ID"),
           cv: `${process.env.NEXT_PUBLIC_API_URL}/uploads/files/${item.cv}`,
-          posisi: item.posisi,     
+          posisi: item.posisi,
         }));
 
-        setPelamars(transformedData);   
-      } catch (err: any) {
-        setError(err.message);
+        setPelamars(transformedData);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Terjadi error yang tidak diketahui");
+        }
       } finally {
         setLoading(false);
       }
