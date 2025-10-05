@@ -22,12 +22,17 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: apiUrl,
-        pathname: "/uploads/images/**", // untuk foto profil
+        pathname: "/uploads/images/**",
       },
       {
         protocol: "https",
         hostname: apiUrl,
-        pathname: "/uploads/files/**", // ✅ untuk sertifikat
+        pathname: "/uploads/files/**",
+      },
+      {
+        protocol: "https",
+        hostname: apiUrl,
+        pathname: "/uploads/company_logos/**",
       },
     ],
   },

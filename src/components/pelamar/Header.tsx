@@ -6,9 +6,9 @@ import { ChevronDown } from "lucide-react";
 
 type HeaderProps = {
   title: string;
-  name?: string;              // 🔹 opsional
-  role?: string;              // 🔹 opsional
-  avatarUrl?: string | null;  // 🔹 opsional
+  name?: string;
+  role?: string;
+  avatarUrl?: string | null;
 };
 
 interface Language {

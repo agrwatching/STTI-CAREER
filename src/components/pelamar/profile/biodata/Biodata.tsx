@@ -849,6 +849,8 @@ export default function Biodata({ user, isEditing, onCancel, onSaveSuccess }: Pr
 
       alert(getTranslation("Biodata berhasil diperbarui!", currentLanguage.code));
       onSaveSuccess(finalData);
+      window.location.reload();
+      
     } catch (err) {
       console.error("❌ Save error:", err);
       const errorMessage = (err as Error).message || "Terjadi kesalahan server";

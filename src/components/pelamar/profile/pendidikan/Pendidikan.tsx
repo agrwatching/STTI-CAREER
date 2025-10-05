@@ -220,7 +220,7 @@ export default function Pendidikan({ education, isEditing, onCancel, onSaveSucce
       const data = await res.json();
       if (res.ok && data.success) {
         alert(getTranslation("Pendidikan berhasil diperbarui", currentLanguage.code));
-        onSaveSuccess(form);
+        window.location.reload();
       } else {
         alert(`${getTranslation("Gagal memperbarui pendidikan", currentLanguage.code)}: ${data.message || "Unknown error"}`);
       }
