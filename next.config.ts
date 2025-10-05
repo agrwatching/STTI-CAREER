@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
         hostname: apiUrl,
         pathname: "/uploads/files/**", // ✅ untuk sertifikat
       },
+      {
+          protocol: "https",
+          hostname: apiUrl,
+          pathname: "/uploads/company_logos/**",
+        },
+
     ],
   },
 };
