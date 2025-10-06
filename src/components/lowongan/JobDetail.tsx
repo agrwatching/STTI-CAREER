@@ -37,61 +37,55 @@ const JobDetail: React.FC = () => {
   const params = useParams<{ id: string }>();
   const jobId = params?.id;
 
- // Fetch job detail (API)
-const fetchJobDetail = useCallback(async (id: string) => {
-  try {
-    setLoading(true);
-    setError(null);
+  // Fetch job detail (API)
+  const fetchJobDetail = useCallback(async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`
-    );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/public/${id}`);
 
-    if (!res.ok) {
-      throw new Error(`Failed to fetch job (status ${res.status})`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch job (status ${res.status})`);
+      }
+
+      const json = await res.json();
+
+      if (json.success && json.data) {
+        // mapping data API → struktur JobDetail
+        const apiJob = json.data;
+
+        const mappedJob: JobDetail = {
+          id: apiJob.id,
+          title: apiJob.job_title,
+          company: `Company #${apiJob.company_id}`,
+          location: apiJob.location,
+          type: "Full Time", // sementara hardcode, karena API belum ada field type
+          description: apiJob.job_description,
+          tags: ["Remote"], // sementara statis, nanti bisa parsing dari location atau field baru
+          salary: apiJob.salary_min && apiJob.salary_max ? `Rp ${apiJob.salary_min.toLocaleString()} – Rp ${apiJob.salary_max.toLocaleString()}` : "Salary not specified",
+          postedAt: apiJob.created_at,
+          companyLogo: undefined, // kalau backend nanti kasih logo, bisa dipakai
+          companyDescription: undefined, // belum ada di API
+          requirements: [], // kalau belum ada field, kosongkan
+          responsibilities: [],
+          benefits: [],
+          workingSystem: [],
+          companyCriteria: [],
+          applicants: 0,
+          views: 0,
+        };
+
+        setJob(mappedJob);
+      } else {
+        throw new Error("Job not found");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch job details");
+    } finally {
+      setLoading(false);
     }
-
-    const json = await res.json();
-
-    if (json.success && json.data) {
-      // mapping data API → struktur JobDetail
-      const apiJob = json.data;
-
-      const mappedJob: JobDetail = {
-        id: apiJob.id,
-        title: apiJob.job_title,
-        company: `Company #${apiJob.company_id}`,
-        location: apiJob.location,
-        type: "Full Time", // sementara hardcode, karena API belum ada field type
-        description: apiJob.job_description,
-        tags: ["Remote"], // sementara statis, nanti bisa parsing dari location atau field baru
-        salary:
-          apiJob.salary_min && apiJob.salary_max
-            ? `Rp ${apiJob.salary_min.toLocaleString()} – Rp ${apiJob.salary_max.toLocaleString()}`
-            : "Salary not specified",
-        postedAt: apiJob.created_at,
-        companyLogo: undefined, // kalau backend nanti kasih logo, bisa dipakai
-        companyDescription: undefined, // belum ada di API
-        requirements: [], // kalau belum ada field, kosongkan
-        responsibilities: [],
-        benefits: [],
-        workingSystem: [],
-        companyCriteria: [],
-        applicants: 0,
-        views: 0,
-      };
-
-      setJob(mappedJob);
-    } else {
-      throw new Error("Job not found");
-    }
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "Failed to fetch job details");
-  } finally {
-    setLoading(false);
-  }
-}, []);
-
+  }, []);
 
   // Check if job is bookmarked (dummy)
   const checkBookmarkStatus = useCallback(async () => {
@@ -158,17 +152,9 @@ const fetchJobDetail = useCallback(async (id: string) => {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {error || "Job not found"}
-          </h3>
-          <p className="text-gray-500 mb-4">
-            The job you&apos;re looking for doesn&apos;t exist or has been
-            removed.
-          </p>
-          <button
-            onClick={() => router.push("/lowongan")}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{error || "Job not found"}</h3>
+          <p className="text-gray-500 mb-4">The job you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <button onClick={() => router.push("/lowongan")} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
             Back to Jobs
           </button>
         </div>
@@ -180,10 +166,7 @@ const fetchJobDetail = useCallback(async (id: string) => {
     <div className="min-h-screen bg-gray-50 pt-16 md:pt-20">
       <div className="max-w-4xl mx-auto p-4 lg:p-6">
         {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors"
-        >
+        <button onClick={() => router.back()} className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors">
           ← Back
         </button>
 
@@ -194,23 +177,13 @@ const fetchJobDetail = useCallback(async (id: string) => {
             <div className="flex items-start space-x-4">
               <div className="w-16 h-16 relative">
                 {job.companyLogo ? (
-                  <Image
-                    src={job.companyLogo}
-                    alt={`${job.company} logo`}
-                    width={64}
-                    height={64}
-                    className="rounded-lg object-cover"
-                  />
+                  <Image src={job.companyLogo} alt={`${job.company} logo`} width={64} height={64} className="rounded-lg object-cover" />
                 ) : (
-                  <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-                    {job.company.charAt(0)}
-                  </div>
+                  <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">{job.company.charAt(0)}</div>
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {job.title}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
                 <p className="text-gray-600">{job.company}</p>
                 <p className="text-gray-500">{job.location}</p>
               </div>
@@ -218,15 +191,10 @@ const fetchJobDetail = useCallback(async (id: string) => {
 
             {/* Job Type & Tags */}
             <div className="mt-4 lg:mt-0 flex flex-col gap-2">
-              <span className="bg-blue-600 text-white px-3 py-1 rounded text-sm text-center">
-                {job.type}
-              </span>
+              <span className="bg-blue-600 text-white px-3 py-1 rounded text-sm text-center">{job.type}</span>
               <div className="flex flex-wrap gap-2">
                 {job.tags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs"
-                  >
+                  <span key={i} className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs">
                     {tag}
                   </span>
                 ))}
@@ -258,26 +226,13 @@ const fetchJobDetail = useCallback(async (id: string) => {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-6">
-            <button
-              onClick={handleBookmark}
-              className={`px-4 py-2 rounded-md ${
-                isBookmarked
-                  ? "bg-blue-100 text-blue-700 border border-blue-200"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
+            <button onClick={handleBookmark} className={`px-4 py-2 rounded-md ${isBookmarked ? "bg-blue-100 text-blue-700 border border-blue-200" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}>
               {isBookmarked ? "Tersimpan" : "Simpan"}
             </button>
-            <button
-              onClick={handleShare}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
-            >
+            <button onClick={handleShare} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
               Bagikan
             </button>
-            <button
-              onClick={handleApplyNow}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
+            <button onClick={handleApplyNow} className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
               Apply Now
             </button>
           </div>
