@@ -63,7 +63,7 @@ const LamarKerja: React.FC = () => {
       try {
         setLoading(true);
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${jobId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/public/${jobId}`
         );
         const result = await res.json();
 
