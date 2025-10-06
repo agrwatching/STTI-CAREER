@@ -22,17 +22,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: apiUrl,
-        pathname: "/uploads/images/**",
-      },
-      {
-        protocol: "https",
-        hostname: apiUrl,
-        pathname: "/uploads/files/**",
-      },
-      {
-        protocol: "https",
-        hostname: apiUrl,
-        pathname: "/uploads/company_logos/**",
+        pathname: "/uploads/**",
       },
     ],
   },
