@@ -139,11 +139,6 @@ const fetchJobs = async () => {
     setLoading(false);
   }
 };
-
-
-
-
-
   // Fetch jobs from API - replace mock data
 
   // Apply filters
