@@ -29,21 +29,19 @@ export default function PelamarPage() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            cache: "no-store",
-          }
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applicant`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
 
         if (!res.ok) {
           throw new Error("Terjadi kesalahan saat memuat data");
         }
 
-        const rawData: RawApplicant[] = await res.json();
+        const resData = await res.json();
+        const rawData: RawApplicant[] = resData.data;
 
         const transformedData: JobApplicant[] = rawData.map((item) => ({
           id: item.id,
