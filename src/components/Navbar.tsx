@@ -46,53 +46,56 @@ interface TranslationSet {
 }
 
 const languages: Language[] = [
-  { code: 'id', name: 'Indonesia', flag: '🇮🇩' },
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' } // Fixed: consistent 'ja' code
+  { code: "id", name: "Indonesia", flag: "🇮🇩" },
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "ja", name: "日本語", flag: "🇯🇵" }, // Fixed: consistent 'ja' code
 ];
 
 // Complete static translations for all languages
 const translations: TranslationSet = {
-  'Beranda': {
-    'id': 'Beranda',
-    'en': 'Home',
-    'ja': 'ホーム'
+  Beranda: {
+    id: "Beranda",
+    en: "Home",
+    ja: "ホーム",
   },
-  'Lowongan': {
-    'id': 'Lowongan',
-    'en': 'Jobs',
-    'ja': '求人'
+  Lowongan: {
+    id: "Lowongan",
+    en: "Jobs",
+    ja: "求人",
   },
-  'Perusahaan': {
-    'id': 'Perusahaan',
-    'en': 'Companies',
-    'ja': '企業'
+  Perusahaan: {
+    id: "Perusahaan",
+    en: "Companies",
+    ja: "企業",
   },
-  'Tentang Kami': {
-    'id': 'Tentang Kami',
-    'en': 'About Us',
-    'ja': '私たちについて'
+  "Tentang Kami": {
+    id: "Tentang Kami",
+    en: "About Us",
+    ja: "私たちについて",
   },
-  'Login': {
-    'id': 'Login',
-    'en': 'Login',
-    'ja': 'ログイン'
+  Login: {
+    id: "Login",
+    en: "Login",
+    ja: "ログイン",
   },
-  'Logout': {
-    'id': 'Logout',
-    'en': 'Logout',
-    'ja': 'ログアウト'
-  }
+  Logout: {
+    id: "Logout",
+    en: "Logout",
+    ja: "ログアウト",
+  },
 };
 
 export default function Navbar() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    languages[0]
+  );
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
-  const [isMobileLanguageDropdownOpen, setIsMobileLanguageDropdownOpen] = useState(false);
-  
+  const [isMobileLanguageDropdownOpen, setIsMobileLanguageDropdownOpen] =
+    useState(false);
+
   const languageDropdownRef = useRef<HTMLDivElement>(null);
   const mobileLanguageDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -113,9 +116,9 @@ export default function Navbar() {
 
   // Get translated navigation items
   const getTranslatedNavigation = (lang: string) => {
-    return navigationItems.map(item => ({
+    return navigationItems.map((item) => ({
       ...item,
-      name: getTranslation(item.key, lang)
+      name: getTranslation(item.key, lang),
     }));
   };
 
@@ -124,38 +127,41 @@ export default function Navbar() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      
+
       if (!token) {
         setLoading(false);
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const result: ApiProfileResponse = await response.json();
-        
+
         if (result.success && result.data) {
           const userData: UserProfile = {
             id: result.data.user_id,
             full_name: result.data.full_name,
             email: result.data.email,
-            role: 'pelamar',
-            profile_photo_url: result.data.profile_photo_url
+            role: "pelamar",
+            profile_photo_url: result.data.profile_photo_url,
           };
-          
+
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
         }
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error("Error fetching profile:", error);
       fallbackToLocalStorage();
     } finally {
       setLoading(false);
@@ -182,51 +188,57 @@ export default function Navbar() {
   const handleLanguageChange = (language: Language) => {
     const previousLanguage = currentLanguage.code;
     setCurrentLanguage(language);
-    localStorage.setItem('selectedLanguage', language.code);
+    localStorage.setItem("selectedLanguage", language.code);
     setIsLanguageDropdownOpen(false);
     setIsMobileLanguageDropdownOpen(false);
-    
+
     // Dispatch custom event to notify other components
-    const event = new CustomEvent('languageChanged', {
+    const event = new CustomEvent("languageChanged", {
       detail: {
         language: language.code,
-        previousLanguage: previousLanguage
-      }
+        previousLanguage: previousLanguage,
+      },
     });
     window.dispatchEvent(event);
-    
-    console.log('Language changed to:', language.code);
+
+    console.log("Language changed to:", language.code);
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsLanguageDropdownOpen(false);
       }
-      if (mobileLanguageDropdownRef.current && !mobileLanguageDropdownRef.current.contains(event.target as Node)) {
+      if (
+        mobileLanguageDropdownRef.current &&
+        !mobileLanguageDropdownRef.current.contains(event.target as Node)
+      ) {
         setIsMobileLanguageDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    
+
     // Load saved language
-    const savedLanguage = localStorage.getItem('selectedLanguage');
+    const savedLanguage = localStorage.getItem("selectedLanguage");
     if (savedLanguage) {
-      const language = languages.find(lang => lang.code === savedLanguage);
+      const language = languages.find((lang) => lang.code === savedLanguage);
       if (language) {
         setCurrentLanguage(language);
       }
     }
-    
+
     if (token) {
       fallbackToLocalStorage();
       fetchProfileData();
@@ -235,11 +247,34 @@ export default function Navbar() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      // Panggil API logout
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      // Bersihkan semua data lokal
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+
+      setUser(null);
+      router.push("/login");
+    } catch (err) {
+      console.error("Gagal logout:", err);
+      // Tetap hapus token biar user gak stuck
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      router.push("/login");
+    }
   };
 
   const isActiveLink = (href: string) => pathname === href;
@@ -291,7 +326,7 @@ export default function Navbar() {
               href="/login"
               className="bg-yellow-400 text-blue-900 px-6 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors whitespace-nowrap"
             >
-              {getTranslation('Login', currentLanguage.code)}
+              {getTranslation("Login", currentLanguage.code)}
             </Link>
           ) : (
             <div className="flex items-center space-x-4">
@@ -309,7 +344,7 @@ export default function Navbar() {
                     className="w-8 h-8 rounded-full border-2 border-white object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
+                      target.style.display = "none";
                     }}
                   />
                 ) : (
@@ -325,22 +360,29 @@ export default function Navbar() {
                 onClick={handleLogout}
                 className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors whitespace-nowrap"
               >
-                {getTranslation('Logout', currentLanguage.code)}
+                {getTranslation("Logout", currentLanguage.code)}
               </button>
             </div>
           )}
 
           {/* Language Dropdown - Desktop */}
           <div className="relative" ref={languageDropdownRef}>
-            <button 
+            <button
               onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
               className="flex items-center space-x-1 hover:text-yellow-400 transition-colors px-2 py-1 rounded-md"
             >
               <span className="text-lg">{currentLanguage.flag}</span>
-              <span className="text-sm">{currentLanguage.code.toUpperCase()}</span>
-              <ChevronDown size={16} className={`transform transition-transform ${isLanguageDropdownOpen ? 'rotate-180' : ''}`} />
+              <span className="text-sm">
+                {currentLanguage.code.toUpperCase()}
+              </span>
+              <ChevronDown
+                size={16}
+                className={`transform transition-transform ${
+                  isLanguageDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
             </button>
-            
+
             {isLanguageDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
                 {languages.map((language) => (
@@ -348,7 +390,9 @@ export default function Navbar() {
                     key={language.code}
                     onClick={() => handleLanguageChange(language)}
                     className={`w-full px-4 py-2 text-left flex items-center space-x-2 hover:bg-gray-100 transition-colors text-gray-800 ${
-                      currentLanguage.code === language.code ? 'bg-blue-50 text-blue-600' : ''
+                      currentLanguage.code === language.code
+                        ? "bg-blue-50 text-blue-600"
+                        : ""
                     }`}
                   >
                     <span className="text-lg">{language.flag}</span>
@@ -398,7 +442,7 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block bg-yellow-400 text-blue-900 px-3 py-2 rounded-md font-medium text-center hover:bg-yellow-500 transition-colors"
                 >
-                  {getTranslation('Login', currentLanguage.code)}
+                  {getTranslation("Login", currentLanguage.code)}
                 </Link>
               ) : (
                 <>
@@ -417,7 +461,7 @@ export default function Navbar() {
                         className="w-8 h-8 rounded-full border-2 border-white object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
+                          target.style.display = "none";
                         }}
                       />
                     ) : (
@@ -436,24 +480,33 @@ export default function Navbar() {
                     }}
                     className="w-full text-left bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600 transition-colors"
                   >
-                    {getTranslation('Logout', currentLanguage.code)}
+                    {getTranslation("Logout", currentLanguage.code)}
                   </button>
                 </>
               )}
 
               {/* Language Dropdown Mobile */}
               <div className="relative" ref={mobileLanguageDropdownRef}>
-                <button 
-                  onClick={() => setIsMobileLanguageDropdownOpen(!isMobileLanguageDropdownOpen)}
+                <button
+                  onClick={() =>
+                    setIsMobileLanguageDropdownOpen(
+                      !isMobileLanguageDropdownOpen
+                    )
+                  }
                   className="w-full flex items-center justify-between px-3 py-2 hover:bg-blue-700 rounded-md transition-colors"
                 >
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{currentLanguage.flag}</span>
                     <span>{currentLanguage.name}</span>
                   </div>
-                  <ChevronDown size={16} className={`transform transition-transform ${isMobileLanguageDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    size={16}
+                    className={`transform transition-transform ${
+                      isMobileLanguageDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-                
+
                 {isMobileLanguageDropdownOpen && (
                   <div className="mt-2 bg-blue-800 rounded-md py-1 ml-4">
                     {languages.map((language) => (
@@ -461,7 +514,9 @@ export default function Navbar() {
                         key={language.code}
                         onClick={() => handleLanguageChange(language)}
                         className={`w-full px-4 py-2 text-left flex items-center space-x-2 hover:bg-blue-700 transition-colors ${
-                          currentLanguage.code === language.code ? 'bg-blue-700 text-yellow-400' : ''
+                          currentLanguage.code === language.code
+                            ? "bg-blue-700 text-yellow-400"
+                            : ""
                         }`}
                       >
                         <span className="text-lg">{language.flag}</span>

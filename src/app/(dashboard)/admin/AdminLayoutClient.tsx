@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import SidebarAdmin from "@/app/(dashboard)/admin/adminSidebar";
 import Header from "@/app/(dashboard)/admin/Profil";
+import { refreshAccessToken, logout } from "@utils/auth";
 
 const pageTitles: Record<string, string> = {
   "/admin/dashboard": "Dashboard",
@@ -21,19 +22,38 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const title = pageTitles[pathname] || "";
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-    const role = user ? JSON.parse(user).role : null;
+    const checkAuth = async () => {
+      const userStr = localStorage.getItem("user");
+      const user = userStr ? JSON.parse(userStr) : null;
 
-    if (!token || role !== "admin") {
-      router.replace("/login");
-    } else {
+      if (!user || user.role !== "admin") {
+        logout(); // redirect ke login
+        return;
+      }
+
+      const token = localStorage.getItem("accessToken");
+
+      // Jika token tidak ada atau expired, coba refresh
+      if (!token) {
+        const newToken = await refreshAccessToken();
+        if (!newToken) {
+          logout();
+          return;
+        }
+      }
+
       setAuthorized(true);
-    }
+    };
+
+    checkAuth();
   }, [router]);
 
   if (authorized === null) {
-    return <div className="flex h-screen items-center justify-center text-white">Checking access...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center text-white">
+        Checking access...
+      </div>
+    );
   }
 
   if (!authorized) return null;
