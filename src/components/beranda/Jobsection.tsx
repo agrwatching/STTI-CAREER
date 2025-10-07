@@ -2,25 +2,48 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Search, MapPin } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+
+// Work type
+const workTypeMap: Record<string, string> = {
+  on_site: "onSite",
+  remote: "remote",
+  hybrid: "hybrid",
+  field: "field",
+};
+
+// Work time
+const workTimeMap: Record<string, string> = {
+  full_time: "fulltime",
+  part_time: "partTime",
+  freelance: "freelance",
+  internship: "internship",
+  contract: "contract",
+  volunteer: "volunteer",
+  seasonal: "seasonal",
+};
 
 // Job interface
 interface Job {
   id: number;
   job_title: string;
   company_id: number;
+  company_name?: string; // optional
+  company_logo?: string | null; // ✅ tambah ini
   job_description: string;
   salary_min?: number | null;
   salary_max?: number | null;
   location?: string | null;
+  work_type?: string | null; // ✅ Tambah ini
+  work_time?: string | null; // ✅ Dan ini
 }
 
-// Translated job interface
+// Translated job interface (update)
 interface TranslatedJob extends Job {
   translated_job_title?: string;
   translated_job_description?: string;
   translated_location?: string | null;
+  translated_company_name?: string;
 }
 
 // Translation interface
@@ -622,24 +645,46 @@ const formatSalary = (min?: number | null, max?: number | null) => {
               <div key={`${job.id}-${currentLanguage}`} className={`bg-white p-6 rounded-2xl shadow hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[320px] ${translating ? "opacity-70" : ""}`}>
                 {/* Header */}
                 <div className="flex items-start gap-3 mb-4">
-                  <Image src="https://dummyimage.com/60x60/2563eb/ffffff&text=C" alt="company logo" width={60} height={60} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                  {job.company_logo ? (
+                  <img
+                    src={job.company_logo.startsWith("http")
+                      ? job.company_logo
+                      : `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${job.company_logo}`}
+                    alt={job.company_name || "company logo"}
+                    className="w-12 h-12 rounded-full object-cover flex-shrink-0 border border-gray-200"
+                  />
+                ) : (
+  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 border border-gray-300">
+    <span className="text-gray-500 text-sm font-medium">C</span>
+  </div>
+)}
+
                   <div className="min-w-0">
                     <h3 className={`font-semibold line-clamp-2 transition-all duration-300 ${currentLanguage === "ja" ? "text-base" : "text-lg"}`}>{getJobTitle(job)}</h3>
-                    <p className="text-gray-600 text-sm">
-                      {translations.companyPrefix}
-                      {job.company_id}
-                    </p>
+                 <p className="text-gray-600 text-sm truncate">
+  {job.company_name || `${translations.companyPrefix}${job.company_id}`}
+</p>
+
                   </div>
                 </div>
 
                 {/* Description */}
                 <p className="text-gray-500 text-sm mb-4 line-clamp-3 flex-grow transition-all duration-300">{getJobDescription(job)}</p>
 
-                {/* Tags */}
-                <div className="flex gap-2 flex-wrap mb-4">
-                  <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{translations.fulltime}</span>
-                  <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">{translations.remote}</span>
-                </div>
+            {/* Tags */}
+<div className="flex gap-2 flex-wrap mb-4">
+  {job.work_time && (
+    <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+     {translations[workTimeMap[job.work_time] as keyof typeof translations] || job.work_time}
+    </span>
+  )}
+
+  {job.work_type && (
+    <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+      {translations[workTypeMap[job.work_type] as keyof typeof translations] || job.work_type}
+    </span>
+  )}
+</div>
 
                 {/* Salary */}
                 <div className="mb-4">
