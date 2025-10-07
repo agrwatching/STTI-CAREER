@@ -9,6 +9,7 @@ interface Job {
   id: number;
   title: string;
   company: string;
+  company_logo?: string; // ✅ tambahkan ini
   location: string;
   type: string;
   description: string;
@@ -87,43 +88,51 @@ const fetchJobs = async () => {
 
  if (result.success && Array.isArray(result.data)) {
   // Map API response ke struktur Job
-  const mappedJobs: Job[] = result.data.map((job: unknown) => {
-    const j = job as {
-      id: number;
-      job_title: string;
-      company_name?: string;
-      location?: string;
-      employment_type?: string;
-      job_description: string;
-      tags?: string;
-      salary_min?: number;
-      salary_max?: number;
-      created_at?: string;
-    };
+const mappedJobs: Job[] = result.data.map((job: unknown) => {
+  const j = job as {
+    id: number;
+    job_title: string;
+    company_name?: string;
+    company_logo?: string;
+    location?: string;
+    work_type?: string;
+    work_time?: string;
+    job_description: string;
+    tags?: string;
+    salary_min?: number;
+    salary_max?: number;
+    created_at?: string;
+  };
 
-    let salaryText = "";
-    if (j.salary_min && j.salary_max) {
-      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")} - Rp ${j.salary_max.toLocaleString("id-ID")}`;
-    } else if (j.salary_min) {
-      salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")}`;
-    } else if (j.salary_max) {
-      salaryText = `Rp ${j.salary_max.toLocaleString("id-ID")}`;
-    } else {
-      salaryText = "Negotable";
-    }
+  // Format gaji
+  let salaryText = "";
+  if (j.salary_min && j.salary_max) {
+    salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")} - Rp ${j.salary_max.toLocaleString("id-ID")}`;
+  } else if (j.salary_min) {
+    salaryText = `Rp ${j.salary_min.toLocaleString("id-ID")}`;
+  } else if (j.salary_max) {
+    salaryText = `Rp ${j.salary_max.toLocaleString("id-ID")}`;
+  } else {
+    salaryText = "Negotiable";
+  }
 
-    return {
-      id: j.id,
-      title: j.job_title,
-      company: j.company_name || "Unknown Company",
-      location: j.location || "Indonesia",
-      type: j.employment_type || "Full Time",
-      description: j.job_description,
-      tags: j.tags ? j.tags.split(",") : [],
-      salary: salaryText,
-      postedAt: j.created_at ? timeAgo(j.created_at) : "",
-    };
-  });
+  return {
+    id: j.id,
+    title: j.job_title,
+    company: j.company_name || "Unknown Company",
+    company_logo: j.company_logo
+      ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${j.company_logo}`
+      : null, // ✅ tampilkan logo jika ada
+    location: j.location || "Indonesia",
+    type: j.work_time || "Full Time", // ✅ pakai work_time, bukan employment_type
+    work_type: j.work_type || "on_site", // ✅ tambahkan kalau kamu ingin tampilkan juga
+    description: j.job_description,
+    tags: j.tags ? j.tags.split(",") : [],
+    salary: salaryText,
+    postedAt: j.created_at ? timeAgo(j.created_at) : "",
+  };
+});
+
 
 
       setJobs(mappedJobs);
@@ -513,21 +522,30 @@ const fetchJobs = async () => {
                         {/* Job Icon and Info */}
                         <div className="flex items-start space-x-4 mb-4 lg:mb-0 flex-1">
                           {/* Company Logo/Icon */}
-                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg
-                              className="w-6 h-6 lg:w-8 lg:h-8 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-6m-4 0H3m6 0v-9a2 2 0 012-2h2a2 2 0 012 2v9"
-                              />
-                            </svg>
-                          </div>
+                          <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200">
+  {job.company_logo ? (
+    <img
+      src={job.company_logo}
+      alt={job.company}
+      className="w-full h-full object-contain"
+    />
+  ) : (
+    <svg
+      className="w-6 h-6 lg:w-8 lg:h-8 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-6m-4 0H3m6 0v-9a2 2 0 012-2h2a2 2 0 012 2v9"
+      />
+    </svg>
+  )}
+</div>
+
 
                           {/* Job Details */}
                           <div className="flex-1 min-w-0">
