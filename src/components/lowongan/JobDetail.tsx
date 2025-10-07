@@ -4,27 +4,56 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
 // Interface untuk tipe data job detail
 interface JobDetail {
   id: number;
   title: string;
   company: string;
+  companyLogo?: string;
   location: string;
-  type: string;
+  type: string; // work_time
+  workType: string; // work_type (remote/hybrid/onsite)
   description: string;
   tags: string[];
   salary: string;
   postedAt: string;
-  companyLogo?: string;
   companyDescription?: string;
   requirements: string[];
+  qualifications: string; // qualifications dari API
   responsibilities: string[];
   benefits: string[];
   workingSystem: string[];
   companyCriteria: string[];
   applicants?: number;
   views?: number;
+}
+
+// helper untuk format waktu jadi "1 jam yang lalu"
+function timeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = (now.getTime() - date.getTime()) / 1000; // selisih detik
+
+  const units: { unit: Intl.RelativeTimeFormatUnit; seconds: number }[] = [
+    { unit: "year", seconds: 60 * 60 * 24 * 365 },
+    { unit: "month", seconds: 60 * 60 * 24 * 30 },
+    { unit: "week", seconds: 60 * 60 * 24 * 7 },
+    { unit: "day", seconds: 60 * 60 * 24 },
+    { unit: "hour", seconds: 60 * 60 },
+    { unit: "minute", seconds: 60 },
+    { unit: "second", seconds: 1 },
+  ];
+
+  for (const { unit, seconds } of units) {
+    const value = Math.floor(diff / seconds);
+    if (value >= 1) {
+      return new Intl.RelativeTimeFormat("id", { numeric: "auto" }).format(-value, unit);
+    }
+  }
+
+  return "baru saja";
 }
 
 const JobDetail: React.FC = () => {
@@ -52,27 +81,65 @@ const JobDetail: React.FC = () => {
       const json = await res.json();
 
       if (json.success && json.data) {
-        // mapping data API → struktur JobDetail
         const apiJob = json.data;
 
+        // Format gaji
+        let salaryText = "";
+        if (apiJob.salary_min && apiJob.salary_max) {
+          salaryText = `Rp ${apiJob.salary_min.toLocaleString("id-ID")} - Rp ${apiJob.salary_max.toLocaleString("id-ID")}`;
+        } else if (apiJob.salary_min) {
+          salaryText = `Rp ${apiJob.salary_min.toLocaleString("id-ID")}`;
+        } else if (apiJob.salary_max) {
+          salaryText = `Rp ${apiJob.salary_max.toLocaleString("id-ID")}`;
+        } else {
+          salaryText = "Negotiable";
+        }
+
+        // Format work_type untuk tags
+        const workTypeMap: Record<string, string> = {
+          on_site: "On Site",
+          remote: "Remote",
+          hybrid: "Hybrid",
+          field: "Field",
+        };
+        const workTypeTag = workTypeMap[apiJob.work_type] || "On Site";
+
+        // Format work_time untuk type
+        const workTimeMap: Record<string, string> = {
+          full_time: "Full Time",
+          part_time: "Part Time",
+          freelance: "Freelance",
+          internship: "Internship",
+          contract: "Contract",
+          volunteer: "Volunteer",
+          seasonal: "Seasonal",
+        };
+        const workTimeFormatted = workTimeMap[apiJob.work_time] || "Full Time";
+
+        // Parse requirements jika ada (misal: string dengan newline atau array)
+        const requirementsArray = apiJob.requirements ? apiJob.requirements.split("\n").filter((r: string) => r.trim()) : [];
+
+        // Mapping data API → struktur JobDetail
         const mappedJob: JobDetail = {
           id: apiJob.id,
           title: apiJob.job_title,
-          company: `Company #${apiJob.company_id}`,
-          location: apiJob.location,
-          type: "Full Time", // sementara hardcode, karena API belum ada field type
-          description: apiJob.job_description,
-          tags: ["Remote"], // sementara statis, nanti bisa parsing dari location atau field baru
-          salary: apiJob.salary_min && apiJob.salary_max ? `Rp ${apiJob.salary_min.toLocaleString()} – Rp ${apiJob.salary_max.toLocaleString()}` : "Salary not specified",
-          postedAt: apiJob.created_at,
-          companyLogo: undefined, // kalau backend nanti kasih logo, bisa dipakai
+          company: apiJob.company_name || `Company #${apiJob.company_id}`,
+          companyLogo: apiJob.company_logo ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${apiJob.company_logo}` : undefined,
+          location: apiJob.location || "Indonesia",
+          type: workTimeFormatted, // Full Time, Part Time, dll
+          workType: apiJob.work_type || "on_site", // remote, hybrid, on_site
+          description: apiJob.job_description || "",
+          tags: [workTypeTag], // ["Remote"], ["Hybrid"], atau ["On Site"]
+          salary: salaryText,
+          postedAt: apiJob.created_at ? timeAgo(apiJob.created_at) : "Baru saja",
           companyDescription: undefined, // belum ada di API
-          requirements: [], // kalau belum ada field, kosongkan
+          requirements: requirementsArray,
+          qualifications: apiJob.qualifications || "", // qualifications dari API
           responsibilities: [],
           benefits: [],
           workingSystem: [],
           companyCriteria: [],
-          applicants: 0,
+          applicants: apiJob.total_applicants || 0,
           views: 0,
         };
 
@@ -87,14 +154,85 @@ const JobDetail: React.FC = () => {
     }
   }, []);
 
-  // Check if job is bookmarked (dummy)
+  // Check if job is bookmarked
   const checkBookmarkStatus = useCallback(async () => {
-    setIsBookmarked(false);
-  }, []);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token || !jobId) return;
+
+      // Gunakan endpoint check bookmark spesifik
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookmarks/check/${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setIsBookmarked(result.data.is_bookmarked);
+        }
+      }
+    } catch (err) {
+      console.error("Error checking bookmark status:", err);
+    }
+  }, [jobId]);
 
   // Toggle bookmark
-  const handleBookmark = () => {
-    setIsBookmarked((prev) => !prev);
+  const handleBookmark = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Silakan login terlebih dahulu untuk menyimpan lowongan");
+        router.push("/login");
+        return;
+      }
+
+      if (!jobId) return;
+
+      if (isBookmarked) {
+        // Remove bookmark by job_id (DELETE)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookmarks/job/${jobId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          setIsBookmarked(false);
+          const result = await response.json();
+          toast.success(result.message || "Lowongan berhasil dihapus dari bookmark");
+        } else {
+          const error = await response.json();
+          toast.error(error.message || "Gagal menghapus bookmark");
+        }
+      } else {
+        // Add bookmark (POST)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookmarks`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            job_id: parseInt(jobId),
+          }),
+        });
+
+        if (response.ok) {
+          setIsBookmarked(true);
+          const result = await response.json();
+          toast.success(result.message || "Lowongan berhasil disimpan ke bookmark");
+        } else {
+          const error = await response.json();
+          toast.error(error.message || "Gagal menyimpan bookmark");
+        }
+      }
+    } catch (err) {
+      console.error("Error toggling bookmark:", err);
+      toast.error("Terjadi kesalahan saat menyimpan bookmark");
+    }
   };
 
   // Apply Now
@@ -117,13 +255,13 @@ const JobDetail: React.FC = () => {
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Job link copied to clipboard!");
+        toast.success("Job link copied to clipboard!");
       }
     } catch (err) {
       console.error("Error sharing:", err);
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Job link copied to clipboard!");
+        toast.success("Job link copied to clipboard!");
       } catch {
         console.error("Clipboard not supported");
       }
@@ -175,7 +313,7 @@ const JobDetail: React.FC = () => {
           <div className="flex flex-col lg:flex-row justify-between mb-8">
             {/* Logo & Title */}
             <div className="flex items-start space-x-4">
-              <div className="w-16 h-16 relative">
+              <div className="w-16 h-16 relative flex-shrink-0">
                 {job.companyLogo ? (
                   <Image src={job.companyLogo} alt={`${job.company} logo`} width={64} height={64} className="rounded-lg object-cover" />
                 ) : (
@@ -215,14 +353,24 @@ const JobDetail: React.FC = () => {
           </div>
 
           {/* Requirements */}
-          <div className="mb-6">
-            <h2 className="font-semibold mb-2">Kualifikasi</h2>
-            <ul className="list-disc pl-6 text-gray-700 space-y-1">
-              {job.requirements.map((req, i) => (
-                <li key={i}>{req}</li>
-              ))}
-            </ul>
-          </div>
+          {job.requirements.length > 0 && (
+            <div className="mb-6">
+              <h2 className="font-semibold mb-2">Requirements</h2>
+              <ul className="list-disc pl-6 text-gray-700 space-y-1">
+                {job.requirements.map((req, i) => (
+                  <li key={i}>{req}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Qualifications */}
+          {job.qualifications && (
+            <div className="mb-6">
+              <h2 className="font-semibold mb-2">Kualifikasi</h2>
+              <p className="text-gray-700">{job.qualifications}</p>
+            </div>
+          )}
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mt-6">

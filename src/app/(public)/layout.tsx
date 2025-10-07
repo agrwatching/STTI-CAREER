@@ -2,6 +2,7 @@
 import "@/app/globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "STTI CAREERS",
@@ -17,7 +18,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <head />
       <body>
         <Navbar />
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen">{children}
+          <Toaster />
+        </main>
         <Footer />
       </body>
     </html>
