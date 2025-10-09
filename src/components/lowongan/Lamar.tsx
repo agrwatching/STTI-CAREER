@@ -219,17 +219,18 @@ const LamarKerja: React.FC = () => {
         status: "pending",
       };
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+    const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${job.id}/apply`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  }
+);
+
 
       const result = await res.json();
 
