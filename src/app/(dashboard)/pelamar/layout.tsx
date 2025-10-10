@@ -1,6 +1,7 @@
 // src/app/(dashboard)/pelamar/layout.tsx
 import "@/app/globals.css";
 import PelamarLayoutClient from "./PelamarLayoutClient";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "Dashboard Pelamar",
@@ -14,7 +15,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <PelamarLayoutClient>{children}</PelamarLayoutClient>
+        <PelamarLayoutClient>{children}
+          <Toaster  />
+        </PelamarLayoutClient>
+        
       </body>
     </html>
   );
