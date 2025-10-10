@@ -39,6 +39,7 @@ interface BookmarkResponse {
 }
 
 type BookmarkJob = {
+  id: number; // <-- Tambahkan untuk simpan bookmark_id
   judul: string;
   perusahaan: string;
   lokasi: string;
@@ -93,6 +94,7 @@ export default function LowonganTersimpan() {
           );
 
           const mappedData: BookmarkJob[] = filteredBookmarks.map((item) => ({
+            id: item.bookmark_id, // 🟢 simpan ID bookmark
             judul: item.job_post.title,
             perusahaan: item.job_post.hr_info?.company_name || "Unknown",
             lokasi: item.job_post.location,
@@ -118,6 +120,11 @@ export default function LowonganTersimpan() {
     fetchBookmarks();
   }, []);
 
+  // 🧹 Fungsi hapus bookmark dari list state
+  const handleRemoveBookmark = (id: number) => {
+    setDataLowongan((prev) => prev.filter((item) => item.id !== id));
+  };
+
   if (loading) {
     return <p className="text-gray-500">Loading data...</p>;
   }
@@ -129,10 +136,18 @@ export default function LowonganTersimpan() {
   return (
     <div className="bg-gray-50 p-4 rounded-xl max-h-[calc(100vh-110px)] overflow-y-auto">
       {dataLowongan.length > 0 ? (
-        dataLowongan.map((job, index) => (
+        dataLowongan.map((job) => (
           <CardLowongan
-            key={`${job.judul}-${job.perusahaan}-${index}`}
-            {...job}
+            key={job.id}
+            id={job.id} // 🟢 kirim ID bookmark ke CardLowongan
+            judul={job.judul}
+            perusahaan={job.perusahaan}
+            lokasi={job.lokasi}
+            kategori={job.kategori}
+            warnaKategori={job.warnaKategori}
+            logoUrl={job.logoUrl}
+            gaji={job.gaji}
+            onRemove={handleRemoveBookmark} // 🟢 fungsi hapus di FE
           />
         ))
       ) : (
