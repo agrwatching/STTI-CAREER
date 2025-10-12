@@ -44,7 +44,10 @@ export default function StatsSection() {
           return;
         }
 
-        const data: Applicant[] = await res.json();
+        const result = await res.json();
+        const data: Applicant[] = Array.isArray(result)
+          ? result
+          : result.data || [];
 
         setStats({
           total: data.length,
