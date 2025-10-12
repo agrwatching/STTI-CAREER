@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import AdminLayoutClient from "./AdminLayoutClient";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "STTI CAREERS - Admin",
@@ -15,6 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <AdminLayoutClient>
           {children}
+          <Toaster />
         </AdminLayoutClient>
       </body>
     </html>

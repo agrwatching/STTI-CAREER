@@ -83,8 +83,10 @@ const Dashboard: React.FC = () => {
     data.jobs.find((j) => j.verification_status === "pending")?.total ?? 0;
   const rejectedJobs =
     data.jobs.find((j) => j.verification_status === "rejected")?.total ?? 0;
-  const approvedJobs =
-    data.jobs.find((j) => j.verification_status === "approved")?.total ?? 0;
+const approvedJobs =
+  data.jobs.find((j) =>
+    ["approved", "verified"].includes(j.verification_status.toLowerCase())
+  )?.total ?? 0;
 
   return (
     <>
