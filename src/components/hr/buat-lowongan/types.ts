@@ -57,4 +57,5 @@ export interface JobFormValues {
   salary_min: number ;
   salary_max: number ;
   logo?: string;
+  category_id?: number | null;
 }
