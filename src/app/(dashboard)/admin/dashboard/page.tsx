@@ -35,6 +35,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchDashboard = async () => {
+      
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -56,6 +57,8 @@ const Dashboard: React.FC = () => {
         if (!res.ok) throw new Error("Gagal ambil data dashboard");
 
         const json = await res.json();
+        console.log("Dashboard API response:", json);
+
         setData(json.data);
       } catch (err) {
         console.error(err);
@@ -63,6 +66,7 @@ const Dashboard: React.FC = () => {
       } finally {
         setLoading(false);
       }
+      
     };
 
     fetchDashboard();
@@ -83,10 +87,11 @@ const Dashboard: React.FC = () => {
     data.jobs.find((j) => j.verification_status === "pending")?.total ?? 0;
   const rejectedJobs =
     data.jobs.find((j) => j.verification_status === "rejected")?.total ?? 0;
-const approvedJobs =
+  const approvedJobs =
   data.jobs.find((j) =>
     ["approved", "verified"].includes(j.verification_status.toLowerCase())
   )?.total ?? 0;
+
 
   return (
     <>
