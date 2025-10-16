@@ -19,24 +19,26 @@ export default function CompanyProfileForm() {
   const token = localStorage.getItem("token") || "";
 
   // ======================
-  // Fetch data perusahaan pertama kali
+  // Fetch data perusahaan (termasuk logo)
   // ======================
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/company/`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/company/me`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
         if (!res.ok) {
           console.error("Gagal fetch data perusahaan:", res.statusText);
           return;
         }
 
-        const data = await res.json();
-        const company = Array.isArray(data) ? data[0] : data;
+        const company = await res.json();
 
         if (company) {
           setFormData({
-            id_companies: company.id_companies,
+            id_companies: company.id_companies || "",
             nama_companies: company.nama_companies || "",
             email_companies: company.email_companies || "",
             nomor_telepon: company.nomor_telepon || "",
@@ -46,7 +48,9 @@ export default function CompanyProfileForm() {
           });
 
           if (company.logo) {
-            const logoUrl = company.logo.startsWith("http") ? company.logo : `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${company.logo}`;
+            const logoUrl = company.logo.startsWith("http")
+              ? company.logo
+              : `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${company.logo}`;
             setPreviewLogo(logoUrl);
           }
         }
@@ -55,17 +59,22 @@ export default function CompanyProfileForm() {
       }
     };
 
-    fetchCompany();
+    if (token) fetchCompany();
   }, [token]);
 
   // ======================
   // Handle input change
   // ======================
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ======================
+  // Handle upload logo
+  // ======================
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setLogo(e.target.files[0]);
@@ -73,6 +82,9 @@ export default function CompanyProfileForm() {
     }
   };
 
+  // ======================
+  // Submit form
+  // ======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -83,22 +95,13 @@ export default function CompanyProfileForm() {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const isNewCompany = !formData.id_companies;
 
       // 1️⃣ Simpan data perusahaan
-      let url = `${API_URL}/api/company`;
-      let method: "POST" | "PUT" = "POST";
-
-      if (!isNewCompany) {
-        url += `/${formData.id_companies}`;
-        method = "PUT";
-      }
-
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`${API_URL}/api/company/me`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // pakai token dari localStorage
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           nama_companies: formData.nama_companies,
@@ -106,7 +109,6 @@ export default function CompanyProfileForm() {
           nomor_telepon: formData.nomor_telepon || "",
           website: formData.website || "",
           alamat: formData.alamat || "",
-          logo: formData.logo || null,
         }),
       });
 
@@ -116,31 +118,27 @@ export default function CompanyProfileForm() {
         throw new Error("Gagal simpan perusahaan");
       }
 
-      const data = await res.json();
-      const companyId = isNewCompany ? data.id_companies : formData.id_companies;
-
-      setFormData((prev) => ({ ...prev, id_companies: companyId }));
-
-      // 2️⃣ Upload logo
+      // 2️⃣ Upload logo jika ada file baru
       if (logo) {
         const logoForm = new FormData();
         logoForm.append("logo", logo);
 
-        const logoRes = await fetch(`${API_URL}/api/company/${companyId}/logo`, {
+        const logoRes = await fetch(`${API_URL}/api/company/me/logo`, {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`, // token HR/admin
-          },
+          headers: { Authorization: `Bearer ${token}` },
           body: logoForm,
         });
 
+        const text = await logoRes.text();
+        console.log("📦 Logo upload response:", text);
+
         if (logoRes.ok) {
-          const logoData = await logoRes.json();
+          const logoData = JSON.parse(text);
           setPreviewLogo(logoData.url);
           setFormData((prev) => ({ ...prev, logo: logoData.filename }));
+          toast.success("Logo berhasil diupload!");
         } else {
-          const errText = await logoRes.text();
-          console.error("Gagal upload logo:", errText);
+          toast.error("Gagal upload logo perusahaan.");
         }
       }
 
@@ -152,51 +150,113 @@ export default function CompanyProfileForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border rounded-lg shadow-sm p-6">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white border rounded-lg shadow-sm p-6"
+    >
       <h2 className="text-lg font-semibold mb-6">Profil Perusahaan</h2>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Nama Perusahaan</label>
-          <input type="text" name="nama_companies" value={formData.nama_companies} onChange={handleChange} className="border rounded px-3 py-2 w-full text-sm" />
+          <label className="block text-sm font-medium mb-2">
+            Nama Perusahaan
+          </label>
+          <input
+            type="text"
+            name="nama_companies"
+            value={formData.nama_companies}
+            onChange={handleChange}
+            className="border rounded px-3 py-2 w-full text-sm"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Email Perusahaan</label>
-          <input type="email" name="email_companies" value={formData.email_companies} onChange={handleChange} className="border rounded px-3 py-2 w-full text-sm" />
+          <label className="block text-sm font-medium mb-2">
+            Email Perusahaan
+          </label>
+          <input
+            type="email"
+            name="email_companies"
+            value={formData.email_companies}
+            onChange={handleChange}
+            className="border rounded px-3 py-2 w-full text-sm"
+          />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Nomor Telepon</label>
-          <input type="text" name="nomor_telepon" value={formData.nomor_telepon} onChange={handleChange} className="border rounded px-3 py-2 w-full text-sm" />
+          <label className="block text-sm font-medium mb-2">
+            Nomor Telepon
+          </label>
+          <input
+            type="text"
+            name="nomor_telepon"
+            value={formData.nomor_telepon}
+            onChange={handleChange}
+            className="border rounded px-3 py-2 w-full text-sm"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Website</label>
-          <input type="text" name="website" value={formData.website} onChange={handleChange} className="border rounded px-3 py-2 w-full text-sm" />
+          <input
+            type="text"
+            name="website"
+            value={formData.website}
+            onChange={handleChange}
+            className="border rounded px-3 py-2 w-full text-sm"
+          />
         </div>
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Alamat Perusahaan</label>
-        <textarea name="alamat" value={formData.alamat} onChange={handleChange} className="border rounded px-3 py-2 w-full text-sm" rows={3} />
+        <label className="block text-sm font-medium mb-2">
+          Alamat Perusahaan
+        </label>
+        <textarea
+          name="alamat"
+          value={formData.alamat}
+          onChange={handleChange}
+          className="border rounded px-3 py-2 w-full text-sm"
+          rows={3}
+        />
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Logo Perusahaan</label>
+        <label className="block text-sm font-medium mb-2">
+          Logo Perusahaan
+        </label>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full border flex items-center justify-center bg-gray-100 overflow-hidden">
-            {previewLogo ? <img src={previewLogo} alt="Logo" className="w-full h-full object-cover" /> : <span className="text-gray-400 text-sm">Logo</span>}
+            {previewLogo ? (
+              <img
+                src={previewLogo}
+                alt="Logo"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-gray-400 text-sm">Logo</span>
+            )}
           </div>
           <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">
             Ganti Logo
-            <input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoChange}
+            />
           </label>
         </div>
       </div>
 
       <div className="flex justify-end gap-3">
-        <button type="button" className="px-4 py-2 rounded border hover:bg-gray-100 text-sm">
+        <button
+          type="button"
+          className="px-4 py-2 rounded border hover:bg-gray-100 text-sm"
+        >
           Batal
         </button>
-        <button type="submit" className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm">
+        <button
+          type="submit"
+          className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
+        >
           Simpan Perubahan
         </button>
       </div>

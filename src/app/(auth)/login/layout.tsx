@@ -1,5 +1,6 @@
 // src/app/(auth)/login/layout.tsx *Pengaturan Layout dirubah ke mode html sesuai standar next js BY JERRY
 import "@/app/globals.css";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "Login - STTI CAREERS",
@@ -14,7 +15,9 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
     <html lang="en">
       <head />
       <body>
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen">{children}
+          <Toaster />
+        </main>
       </body>
     </html>
   );

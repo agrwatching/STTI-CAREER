@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Globe, Menu, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import Swal from "sweetalert2";
+
 
 interface UserProfile {
   id: number;
@@ -228,30 +230,47 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    // Load saved language
-    const savedLanguage = localStorage.getItem("selectedLanguage");
-    if (savedLanguage) {
-      const language = languages.find((lang) => lang.code === savedLanguage);
-      if (language) {
-        setCurrentLanguage(language);
-      }
+  // Load saved language
+  const savedLanguage = localStorage.getItem("selectedLanguage");
+  if (savedLanguage) {
+    const language = languages.find((lang) => lang.code === savedLanguage);
+    if (language) {
+      setCurrentLanguage(language);
     }
+  }
 
-    if (token) {
-      fallbackToLocalStorage();
-      fetchProfileData();
-    } else {
-      setLoading(false);
-    }
-  }, []);
+  // Kalau ada token, ambil data profil
+  if (token) {
+    fallbackToLocalStorage();
+    fetchProfileData();
+  } else {
+    console.log("⚠️ Tidak ada token, user dianggap belum login.");
+    setUser(null);
+    setLoading(false);
+  }
+}, []);
 
-  const handleLogout = async () => {
+
+const handleLogout = async () => {
+  const confirm = await Swal.fire({
+    title: "Yakin ingin logout?",
+    text: "Kamu akan keluar dari akun ini.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Ya, logout",
+    cancelButtonText: "Batal",
+    reverseButtons: true,
+  });
+
+  if (confirm.isConfirmed) {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
 
-      // Panggil API logout
+      // Logout API
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
         method: "POST",
         headers: {
@@ -260,22 +279,34 @@ export default function Navbar() {
         body: JSON.stringify({ refreshToken }),
       });
 
-      // Bersihkan semua data lokal
+      // Hapus data lokal
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
 
       setUser(null);
-      router.push("/login");
+
+      // Tampilkan notifikasi sukses
+      Swal.fire({
+        icon: "success",
+        title: "Logout Berhasil",
+        text: "Kamu telah keluar dari akun.",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      setTimeout(() => router.push("/login"), 1500);
     } catch (err) {
       console.error("Gagal logout:", err);
-      // Tetap hapus token biar user gak stuck
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-      router.push("/login");
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Logout",
+        text: "Terjadi kesalahan. Silakan coba lagi.",
+      });
     }
-  };
+  }
+};
+
 
   const isActiveLink = (href: string) => pathname === href;
 

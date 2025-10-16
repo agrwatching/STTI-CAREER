@@ -4,6 +4,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2"; // ✅ ganti toast dengan SweetAlert
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,7 +14,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  async function handleLogin(e: React.FormEvent) {
+ async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -38,14 +40,32 @@ export default function Login() {
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(user));
 
-      alert("Login sukses!");
+      // ✅ SweetAlert success
+      await Swal.fire({
+        icon: "success",
+        title: "Login Berhasil 🎉",
+        text: "Selamat datang kembali!",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+      });
 
+      // ✅ Redirect setelah popup hilang
       if (user.role === "admin") router.push("/admin/dashboard");
       else if (user.role === "hr") router.push("/hr/dashboard");
       else router.push("/");
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Terjadi kesalahan tak terduga");
+      let message = "Terjadi kesalahan tak terduga";
+      if (err instanceof Error) message = err.message;
+      setError(message);
+
+      // ❌ SweetAlert error
+      Swal.fire({
+        icon: "error",
+        title: "Login Gagal",
+        text: message,
+        confirmButtonText: "Coba Lagi",
+      });
     } finally {
       setLoading(false);
     }
