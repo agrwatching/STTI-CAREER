@@ -28,7 +28,7 @@ const HrTable: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/admin/users";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api";
   const TOKEN = localStorage.getItem("token");
 
   // ✅ Fetch semua HR dari semua halaman
@@ -40,7 +40,7 @@ const HrTable: React.FC = () => {
       let totalPages = 1;
 
       do {
-        const res = await fetch(`${API_URL}?page=${currentPage}`, {
+        const res = await fetch(`${API_URL}/admin/users?page=${currentPage}`, {
           headers: {
             Authorization: `Bearer ${TOKEN}`,
             "Content-Type": "application/json",
@@ -57,7 +57,9 @@ const HrTable: React.FC = () => {
         currentPage++;
       } while (currentPage <= totalPages);
 
-      const filtered = allUsers.filter((u) => u.role?.toLowerCase() === "hr");
+      const filtered = allUsers.filter(
+        (u) => u.role?.toLowerCase() === "hr"
+      );
       setHrs(filtered);
     } catch (err) {
       console.error("❌ Error fetching HR users:", err);
@@ -79,25 +81,43 @@ const HrTable: React.FC = () => {
     setShowEditModal(true);
   };
 
-  // ✅ Update data HR
+  // ✅ Update password HR
   const handleUpdate = async () => {
     if (!selectedUser) return;
+    if (!email.trim()) {
+      toast.error("Email tidak boleh kosong");
+      return;
+    }
 
     try {
-      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      const payload: Record<string, string> = {};
 
-      if (!res.ok) throw new Error("Gagal memperbarui data HR");
-      toast.success("Data HR berhasil diperbarui!");
+      if (password.trim()) {
+        if (password.length < 6) {
+          toast.error("Password minimal 6 karakter");
+          return;
+        }
+        payload["new_password"] = password;
+      }
+
+      const response = await fetch(
+        `${API_URL}/users/${selectedUser.id}/reset-password`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result: { success: boolean; message: string } = await response.json();
+
+      if (!response.ok)
+        throw new Error(result?.message || "Gagal memperbarui data HR");
+
+      toast.success(result.message || "Password HR berhasil diperbarui!");
       setShowEditModal(false);
       await fetchHrUsers();
     } catch (err) {
@@ -117,7 +137,7 @@ const HrTable: React.FC = () => {
     if (!selectedId) return;
 
     try {
-      const res = await fetch(`${API_URL}/${selectedId}`, {
+      const res = await fetch(`${API_URL}/admin/users/${selectedId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -245,7 +265,7 @@ const HrTable: React.FC = () => {
         )}
       </div>
 
-      {/* Modal konfirmasi hapus */}
+      {/* Modal Konfirmasi Delete */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[#1E2235] rounded-md w-[550px] shadow-lg border border-[#2A2E42] p-5">
@@ -272,7 +292,7 @@ const HrTable: React.FC = () => {
         </div>
       )}
 
-      {/* Modal edit HR */}
+      {/* Modal Edit HR */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[#1E2235] rounded-md w-[500px] shadow-lg border border-[#2A2E42] p-8">
@@ -280,30 +300,36 @@ const HrTable: React.FC = () => {
               Edit Data HR
             </h2>
 
+            {/* Email (readonly) */}
             <div className="mb-4">
-              <label className="block text-gray-300 text-sm mb-2">
-                Email :
-              </label>
+              <label className="block text-sm text-gray-300 mb-1">Email</label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Masukkan Email"
-                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+                readOnly
+                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-400 border border-gray-600 cursor-not-allowed"
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-gray-300 text-sm mb-2">
-                Password :
-              </label>
+            {/* Password Baru */}
+            <div className="mb-4">
+              <label className="block text-sm text-gray-300 mb-1">Password Baru</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan Password"
-                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+                placeholder="Minimal 6 karakter"
+                className={`w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 border ${
+                  password && password.length < 6
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-600 focus:border-blue-500"
+                } focus:outline-none`}
               />
+              {password && password.length < 6 && (
+                <p className="text-red-500 text-xs mt-1">
+                  Password harus minimal 6 karakter
+                </p>
+              )}
             </div>
 
             <div className="flex justify-center gap-4">

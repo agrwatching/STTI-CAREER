@@ -26,7 +26,7 @@ const ApplicantTable: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/admin/users";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api";
   const TOKEN = localStorage.getItem("token");
 
   // ✅ Ambil semua pelamar dari semua halaman
@@ -38,7 +38,7 @@ const ApplicantTable: React.FC = () => {
       let totalPages = 1;
 
       do {
-        const res = await fetch(`${API_URL}?page=${currentPage}`, {
+        const res = await fetch(`${API_URL}/admin/users?page=${currentPage}`, {
           headers: {
             Authorization: `Bearer ${TOKEN}`,
             "Content-Type": "application/json",
@@ -79,32 +79,55 @@ const ApplicantTable: React.FC = () => {
     setShowEditModal(true);
   };
 
-  // ✅ Update data pelamar
-  const handleUpdate = async () => {
-    if (!selectedUser) return;
+  // ✅ Update email & password pelamar
+const handleUpdate = async () => {
+  if (!selectedUser) return;
+  if (!email.trim()) {
+    toast.error("Email tidak boleh kosong");
+    return;
+  }
 
-    try {
-      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
+  try {
+    // 💡 bentuk payload yang aman dan sesuai BE
+    const payload: Record<string, string> = {};
+
+    // hanya kirim password jika diisi
+    if (password.trim()) {
+      if (password.length < 6) {
+        toast.error("Password minimal 6 karakter");
+        return;
+      }
+      payload["new_password"] = password; // ✅ BE expects this key
+    }
+
+    const response = await fetch(
+      `${API_URL}/users/${selectedUser.id}/reset-password`,
+      {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+        body: JSON.stringify(payload),
+      }
+    );
 
-      if (!res.ok) throw new Error("Gagal memperbarui data");
-      toast.success("Data pelamar berhasil diperbarui!");
-      setShowEditModal(false);
-      await fetchApplicants();
-    } catch (err) {
-      console.error("❌ Error updating applicant:", err);
-      toast.error("Gagal memperbarui pelamar");
-    }
-  };
+    const result: { success: boolean; message: string } = await response.json();
+
+    if (!response.ok) throw new Error(result?.message || "Gagal memperbarui data");
+
+    toast.success(result.message || "Password berhasil diperbarui!");
+    setShowEditModal(false);
+
+    // refresh tabel
+    await fetchApplicants(); // ganti dengan fetchHrUsers() di versi HR
+  } catch (err) {
+    console.error("❌ Error updating user:", err);
+    toast.error("Gagal memperbarui user");
+  }
+};
+
+
 
   // ✅ Konfirmasi hapus
   const confirmDelete = (id: number) => {
@@ -117,7 +140,7 @@ const ApplicantTable: React.FC = () => {
     if (!selectedId) return;
 
     try {
-      const res = await fetch(`${API_URL}/${selectedId}`, {
+      const res = await fetch(`${API_URL}/admin/users/${selectedId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -274,31 +297,39 @@ const ApplicantTable: React.FC = () => {
               Edit Data Pelamar
             </h2>
 
-            <div className="mb-4">
-              <label className="block text-gray-300 text-sm mb-2">
-                Email :
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Masukkan Email"
-                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
-              />
-            </div>
+          {/* Email (readonly karena BE tidak support ubah email) */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  readOnly
+                  className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-400 border border-gray-600 cursor-not-allowed"
+                />
+              </div>
 
-            <div className="mb-6">
-              <label className="block text-gray-300 text-sm mb-2">
-                Password :
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Masukkan Password"
-                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
-              />
-            </div>
+
+        {/* Password Baru */}
+<div className="mb-4">
+  <label className="block text-sm text-gray-300 mb-1">Password Baru</label>
+  <input
+    type="password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    placeholder="Minimal 6 karakter"
+    className={`w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 border ${
+      password && password.length < 6
+        ? "border-red-500 focus:border-red-500"
+        : "border-gray-600 focus:border-blue-500"
+    } focus:outline-none`}
+  />
+  {password && password.length < 6 && (
+    <p className="text-red-500 text-xs mt-1">
+      Password harus minimal 6 karakter
+    </p>
+  )}
+</div>
+
 
             <div className="flex justify-center gap-4">
               <button
