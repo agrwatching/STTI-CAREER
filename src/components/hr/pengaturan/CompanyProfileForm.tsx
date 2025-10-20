@@ -7,14 +7,18 @@ export default function CompanyProfileForm() {
   const [logo, setLogo] = useState<File | null>(null);
   const [previewLogo, setPreviewLogo] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    id_companies: "",
+    id: "",
     nama_companies: "",
     email_companies: "",
     nomor_telepon: "",
     website: "",
     alamat: "",
     logo: "",
+    logo_url: "",
   });
+
+  const [originalData, setOriginalData] = useState(formData); // simpan data asli untuk cancel
+  const [isEditing, setIsEditing] = useState(false); // mode edit atau view
 
   const token = localStorage.getItem("token") || "";
 
@@ -37,15 +41,19 @@ export default function CompanyProfileForm() {
         const company = await res.json();
 
         if (company) {
-          setFormData({
-            id_companies: company.id_companies || "",
+          const newData = {
+            id: company.id || "",
             nama_companies: company.nama_companies || "",
             email_companies: company.email_companies || "",
             nomor_telepon: company.nomor_telepon || "",
             website: company.website || "",
             alamat: company.alamat || "",
             logo: company.logo || "",
-          });
+            logo_url: company.logo_url || "",
+          };
+
+          setFormData(newData);
+          setOriginalData(newData);
 
           if (company.logo) {
             const logoUrl = company.logo.startsWith("http")
@@ -68,6 +76,7 @@ export default function CompanyProfileForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    if (!isEditing) return; // tidak bisa ubah kalau bukan mode edit
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -76,6 +85,7 @@ export default function CompanyProfileForm() {
   // Handle upload logo
   // ======================
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isEditing) return;
     if (e.target.files && e.target.files[0]) {
       setLogo(e.target.files[0]);
       setPreviewLogo(URL.createObjectURL(e.target.files[0]));
@@ -83,10 +93,30 @@ export default function CompanyProfileForm() {
   };
 
   // ======================
-  // Submit form
+  // Cancel edit
+  // ======================
+  const handleCancel = () => {
+    setFormData(originalData);
+    setPreviewLogo(
+      originalData.logo
+        ? originalData.logo.startsWith("http")
+          ? originalData.logo
+          : `${process.env.NEXT_PUBLIC_API_URL}/uploads/company_logos/${originalData.logo}`
+        : null
+    );
+    setLogo(null);
+    setIsEditing(false);
+  };
+
+  // ======================
+  // Submit form (Save)
   // ======================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.id) {
+      toast.error("ID perusahaan tidak ditemukan. Silakan muat ulang halaman.");
+      return;
+    }
 
     if (!formData.nama_companies || !formData.email_companies) {
       toast.error("Nama dan email perusahaan wajib diisi!");
@@ -97,7 +127,7 @@ export default function CompanyProfileForm() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
       // 1️⃣ Simpan data perusahaan
-      const res = await fetch(`${API_URL}/api/company/me`, {
+      const res = await fetch(`${API_URL}/api/company/${formData.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -123,11 +153,14 @@ export default function CompanyProfileForm() {
         const logoForm = new FormData();
         logoForm.append("logo", logo);
 
-        const logoRes = await fetch(`${API_URL}/api/company/me/logo`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: logoForm,
-        });
+        const logoRes = await fetch(
+          `${API_URL}/api/company/${formData.id}/logo`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: logoForm,
+          }
+        );
 
         const text = await logoRes.text();
         console.log("📦 Logo upload response:", text);
@@ -143,6 +176,8 @@ export default function CompanyProfileForm() {
       }
 
       toast.success("Data perusahaan berhasil disimpan!");
+      setOriginalData(formData);
+      setIsEditing(false);
     } catch (err) {
       console.error("Gagal simpan perusahaan:", err);
       toast.error("Terjadi kesalahan saat menyimpan data perusahaan.");
@@ -166,7 +201,10 @@ export default function CompanyProfileForm() {
             name="nama_companies"
             value={formData.nama_companies}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full text-sm"
+            disabled={!isEditing}
+            className={`border rounded px-3 py-2 w-full text-sm ${
+              !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
           />
         </div>
         <div>
@@ -178,7 +216,10 @@ export default function CompanyProfileForm() {
             name="email_companies"
             value={formData.email_companies}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full text-sm"
+            disabled={!isEditing}
+            className={`border rounded px-3 py-2 w-full text-sm ${
+              !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
           />
         </div>
         <div>
@@ -190,7 +231,10 @@ export default function CompanyProfileForm() {
             name="nomor_telepon"
             value={formData.nomor_telepon}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full text-sm"
+            disabled={!isEditing}
+            className={`border rounded px-3 py-2 w-full text-sm ${
+              !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
           />
         </div>
         <div>
@@ -200,7 +244,10 @@ export default function CompanyProfileForm() {
             name="website"
             value={formData.website}
             onChange={handleChange}
-            className="border rounded px-3 py-2 w-full text-sm"
+            disabled={!isEditing}
+            className={`border rounded px-3 py-2 w-full text-sm ${
+              !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
           />
         </div>
       </div>
@@ -213,7 +260,10 @@ export default function CompanyProfileForm() {
           name="alamat"
           value={formData.alamat}
           onChange={handleChange}
-          className="border rounded px-3 py-2 w-full text-sm"
+          disabled={!isEditing}
+          className={`border rounded px-3 py-2 w-full text-sm ${
+            !isEditing ? "bg-gray-100 cursor-not-allowed" : ""
+          }`}
           rows={3}
         />
       </div>
@@ -234,31 +284,47 @@ export default function CompanyProfileForm() {
               <span className="text-gray-400 text-sm">Logo</span>
             )}
           </div>
-          <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">
-            Ganti Logo
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleLogoChange}
-            />
-          </label>
+          {isEditing && (
+            <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded text-sm hover:bg-gray-300">
+              Ganti Logo
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoChange}
+              />
+            </label>
+          )}
         </div>
       </div>
 
+      {/* Tombol aksi */}
       <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          className="px-4 py-2 rounded border hover:bg-gray-100 text-sm"
-        >
-          Batal
-        </button>
-        <button
-          type="submit"
-          className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
-        >
-          Simpan Perubahan
-        </button>
+        {isEditing ? (
+          <>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-4 py-2 rounded border hover:bg-gray-100 text-sm"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm"
+            >
+              Simpan
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="px-6 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 text-sm"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </form>
   );
