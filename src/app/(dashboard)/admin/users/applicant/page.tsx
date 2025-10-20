@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast"; // ✅ import toast
+import toast from "react-hot-toast";
 
 interface Applicant {
   id: number;
@@ -19,65 +19,100 @@ const ApplicantTable: React.FC = () => {
   const [search, setSearch] = useState("");
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedId, setSelectedId] = useState<number | null>(null); // ✅ simpan ID yg mau dihapus
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Applicant | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/admin/users";
   const TOKEN = localStorage.getItem("token");
 
-  // ✅ Ambil data pelamar
- // ✅ Ambil semua data pelamar dari semua halaman
-const fetchApplicants = async () => {
-  try {
-    setLoading(true);
+  // ✅ Ambil semua pelamar dari semua halaman
+  const fetchApplicants = async () => {
+    try {
+      setLoading(true);
+      let allUsers: Applicant[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
 
-    let allUsers: Applicant[] = [];
-    let currentPage = 1;
-    let totalPages = 1;
+      do {
+        const res = await fetch(`${API_URL}?page=${currentPage}`, {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-    do {
-      const res = await fetch(`${API_URL}?page=${currentPage}`, {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      });
+        if (!res.ok) throw new Error("Gagal mengambil data pelamar");
 
-      if (!res.ok) throw new Error("Gagal mengambil data pelamar");
+        const json = await res.json();
+        const users: Applicant[] = json?.data?.users || [];
+        totalPages = json?.data?.pagination?.total_pages || 1;
 
-      const json = await res.json();
-      const users: Applicant[] = json?.data?.users || [];
-      totalPages = json?.data?.pagination?.total_pages || 1;
+        allUsers = [...allUsers, ...users];
+        currentPage++;
+      } while (currentPage <= totalPages);
 
-      allUsers = [...allUsers, ...users];
-      currentPage++;
-    } while (currentPage <= totalPages);
-
-    // ✅ Filter hanya user pelamar
-    const filtered = allUsers.filter(
-      (u) => u.role?.toLowerCase() === "pelamar"
-    );
-    setApplicants(filtered);
-  } catch (err) {
-    console.error("❌ Error fetching applicants:", err);
-    toast.error("Gagal memuat data pelamar");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      const filtered = allUsers.filter(
+        (u) => u.role?.toLowerCase() === "pelamar"
+      );
+      setApplicants(filtered);
+    } catch (err) {
+      console.error("❌ Error fetching applicants:", err);
+      toast.error("Gagal memuat data pelamar");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchApplicants();
   }, []);
 
-  // ✅ Tampilkan modal konfirmasi
+  // ✅ Buka modal edit
+  const openEditModal = (user: Applicant) => {
+    setSelectedUser(user);
+    setEmail(user.email);
+    setPassword("");
+    setShowEditModal(true);
+  };
+
+  // ✅ Update data pelamar
+  const handleUpdate = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal memperbarui data");
+      toast.success("Data pelamar berhasil diperbarui!");
+      setShowEditModal(false);
+      await fetchApplicants();
+    } catch (err) {
+      console.error("❌ Error updating applicant:", err);
+      toast.error("Gagal memperbarui pelamar");
+    }
+  };
+
+  // ✅ Konfirmasi hapus
   const confirmDelete = (id: number) => {
     setSelectedId(id);
     setShowConfirm(true);
   };
 
-  // ✅ Hapus user setelah konfirmasi
+  // ✅ Hapus user
   const handleDelete = async () => {
     if (!selectedId) return;
 
@@ -92,28 +127,36 @@ const fetchApplicants = async () => {
 
       if (!res.ok) throw new Error("Gagal menghapus pelamar");
 
-      // ✅ TOAST BERHASIL
-      toast.success("Pelamar berhasil dihapus ");
+      toast.success("Pelamar berhasil dihapus");
       setShowConfirm(false);
       await fetchApplicants();
     } catch (err) {
       console.error("❌ Error deleting pelamar:", err);
-
-      // ❌ TOAST GAGAL
       toast.error("Gagal menghapus pelamar");
     } finally {
       setSelectedId(null);
     }
   };
 
-  const filtered = applicants.filter((a) => a.full_name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = applicants.filter((a) =>
+    a.full_name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="relative bg-[#1E2235] rounded-xl p-6">
       {/* Search */}
       <div className="flex items-center mb-6">
-        <input type="text" placeholder="Cari pelamar..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-1/3 px-6 py-3 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none" />
-        <button onClick={fetchApplicants} className="ml-auto px-6 py-3 rounded-md bg-[#3A3E55] text-gray-200 hover:bg-[#4A4E66]">
+        <input
+          type="text"
+          placeholder="Cari pelamar..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-1/3 px-6 py-3 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+        />
+        <button
+          onClick={fetchApplicants}
+          className="ml-auto px-6 py-3 rounded-md bg-[#3A3E55] text-gray-200 hover:bg-[#4A4E66]"
+        >
           Refresh
         </button>
       </div>
@@ -126,27 +169,58 @@ const fetchApplicants = async () => {
           <table className="w-full">
             <thead className="bg-[#2A2E42]">
               <tr>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">NAME</th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">EMAIL</th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">ADDRESS</th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">STATUS</th>
-                <th className="text-left py-4 px-6 text-gray-300 font-medium">ACTIONS</th>
+                <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                  NAME
+                </th>
+                <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                  EMAIL
+                </th>
+                <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                  ADDRESS
+                </th>
+                <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                  STATUS
+                </th>
+                <th className="text-left py-4 px-6 text-gray-300 font-medium">
+                  ACTIONS
+                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((user) => (
-                <tr key={user.id} className="border-t border-gray-700 hover:bg-[#2A2E42]">
+                <tr
+                  key={user.id}
+                  className="border-t border-gray-700 hover:bg-[#2A2E42]"
+                >
                   <td className="py-4 px-6 text-white">{user.full_name}</td>
                   <td className="py-4 px-6 text-gray-300">{user.email}</td>
-                  <td className="py-4 px-6 text-gray-300">{user.address || "-"}</td>
+                  <td className="py-4 px-6 text-gray-300">
+                    {user.address || "-"}
+                  </td>
                   <td className="py-4 px-6">
-                    <span className={`px-4 py-1 rounded-full text-xs font-medium ${user.is_active ? "bg-green-500 text-black" : "bg-gray-400 text-black"}`}>{user.is_active ? "Active" : "Inactive"}</span>
+                    <span
+                      className={`px-4 py-1 rounded-full text-xs font-medium ${
+                        user.is_active
+                          ? "bg-green-500 text-black"
+                          : "bg-gray-400 text-black"
+                      }`}
+                    >
+                      {user.is_active ? "Active" : "Inactive"}
+                    </span>
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex space-x-2 text-sm">
-                      <button className="text-yellow-400 hover:text-yellow-300 font-medium">Edit</button>
+                      <button
+                        onClick={() => openEditModal(user)}
+                        className="text-yellow-400 hover:text-yellow-300 font-medium"
+                      >
+                        Edit
+                      </button>
                       <span className="text-gray-500">|</span>
-                      <button onClick={() => confirmDelete(user.id)} className="text-red-400 hover:text-red-300 font-medium">
+                      <button
+                        onClick={() => confirmDelete(user.id)}
+                        className="text-red-400 hover:text-red-300 font-medium"
+                      >
                         Hapus
                       </button>
                     </div>
@@ -165,24 +239,80 @@ const fetchApplicants = async () => {
         )}
       </div>
 
-      {/* ✅ Modal Konfirmasi */}
+      {/* Modal konfirmasi hapus */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[#1E2235] rounded-md w-[550px] shadow-lg border border-[#2A2E42] p-5">
-            {/* Baris teks + tombol */}
             <div className="flex items-center justify-between">
-              {/* teks di kiri */}
-              <p className="text-gray-200 text-sm font-medium whitespace-nowrap">Apakah anda yakin ingin menghapus akun ini ?</p>
-
-              {/* tombol di kanan */}
+              <p className="text-gray-200 text-sm font-medium whitespace-nowrap">
+                Apakah anda yakin ingin menghapus akun ini ?
+              </p>
               <div className="flex gap-2 ml-4">
-                <button onClick={handleDelete} className="px-4 py-1.5 text-sm font-semibold text-white bg-[#2A2E42] rounded-md hover:bg-[#343850] transition-colors">
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-1.5 text-sm font-semibold text-white bg-[#2A2E42] rounded-md hover:bg-[#343850] transition-colors"
+                >
                   Iya
                 </button>
-                <button onClick={() => setShowConfirm(false)} className="px-4 py-1.5 text-sm font-semibold text-white bg-[#2A2E42] rounded-md hover:bg-[#343850] transition-colors">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="px-4 py-1.5 text-sm font-semibold text-white bg-[#2A2E42] rounded-md hover:bg-[#343850] transition-colors"
+                >
                   Tidak
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal edit */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[#1E2235] rounded-md w-[500px] shadow-lg border border-[#2A2E42] p-8">
+            <h2 className="text-lg text-gray-200 font-semibold mb-6">
+              Edit Data Pelamar
+            </h2>
+
+            <div className="mb-4">
+              <label className="block text-gray-300 text-sm mb-2">
+                Email :
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Masukkan Email"
+                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-300 text-sm mb-2">
+                Password :
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Masukkan Password"
+                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-6 py-2 text-sm font-semibold text-white bg-gray-500 rounded-md hover:bg-gray-600"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Simpan
+              </button>
             </div>
           </div>
         </div>

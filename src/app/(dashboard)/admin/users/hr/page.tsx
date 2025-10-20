@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast"; // ✅ import toast
+import toast from "react-hot-toast";
 
 interface HrUser {
   id: number;
@@ -23,61 +23,96 @@ const HrTable: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<HrUser | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL + "/api/admin/users";
   const TOKEN = localStorage.getItem("token");
 
-  // ✅ Fetch semua user HR
-// ✅ Fetch semua user HR dari semua halaman
-const fetchHrUsers = async () => {
-  try {
-    setLoading(true);
+  // ✅ Fetch semua HR dari semua halaman
+  const fetchHrUsers = async () => {
+    try {
+      setLoading(true);
+      let allUsers: HrUser[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
 
-    let allUsers: HrUser[] = [];
-    let currentPage = 1;
-    let totalPages = 1;
+      do {
+        const res = await fetch(`${API_URL}?page=${currentPage}`, {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-    do {
-      const res = await fetch(`${API_URL}?page=${currentPage}`, {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      });
+        if (!res.ok) throw new Error("Gagal mengambil data HR");
 
-      if (!res.ok) throw new Error("Gagal mengambil data HR");
+        const json = await res.json();
+        const users: HrUser[] = json?.data?.users || [];
+        totalPages = json?.data?.pagination?.total_pages || 1;
 
-      const json = await res.json();
-      const users: HrUser[] = json?.data?.users || [];
-      totalPages = json?.data?.pagination?.total_pages || 1;
+        allUsers = [...allUsers, ...users];
+        currentPage++;
+      } while (currentPage <= totalPages);
 
-      allUsers = [...allUsers, ...users];
-      currentPage++;
-    } while (currentPage <= totalPages);
-
-    // ✅ Filter hanya user HR
-    const filtered = allUsers.filter((u) => u.role?.toLowerCase() === "hr");
-    setHrs(filtered);
-  } catch (err) {
-    console.error("❌ Error fetching HR users:", err);
-    toast.error("Gagal memuat data HR");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      const filtered = allUsers.filter((u) => u.role?.toLowerCase() === "hr");
+      setHrs(filtered);
+    } catch (err) {
+      console.error("❌ Error fetching HR users:", err);
+      toast.error("Gagal memuat data HR");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchHrUsers();
   }, []);
 
-  // ✅ Tampilkan modal konfirmasi
+  // ✅ Buka modal edit
+  const openEditModal = (user: HrUser) => {
+    setSelectedUser(user);
+    setEmail(user.email);
+    setPassword("");
+    setShowEditModal(true);
+  };
+
+  // ✅ Update data HR
+  const handleUpdate = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const res = await fetch(`${API_URL}/${selectedUser.id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal memperbarui data HR");
+      toast.success("Data HR berhasil diperbarui!");
+      setShowEditModal(false);
+      await fetchHrUsers();
+    } catch (err) {
+      console.error("❌ Error updating HR:", err);
+      toast.error("Gagal memperbarui HR");
+    }
+  };
+
+  // ✅ Konfirmasi hapus
   const confirmDelete = (id: number) => {
     setSelectedId(id);
     setShowConfirm(true);
   };
 
-  // ✅ Hapus user setelah konfirmasi
+  // ✅ Hapus HR
   const handleDelete = async () => {
     if (!selectedId) return;
 
@@ -181,7 +216,10 @@ const fetchHrUsers = async () => {
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex space-x-2 text-sm">
-                      <button className="text-yellow-400 hover:text-yellow-300 font-medium">
+                      <button
+                        onClick={() => openEditModal(user)}
+                        className="text-yellow-400 hover:text-yellow-300 font-medium"
+                      >
                         Edit
                       </button>
                       <span className="text-gray-500">|</span>
@@ -207,7 +245,7 @@ const fetchHrUsers = async () => {
         )}
       </div>
 
-      {/* ✅ Modal Konfirmasi */}
+      {/* Modal konfirmasi hapus */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-[#1E2235] rounded-md w-[550px] shadow-lg border border-[#2A2E42] p-5">
@@ -229,6 +267,58 @@ const fetchHrUsers = async () => {
                   Tidak
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal edit HR */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[#1E2235] rounded-md w-[500px] shadow-lg border border-[#2A2E42] p-8">
+            <h2 className="text-lg text-gray-200 font-semibold mb-6">
+              Edit Data HR
+            </h2>
+
+            <div className="mb-4">
+              <label className="block text-gray-300 text-sm mb-2">
+                Email :
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Masukkan Email"
+                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-300 text-sm mb-2">
+                Password :
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Masukkan Password"
+                className="w-full px-4 py-2 rounded-md bg-[#2A2E42] text-gray-200 placeholder-gray-400 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-6 py-2 text-sm font-semibold text-white bg-gray-500 rounded-md hover:bg-gray-600"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Simpan
+              </button>
             </div>
           </div>
         </div>
