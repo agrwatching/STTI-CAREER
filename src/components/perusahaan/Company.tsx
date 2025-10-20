@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 
 interface Company {
   id: number;
@@ -184,12 +184,18 @@ export default function CompanyPage() {
         </div>
 
         <div className="flex-1 flex flex-col items-start">
-          <p className="text-gray-600 text-sm leading-relaxed mb-3 line-clamp-3">
-            {company.alamat || "Alamat tidak tersedia"}
-          </p>
+          {/* 📍 Alamat */}
+          <div className="flex items-center text-gray-600 text-sm mb-3">
+            <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+            <span className="leading-relaxed line-clamp-3">
+              {company.alamat || "Alamat tidak tersedia"}
+            </span>
+          </div>
+
+          {/* ☎️ Nomor telepon */}
           <div className="flex items-center text-gray-500 text-sm mt-auto">
-            <MapPin className="w-4 h-4 mr-1" />
-            {company.nomor_telepon || "Tidak ada kontak"}
+            <Phone className="w-4 h-4 mr-1 flex-shrink-0" />
+            <span>{company.nomor_telepon || "Tidak ada kontak"}</span>
           </div>
         </div>
       </div>
