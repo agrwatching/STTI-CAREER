@@ -1,3 +1,4 @@
+//src/components/hr/pelamar/PelamarDetail.tsx
 "use client";
 
 import { useRouter } from "next/navigation";

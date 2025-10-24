@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="">
       <head />
       <body>
         <main className="min-h-screen">{children}

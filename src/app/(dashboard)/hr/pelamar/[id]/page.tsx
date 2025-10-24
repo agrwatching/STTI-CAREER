@@ -1,47 +1,71 @@
+"use client";
+
+import { use } from "react";
+import { useEffect, useState } from "react";
 import PelamarDetail from "@/components/hr/pelamar/PelamarDetail";
 
-export default function PelamarDetailPage({ params }: { params: { id: string } }) {
-  // Dummy data, di real-case dari DB / API
-  const pelamar = {
-  id: params.id,
-  nama: "Moh Rizal",
-  posisi: "Webdev",
-  tanggal: "23-08-2023",
-  foto: "https://i.pravatar.cc/150?img=12",
-  email: "rizal8024@gmail.com",
-  telepon: "089xxxxxxx",
-  alamat: "Jl. Sumur Selang, Cimahi",
-  tanggalLahir: "11-02-2004",
-  universitas: "STMIK XYZ Jakarta",
-  jurusan: "Teknik Informatika",
-  tahunLulus: 2025,
-  ipk: 4.0,
-  pengalaman: [
-    {
-      posisi: "Frontend Developer",
-      perusahaan: "PT. Maju Mundur",
-      periode: "Jan 2023 - Sekarang",
-      deskripsi: [
-        "Membuat dashboard admin dengan React",
-        "Integrasi API dan optimasi performa",
-      ],
-    },
-    
-    {
-      posisi: "Fullstack Developer",
-      perusahaan: "PT. Sukses Selalu",
-      periode: "Feb 2021 - Des 2022",
-      deskripsi: [
-        "Membangun aplikasi internal perusahaan",
-        "Mengelola database MySQL dan API Node.js",
-      ],
-    },
-  ],
-  ringkasan:
-    "Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.Seorang profesional IT dengan pengalaman dalam pengembangan web frontend dan backend, terbiasa bekerja dengan tim menggunakan metodologi Agile.",
-  keahlian: ["HTML", "CSS", "JavaScript", "React", "TailwindCSS"],
-};
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
+export default function PelamarDetailPage({ params }: Props) {
+  const { id } = use(params); // ✅ unwrap params Promise
+
+  const [pelamar, setPelamar] = useState<any>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchPelamar = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${apiUrl}/api/applicant/detail/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Gagal memuat data pelamar");
+
+        const json = await res.json();
+        const data = json.data && json.data.length > 0 ? json.data[0] : null;
+        if (!data) throw new Error("Data pelamar tidak ditemukan");
+
+        setPelamar({
+          id: data.application_id.toString(),
+          nama: data.full_name,
+          posisi: data.posisi,
+          tanggal: new Date(data.applied_at).toLocaleDateString("id-ID"),
+          foto: data.profile_photo_url,
+          email: data.email,
+          telepon: data.phone,
+          alamat: data.address,
+          tanggalLahir: "-",
+          universitas: data.institution_name,
+          jurusan: data.major,
+          tahunLulus: data.graduation_year,
+          ipk: parseFloat(data.gpa),
+          pengalaman: data.work_experiences.map((exp: any) => ({
+            posisi: exp.position,
+            perusahaan: exp.company_name,
+            periode: `${new Date(exp.start_date).getFullYear()} - ${new Date(exp.end_date).getFullYear()}`,
+            deskripsi: [exp.job_description],
+          })),
+          ringkasan: "Pelamar ini memiliki pengalaman kerja yang relevan.",
+          keahlian: data.certificates.map((c: any) => c.certificate_name),
+        });
+      } catch (err) {
+        console.error(err);
+        setError("Gagal memuat data pelamar");
+      }
+    };
+
+    fetchPelamar();
+  }, [id]);
+
+  if (error) return <div>{error}</div>;
+  if (!pelamar) return <div>Loading...</div>;
 
   return <PelamarDetail pelamar={pelamar} />;
 }

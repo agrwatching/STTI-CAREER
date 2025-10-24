@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RegisterLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="">
       <head />
       <body>
         <main className="min-h-screen">{children}</main>
