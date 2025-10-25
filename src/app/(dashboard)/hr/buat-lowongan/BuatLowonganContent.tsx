@@ -6,7 +6,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/hr/buat-lowongan/Header";
 import JobList from "@/components/hr/buat-lowongan/JobList";
 import JobForm from "@/components/hr/buat-lowongan/JobForm";
-import type { JobApiResponse, JobType, JobFormValues } from "@/components/hr/buat-lowongan/types";
+import type {
+  JobApiResponse,
+  JobType,
+  JobFormValues,
+} from "@/components/hr/buat-lowongan/types";
 import toast from "react-hot-toast";
 
 function mapJob(job: JobApiResponse): JobType {
@@ -36,21 +40,24 @@ function mapJob(job: JobApiResponse): JobType {
       icon = <Clock className="w-5 h-5 text-blue-600" />;
   }
 
-  
   return {
     ...job,
     title: job.job_title?.trim() || "Untitled Position",
     description: job.job_description?.trim() || "No description available",
     requirements: job.qualifications || "-",
     salary_range: `Rp ${job.salary_min.toLocaleString()} - Rp ${job.salary_max.toLocaleString()}`,
-    type: job.work_type === "remote" ? "Remote" : job.work_type === "on_site" ? "On-site" : "Hybrid",
+    type:
+      job.work_type === "remote"
+        ? "Remote"
+        : job.work_type === "on_site"
+        ? "On-site"
+        : "Hybrid",
     logo: job.logo || "/logo-stti.png",
     statusLabel,
     statusColor,
     icon,
   };
 }
-
 
 export default function BuatLowonganContent() {
   const searchParams = useSearchParams();
@@ -66,7 +73,7 @@ export default function BuatLowonganContent() {
     const fetchJobs = async () => {
       const token = localStorage.getItem("token");
       const hrId = localStorage.getItem("hrId");
-      
+
       if (!token) {
         router.push("/login");
         return;
@@ -79,23 +86,25 @@ export default function BuatLowonganContent() {
 
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs?hrId=${hrId}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs?hrId=${hrId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) throw new Error("Gagal mengambil data lowongan");
-        
+
         const data = await res.json();
 
         const mappedJobs: JobType[] = (
-  Array.isArray(data.data) ? data.data : [data.data]
-          ).map(mapJob);
+          Array.isArray(data.data) ? data.data : [data.data]
+        ).map(mapJob);
 
-          setJobs(mappedJobs);
-
+        setJobs(mappedJobs);
       } catch (err) {
         console.error("Error fetching jobs:", err);
         toast.error("Gagal memuat data lowongan");
@@ -117,7 +126,6 @@ export default function BuatLowonganContent() {
   // Add job via API
   const handleAddJob = async (job: JobFormValues) => {
     try {
-      
       const token = localStorage.getItem("token");
       if (!token) {
         router.push("/login");
@@ -142,7 +150,7 @@ export default function BuatLowonganContent() {
         setEditJob(null);
         toast.success("Lowongan berhasil ditambahkan ✅");
       } else {
-        toast.error(`Gagal tambah job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal tambah job: ${data.message || "Unknown error"}`);
       }
     } catch (err) {
       console.error("Error adding job:", err);
@@ -159,35 +167,45 @@ export default function BuatLowonganContent() {
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(job),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(job),
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok) {
         // Update local state
         setJobs((prev) =>
-          prev.map((j) => (j.id === id ? { 
-            ...j, 
-            ...job,
-            title: job.job_title,
-            description: job.job_description,
-            requirements: job.qualifications,
-            salary_range: `Rp ${Number(job.salary_min).toLocaleString()} - Rp ${Number(job.salary_max).toLocaleString()}`,
-
-          } : j))
+          prev.map((j) =>
+            j.id === id
+              ? {
+                  ...j,
+                  ...job,
+                  title: job.job_title,
+                  description: job.job_description,
+                  requirements: job.qualifications,
+                  salary_range: `Rp ${Number(
+                    job.salary_min
+                  ).toLocaleString()} - Rp ${Number(
+                    job.salary_max
+                  ).toLocaleString()}`,
+                }
+              : j
+          )
         );
         setShowForm(false);
         setEditJob(null);
         toast.success("Lowongan berhasil diperbarui ✏️");
       } else {
-        toast.error(`Gagal update job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal update job: ${data.message || "Unknown error"}`);
       }
     } catch (err) {
       console.error("Error updating job:", err);
@@ -208,19 +226,22 @@ export default function BuatLowonganContent() {
         return;
       }
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/jobs/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.ok) {
         setJobs((prev) => prev.filter((job) => job.id !== id));
         toast.success("Lowongan berhasil dihapus 🗑️");
       } else {
         const data = await res.json();
-        toast.error(`Gagal hapus job: ${data.message || 'Unknown error'}`);
+        toast.error(`Gagal hapus job: ${data.message || "Unknown error"}`);
       }
     } catch (err) {
       console.error("Error deleting job:", err);
@@ -228,46 +249,43 @@ export default function BuatLowonganContent() {
     }
   };
 
-return (
-  <div className="flex flex-col bg-gray-50 h-full">
-    {/* Header sticky */}
-    <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-      <Header onAddClick={() => setShowForm(true)} />
+  return (
+    <div className="flex flex-col bg-gray-50 h-full">
+      {/* Header sticky */}
+      <div className="bg-white border-b shadow-sm sticky top-0 z-10">
+        <Header onAddClick={() => setShowForm(true)} />
+      </div>
+
+      {/* Konten ikut scroll parent */}
+      <div className="p-6">
+        {showForm ? (
+          <JobForm
+            initialValues={editJob || undefined}
+            onCancel={() => {
+              setShowForm(false);
+              setEditJob(null);
+              router.push("/hr/buat-lowongan");
+            }}
+            onSubmit={(values) =>
+              editJob ? handleEditJob(values, editJob.id) : handleAddJob(values)
+            }
+          />
+        ) : loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-500 mt-4">Memuat data lowongan...</p>
+          </div>
+        ) : (
+          <JobList
+            jobs={jobs}
+            onEdit={(job) => {
+              setEditJob(job);
+              setShowForm(true);
+            }}
+            onDelete={handleDeleteJob}
+          />
+        )}
+      </div>
     </div>
-
-    {/* Konten ikut scroll parent */}
-    <div className="p-6">
-      {showForm ? (
-        <JobForm
-          initialValues={editJob || undefined}
-          onCancel={() => {
-            setShowForm(false);
-            setEditJob(null);
-            router.push("/hr/buat-lowongan");
-          }}
-          onSubmit={(values) =>
-            editJob ? handleEditJob(values, editJob.id) : handleAddJob(values)
-          }
-        />
-      ) : loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Memuat data lowongan...</p>
-        </div>
-      ) : (
-        <JobList
-          jobs={jobs}
-          onEdit={(job) => {
-            setEditJob(job);
-            setShowForm(true);
-          }}
-          onDelete={handleDeleteJob}
-        />
-      )}
-    </div>
-  </div>
-);
-
-
-
+  );
 }

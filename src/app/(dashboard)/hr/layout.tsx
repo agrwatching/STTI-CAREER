@@ -11,15 +11,11 @@ export const metadata = {
   },
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function HRLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <HRLayoutClient>
-          {children}
-          <Toaster />
-        </HRLayoutClient>
-      </body>
-    </html>
+    <HRLayoutClient>
+      {children}
+      <Toaster />
+    </HRLayoutClient>
   );
 }

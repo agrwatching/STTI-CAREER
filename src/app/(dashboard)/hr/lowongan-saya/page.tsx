@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import LowonganSayaTable from "@/components/hr/lowongan-saya/LowonganSayaTable";
 import type { Job } from "@/components/hr/lowongan-saya/LowonganSayaTable";
 
@@ -8,53 +11,67 @@ interface JobApiResponseItem {
   verification_status: string;
 }
 
-export default async function LowonganSayaPage() {
-  // Mengirim request ke API untuk mendapatkan data lowongan pekerjaan
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
-    cache: "no-store", // Memastikan data yang diambil selalu fresh, tidak menggunakan cache
-  });
+export default function LowonganSayaPage() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mengubah response menjadi JSON
-  const data = await res.json();
+  useEffect(() => {
+    const fetchJobs = async () => {
+      const token = localStorage.getItem("token");
+      const hrId = localStorage.getItem("hrId");
 
-  // Menampilkan data yang diterima dari API ke console untuk debugging
-  console.log("Response from /api/jobs:", data);
+      if (!token || !hrId) return;
 
-  // Mendefinisikan array kosong untuk menyimpan daftar pekerjaan yang sudah diproses
-  let jobs: Job[] = [];
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/jobs?hrId=${hrId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await res.json();
 
-  // Memeriksa apakah data yang diterima sesuai format yang diharapkan
-  if (data?.data && Array.isArray(data.data)) {
-    // Memetakan data dari API ke format yang dibutuhkan oleh komponen LowonganSayaTable
-    jobs = data.data.map((item: JobApiResponseItem) => ({
-      hr_id: item.hr_id,
-      posisi: item.job_title,
-      tanggal: new Date(item.created_at).toLocaleDateString("id-ID"), // Mengubah tanggal pembuatan ke format tanggal Indonesia
-      status: convertStatus(item.verification_status), // Mengkonversi status verifikasi ke status yang dapat ditampilkan
-    }));
-  } else {
-    // Jika format data tidak sesuai, tampilkan error di console
-    console.error("Unexpected response format:", data);
-  }
+        if (data?.data && Array.isArray(data.data)) {
+          const mappedJobs: Job[] = data.data.map((item: JobApiResponseItem) => ({
+            hr_id: item.hr_id,
+            posisi: item.job_title,
+            tanggal: new Date(item.created_at).toLocaleDateString("id-ID"),
+            status: convertStatus(item.verification_status),
+          }));
+          setJobs(mappedJobs);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Mengembalikan JSX yang menampilkan tabel lowongan pekerjaan dengan data yang sudah diproses
+    fetchJobs();
+  }, []);
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <LowonganSayaTable jobs={jobs} />
+      {loading ? (
+        <p>Memuat data lowongan...</p>
+      ) : (
+        <LowonganSayaTable jobs={jobs} />
+      )}
     </div>
   );
 }
 
-// Fungsi untuk mengkonversi status verifikasi API menjadi status yang ramah pengguna
 function convertStatus(status: string): Job["status"] {
   switch (status.toLowerCase()) {
     case "verified":
-      return "AKTIF"; // Jika sudah diverifikasi, statusnya AKTIF
+      return "AKTIF";
     case "rejected":
-      return "DITUTUP"; // Jika ditolak, statusnya DITUTUP
+      return "DITUTUP";
     case "pending":
-      return "MENUNGGU"; // Jika status pending, berarti MENUNGGU
+      return "MENUNGGU";
     default:
-      return "MENUNGGU"; // Default status MENUNGGU jika tidak dikenali
+      return "MENUNGGU";
   }
 }

@@ -1,3 +1,4 @@
+//src/app/%28dashboard%29/hr/pelamar/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +10,9 @@ type JobApplicant = {
   tanggal: string;
   cv: string;
   posisi: string;
+  status?: "pending" | "accepted" | "rejected"; // ✅ tambahan
 };
+
 
 type RawApplicant = {
   id: number;
@@ -17,7 +20,9 @@ type RawApplicant = {
   tanggal: string;
   cv: string;
   posisi: string;
+  status?: "pending" | "accepted" | "rejected"; // ✅ tambahkan ini
 };
+
 
 export default function PelamarPage() {
   const [pelamars, setPelamars] = useState<JobApplicant[]>([]);
@@ -29,12 +34,15 @@ export default function PelamarPage() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/applicant`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/applicant`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Terjadi kesalahan saat memuat data");
@@ -49,6 +57,7 @@ export default function PelamarPage() {
           tanggal: new Date(item.tanggal).toLocaleDateString("id-ID"),
           cv: `${process.env.NEXT_PUBLIC_API_URL}/uploads/files/${item.cv}`,
           posisi: item.posisi,
+          status: item.status || "pending", // ✅ tambahkan ini
         }));
 
         setPelamars(transformedData);
